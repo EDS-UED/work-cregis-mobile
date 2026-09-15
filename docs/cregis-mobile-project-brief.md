@@ -2,7 +2,8 @@
 
 > **版本**：v1.0  
 > **日期**：2026-09-15  
-> **仓库**：`work-cregis-mobile`  
+> **仓库**：[EDS-UED/work-cregis-mobile](https://github.com/EDS-UED/work-cregis-mobile)  
+> **Pages 预览**：https://eds-ued.github.io/work-cregis-mobile/  
 > **读者**：Cregis Mobile 工程、设计系统协作、Cursor / AI
 
 ---
@@ -28,10 +29,10 @@
 
 | 项 | 值 |
 |----|-----|
-| 设计系统仓库 | `~/Projects/eds-mobile` |
+| 设计系统仓库 | [EDS-UED/eds-mobile](https://github.com/EDS-UED/eds-mobile) |
 | Figma | [EDS Mobile](https://www.figma.com/design/LlB2jT8KdxM6taf5wOSAEM/) · fileKey `LlB2jT8KdxM6taf5wOSAEM` |
-| Consumer 依赖方式 | **本地 path** → `@eds-evergreen/mobile` |
-| 规范真源 | `eds-mobile/.cursor/rules/work.mdc` · `AGENTS.md` |
+| Consumer 依赖方式 | **本地 path** → `@eds-evergreen/mobile`（`file:../eds-mobile/packages/mobile`） |
+| 规范真源 | [eds-mobile/.cursor/rules/work.mdc](https://github.com/EDS-UED/eds-mobile/blob/main/.cursor/rules/work.mdc) · `AGENTS.md` |
 
 ### 包分层
 
