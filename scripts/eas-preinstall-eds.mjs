@@ -90,7 +90,7 @@ run('git', [
   easEdsRoot,
 ]);
 
-run('pnpm', ['install'], { cwd: easEdsRoot });
+run('pnpm', ['install', '--no-frozen-lockfile'], { cwd: easEdsRoot });
 run('pnpm', ['build:mobile'], { cwd: easEdsRoot });
 
 if (!existsSync(easDist)) {
