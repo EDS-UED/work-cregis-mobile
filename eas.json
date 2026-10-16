@@ -1,0 +1,21 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "channel": "preview",
+      "distribution": "internal",
+      "env": {
+        "EAS_FETCH_EDS": "1"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": {
+        "EAS_FETCH_EDS": "1"
+      }
+    }
+  }
+}

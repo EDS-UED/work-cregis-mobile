@@ -1,3 +1,4 @@
+import './src/polyfills/queueMicrotask';
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
 

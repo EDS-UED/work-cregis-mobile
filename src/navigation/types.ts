@@ -2,10 +2,9 @@ import type { TabRouteName } from '@/types/app';
 
 export type RootTabParamList = {
   Home: undefined;
+  Wallet: undefined;
   Collaboration: undefined;
-  Assets: undefined;
-  Waas: undefined;
-  Profile: undefined;
+  TransactionRecords: undefined;
 };
 
 export type HomeStackParamList = {
@@ -21,27 +20,18 @@ export type AssetsStackParamList = {
   AssetsMain: undefined;
 };
 
-export type WaasStackParamList = {
-  WaasMain: undefined;
+export type TransactionRecordsStackParamList = {
+  TransactionRecordsMain: undefined;
 };
 
-export type ProfileStackParamList = {
-  ProfileMain: undefined;
+export const tabRouteNames: TabRouteName[] = ['Home', 'Wallet', 'Collaboration', 'TransactionRecords'];
+
+export const tabI18nKeys: Record<
+  TabRouteName,
+  `tabs.${'home' | 'wallet' | 'collaboration' | 'transactionRecords'}`
+> = {
+  Home: 'tabs.home',
+  Wallet: 'tabs.wallet',
+  Collaboration: 'tabs.collaboration',
+  TransactionRecords: 'tabs.transactionRecords',
 };
-
-export const tabRouteNames: TabRouteName[] = [
-  'Home',
-  'Collaboration',
-  'Assets',
-  'Waas',
-  'Profile',
-];
-
-export const tabI18nKeys: Record<TabRouteName, `tabs.${'home' | 'collaboration' | 'assets' | 'waas' | 'my'}`> =
-  {
-    Home: 'tabs.home',
-    Collaboration: 'tabs.collaboration',
-    Assets: 'tabs.assets',
-    Waas: 'tabs.waas',
-    Profile: 'tabs.my',
-  };

@@ -19,7 +19,7 @@
 **核心边界**：
 
 > **Motion 的定义、token、组件内动效 — 是设计系统的职能。**  
-> **work-cregis-mobile 只负责正确引用、导航编排、业务场景组装与 Dev Inspect 读取。**
+> **work-cregis-mobile 只负责正确引用、导航编排、业务场景组装与 Native 运行态集成。**
 
 ---
 
@@ -32,7 +32,7 @@
 | 设计系统仓库 | [EDS-UED/eds-mobile](https://github.com/EDS-UED/eds-mobile) |
 | Figma | [EDS Mobile](https://www.figma.com/design/LlB2jT8KdxM6taf5wOSAEM/) · fileKey `LlB2jT8KdxM6taf5wOSAEM` |
 | Consumer 依赖方式 | **本地 path** → `@eds-evergreen/mobile`（`file:../eds-mobile/packages/mobile`） |
-| 规范真源 | [eds-mobile/.cursor/rules/work.mdc](https://github.com/EDS-UED/eds-mobile/blob/main/.cursor/rules/work.mdc) · `AGENTS.md` |
+| 规范真源 | [eds-mobile/.cursor/rules/work.mdc](https://github.com/EDS-UED/eds-mobile/blob/main/.cursor/rules/work.mdc) · `.cursor/rules/work.md` |
 
 ### 包分层
 
@@ -285,19 +285,21 @@ mobileMotion.timing.easeIn
 
 ---
 
-## A.5 设计系统文档与 Preview 入口
+## A.5 EDS Mobile Preview 入口（2026-09 架构）
 
 | 入口 | 用途 | 栈 |
 |------|------|-----|
-| `pnpm dev:playground` | **RN 组件 live preview 真源** | Expo / Simulator / 真机 |
-| Showcase `:5178` | Token / Animations / Components 文档 IA | Vue 过渡壳（**非 RN 运行时真源**） |
-| Showcase → Animations | ios-spring-* / ios-navigation-push 文档 | 对照 catalog |
+| `pnpm dev:playground` | **EDS 唯一组件 preview** — Live · Customize · Props/API · Inspect | Expo / 模拟器 / 真机 |
+| `apps/showcase` · `apps/rn-preview` | **已删除** — 能力在 playground | 勿再引用 |
+| `npm run ios` / `android` | **Consumer 业务** — Scene / 流程 / 集成 | Native Dev Build / 模拟器 |
 
 Consumer 动效问题排查顺序：
 
 1. `@eds/mobile-animations` preset 是否存在  
-2. 对应 `Eg*` 组件 DS 是否已实现动效  
+2. 对应 `Eg*` 组件 EDS 是否已实现动效  
 3. App 导航层是否正确引用 preset（§C）
+
+预览架构详案：`docs/eds-preview-architecture.md`。
 
 ---
 
@@ -310,7 +312,7 @@ Consumer 动效问题排查顺序：
 | 产品 | Cregis 跨平台 Mobile App（Crypto 方向） |
 | 仓库 | `work-cregis-mobile`（**从零搭建**） |
 | 与 Desktop | **业务完全独立** — 不对标 `work-cregis-desktop` 业务架构 |
-| 核心原则 | **一套 RN 业务代码** → iOS / Android / Browser Preview |
+| 核心原则 | **一套 RN 业务代码** → iOS / Android（Native only） |
 | App 名称 | `cregis`（Logo 后续提供） |
 | Bundle ID 等 | 工程侧按常规处理（如 `com.cregis.app`） |
 
@@ -321,7 +323,7 @@ Consumer 动效问题排查顺序：
 | 层 | 选型 |
 |----|------|
 | 框架 | React Native + **Expo（最新稳定 SDK）** + TypeScript |
-| Browser Preview | React Native Web + Mobile Device Frame |
+| Native Runtime | Expo Dev Build · Simulator / 真机 |
 | 真机 / 模拟器 | **Expo Development Build**（长期正式开发客户端；Expo Go 仅快速原型） |
 | 构建 | Local Build + Metro + Fast Refresh；**EAS 不强制** |
 | 导航 | **React Navigation**（Tab + Native Stack） |
@@ -340,13 +342,13 @@ Consumer 动效问题排查顺序：
                               │
               ┌───────────────┴───────────────┐
               ↓                               ↓
-       Browser Preview                  Native Runtime
-    （RN Web · 设备框 · Inspect）      （Dev Build · Simulator / 真机）
+       Native Runtime
+    （Dev Build · Simulator / 真机）
 ```
 
 | 通道 | 职责 |
 |------|------|
-| **Browser Preview** | UI / 交互预览 · Dev Mode / Inspect · Cursor 上下文 |
+| **Native Dev** | UI / 交互 · 模拟器 / 真机 |
 | **Simulator / 真机** | Native API · Biometrics · Secure Storage · 手感验收 |
 
 **Browser 与动效**：不维护第二套动效实现；Browser 里渲染成什么样，就是 RN Web 对**同一代码**的呈现结果。不为 Preview 单独设计或调参。
@@ -375,8 +377,6 @@ work-cregis-mobile/
 │   ├── i18n/
 │   ├── assets/
 │   └── utils/
-├── browser-preview/          # 设备框 · Preview 壳
-├── dev-mode/                 # Inspect（对齐 Desktop shell-debug 模型）
 ├── docs/                     # 项目文档（本文档）
 ├── scripts/
 ├── ios/
@@ -416,7 +416,6 @@ Tab 栏组件：**`EgCregisTabBar`**（来自设计系统，非 consumer 手搓�
 | `useAssetsStore` | 资产 |
 | `useWaasStore` | WaaS 项目 |
 | `useProfileStore` | 账号偏好 |
-| `useDevInspectStore` | Browser Inspect 壳外态 |
 
 **不进 store**：弹窗步骤、动画 progress、scroll 位置、表单草稿 → Hooks + Reanimated sharedValue。
 
@@ -456,10 +455,7 @@ services/* (interface)
 
 ---
 
-## B.9 Dev Inspect（壳外工具）
-
-| 项 | 说明 |
-|----|------|
+----|------|
 | 参考 | `work-cregis-desktop/src/dev/shell-debug/` 能力模型 |
 | 原则 | **壳 ↔ 业务双向隔离**；Inspect 只读，不改业务 layout / API |
 | Motion 行 | 展示节点 **Semantic 场景名 + DS preset**（§C.4） |
@@ -479,8 +475,6 @@ services/* (interface)
 | Sheet 拖拽编排 | preset 由 DS 提供 | ✅ hooks + Gesture Handler |
 | 业务 Scene | ❌ | ✅ `src/scenes/` |
 | Biometrics / API | ❌ | ✅ `src/services/` |
-| Browser Preview 壳 | ❌ | ✅ `browser-preview/` |
-| Inspect 工具 | ❌ | ✅ `dev-mode/` |
 | 缺失 token / 组件 | ✅ 设计系统补 | ⏸ 停改，先确认 |
 
 ---
@@ -490,8 +484,6 @@ services/* (interface)
 ### 必做
 
 - [ ] Expo + RN + TS + Dev Build 配置
-- [ ] RN Web Browser Preview（设备框 + Preview）
-- [ ] Dev Inspect 基础壳 + Motion 行
 - [ ] React Navigation 五 Tab + `EgCregisTabBar`
 - [ ] Zustand store 骨架 + Mock services
 - [ ] Biometrics + SecureStorage adapters（Mock + Native + 预留）
@@ -516,7 +508,6 @@ services/* (interface)
 ❌ 修改 eds-mobile/packages/tokens/spec/motion/*
 ❌ consumer 内 withSpring({ damping: 18, ... }) 硬编码
 ❌ 手搓与 Eg* 平行的 TabBar / Button / Sheet 组件
-❌ 为 Browser Preview 单独维护一套动效代码
 ❌ 用 hover / focus 术语描述 App 动效
 ❌ 缺失 DS 能力时擅自硬编码样式或 token
 ```
@@ -589,24 +580,6 @@ withSpring(0, { damping: 18, stiffness: 220 });
 
 ---
 
-## C.4 Dev Inspect — Motion 行（项目侧展示）
-
-Inspect **读取**设计系统语义，不定义新 semantic：
-
-```text
-Motion
-scene: motion-flotation
-preset: spring.default · @eds/mobile-animations
-```
-
-```text
-Motion
-scene: motion-page
-preset: timing.navigationPush · @eds/mobile-animations
-```
-
-无声明 → 显示 **「无」**；不继承祖先；不用 hover 类名。
-
 ---
 
 ## C.5 App 场景 → 设计系统对照
@@ -648,7 +621,6 @@ preset: timing.navigationPush · @eds/mobile-animations
  真机验收手感          渲染即结果
 ```
 
-项目不为 Browser 写 `.web.motion.ts` 平行 preset；若 RN Web 渲染差异，接受为同一实现的呈现，Native 仍为产品手感基准。
 
 ---
 

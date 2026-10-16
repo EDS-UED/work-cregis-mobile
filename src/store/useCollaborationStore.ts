@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 export type CollaborationItem = {
   id: string;
-  title: string;
+  kind: 'approval' | 'signing';
   status: 'pending' | 'approved' | 'rejected';
 };
 
@@ -13,11 +13,16 @@ type CollaborationState = {
   loadMockItems: () => void;
 };
 
-const mockItems: CollaborationItem[] = [
-  { id: 'APR-000001', title: 'Approval request #1', status: 'pending' },
-  { id: 'SIG-000001', title: 'Signing request #1', status: 'pending' },
-  { id: 'APR-000002', title: 'Approval request #2', status: 'approved' },
-];
+const mockItems: CollaborationItem[] = Array.from({ length: 24 }, (_, index) => {
+  const kind = index % 2 === 0 ? 'approval' : 'signing';
+  const prefix = kind === 'approval' ? 'APR' : 'SIG';
+  const statusCycle: CollaborationItem['status'][] = ['pending', 'approved', 'rejected'];
+  return {
+    id: `${prefix}-${String(index + 1).padStart(6, '0')}`,
+    kind,
+    status: statusCycle[index % statusCycle.length],
+  };
+});
 
 export const useCollaborationStore = create<CollaborationState>((set) => ({
   items: mockItems,

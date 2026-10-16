@@ -1,7 +1,8 @@
 import { useColorScheme } from 'react-native';
-import { getThemeColors, resolveThemeMode, type ThemeMode } from '@eds-evergreen/mobile';
+import { resolveThemeMode, type ThemeMode } from '@eds-evergreen/mobile';
 
 import { useAppStore } from '@/store';
+import { getCregisThemeColors } from '@/utils/edsTheme';
 
 export function useEffectiveThemeMode(): ThemeMode {
   const preference = useAppStore((state) => state.themePreference);
@@ -16,5 +17,5 @@ export function useEffectiveThemeMode(): ThemeMode {
 
 export function useThemeColors() {
   const mode = useEffectiveThemeMode();
-  return getThemeColors(mode);
+  return getCregisThemeColors(mode);
 }

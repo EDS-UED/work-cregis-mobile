@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { DevicePresetId, LocaleCode, PreviewMode, ThemePreference } from '@/types/app';
+import type { LocaleCode, ThemePreference } from '@/types/app';
 
 const STORAGE_KEYS = {
   locale: 'cregis-locale',
@@ -11,23 +11,15 @@ type AppState = {
   locale: LocaleCode;
   themePreference: ThemePreference;
   globalLoading: boolean;
-  previewMode: PreviewMode;
-  devicePreset: DevicePresetId;
   reducedMotion: boolean;
   setLocale: (locale: LocaleCode) => void;
   setThemePreference: (theme: ThemePreference) => void;
   setGlobalLoading: (loading: boolean) => void;
-  setPreviewMode: (mode: PreviewMode) => void;
-  setDevicePreset: (preset: DevicePresetId) => void;
   setReducedMotion: (enabled: boolean) => void;
   hydratePreferences: () => Promise<void>;
 };
 
 async function readPreference(key: string): Promise<string | null> {
-  if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem(key);
-  }
-
   try {
     const SecureStore = await import('expo-secure-store');
     return SecureStore.getItemAsync(key);
@@ -37,11 +29,6 @@ async function readPreference(key: string): Promise<string | null> {
 }
 
 async function writePreference(key: string, value: string): Promise<void> {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(key, value);
-    return;
-  }
-
   try {
     const SecureStore = await import('expo-secure-store');
     await SecureStore.setItemAsync(key, value);
@@ -54,8 +41,6 @@ export const useAppStore = create<AppState>((set) => ({
   locale: 'zh-CN',
   themePreference: 'system',
   globalLoading: false,
-  previewMode: 'preview',
-  devicePreset: 'iphone',
   reducedMotion: false,
   setLocale: (locale) => {
     void writePreference(STORAGE_KEYS.locale, locale);
@@ -66,8 +51,6 @@ export const useAppStore = create<AppState>((set) => ({
     set({ themePreference });
   },
   setGlobalLoading: (globalLoading) => set({ globalLoading }),
-  setPreviewMode: (previewMode) => set({ previewMode }),
-  setDevicePreset: (devicePreset) => set({ devicePreset }),
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
   hydratePreferences: async () => {
     const [locale, theme] = await Promise.all([

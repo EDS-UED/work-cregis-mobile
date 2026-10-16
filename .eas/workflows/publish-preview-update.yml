@@ -1,0 +1,16 @@
+name: Publish preview update
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  publish_preview_update:
+    name: Publish preview update
+    type: update
+    env:
+      EAS_FETCH_EDS: '1'
+    params:
+      channel: preview
+      branch: ${{ github.ref_name }}

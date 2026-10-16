@@ -1,38 +1,57 @@
 import type { PropsWithChildren } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
-import type { InspectSelection } from '@/store';
-import { InspectTarget } from '@/scenes/shared/InspectTarget';
+import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { useEdsTypography } from '@/hooks/useEdsTypography';
+import { edsPx } from '@/utils/edsTheme';
 
 type SceneCardProps = PropsWithChildren<{
   title: string;
-  inspect: InspectSelection;
   onPress?: () => void;
 }>;
 
-export function SceneCard({ title, inspect, onPress, children }: SceneCardProps) {
+export function SceneCard({ title, onPress, children }: SceneCardProps) {
   const colors = useThemeColors();
+  const { spacing } = useEdsTheme();
+  const text = useEdsTypography();
+
+  const card = (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors['material-card-shallow'],
+          borderColor: colors['stroke-divider'],
+          padding: edsPx(spacing['spacing-4']),
+          gap: edsPx(spacing['spacing-2']),
+          borderRadius: edsPx(spacing['radius-lg']),
+        },
+      ]}
+    >
+      <Text style={[text.bodySemibold, { color: colors['text-base-primary'] }]}>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+
+  if (!onPress) {
+    return card;
+  }
 
   return (
-    <InspectTarget inspect={inspect} onPress={onPress}>
-      <View style={[styles.card, { backgroundColor: colors['material-card-shallow'], borderColor: colors['stroke-divider'] }]}>
-        <Text style={[styles.title, { color: colors['text-base-primary'] }]}>{title}</Text>
-        {children}
-      </View>
-    </InspectTarget>
+    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      {card}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
-    gap: 8,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
+  pressed: {
+    opacity: 0.92,
   },
 });

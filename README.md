@@ -5,7 +5,6 @@ Cregis 跨平台 Mobile 业务应用，基于 [EDS Mobile](https://github.com/ED
 | | |
 |---|---|
 | **GitHub** | [EDS-UED/work-cregis-mobile](https://github.com/EDS-UED/work-cregis-mobile) |
-| **Live Preview (Pages)** | https://eds-ued.github.io/work-cregis-mobile/ |
 | **设计系统** | [EDS-UED/eds-mobile](https://github.com/EDS-UED/eds-mobile) |
 | **Figma** | [EDS Mobile](https://www.figma.com/design/LlB2jT8KdxM6taf5wOSAEM/) |
 
@@ -33,46 +32,39 @@ pnpm build:mobile
 # 2. 安装并启动 consumer
 cd ../work-cregis-mobile
 npm install
-npm run web
+npm start
+# 或 npm run ios / npm run android
 ```
 
-- 本地 Browser Preview：http://localhost:8090/
-- Pages 线上预览见下方 §GitHub Pages
-
 详细架构与 Motion 边界见 [`docs/cregis-mobile-project-brief.md`](docs/cregis-mobile-project-brief.md)。
+
+**远程预览（EAS Update + Expo Go，无需安装包）**：见 [`docs/eas-expo-go-preview.md`](docs/eas-expo-go-preview.md)。
 
 ## 设计系统集成（Mobile only）
 
 | 资产 | 包 | 说明 |
 |------|-----|------|
-| Tokens | `@eds/mobile-tokens` | 颜色 / 间距 / 排版；`getThemeColors(mode)` |
+| Tokens / Eg* / Motion | `@eds-evergreen/mobile`（唯一 EDS 依赖） | `getThemeColors` · `mobileTheme` · `mobileMotion` · 全量 `dist` |
 | Animations | `@eds/mobile-animations` | iOS-native motion preset（Reanimated） |
 | Components | `@eds/mobile-components` | 202 个 `Eg*` 组件 |
 | 统一出口 | `@eds-evergreen/mobile` | consumer 主要 import 入口 |
 
 **100% EDS Mobile** — 禁止 consumer 自建 design / motion token；缺失须与设计系统确认。
 
-本地依赖：`package.json` 中 `"@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile"`。
+**EDS 依赖（仅本地）**：`"@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile"` — 联调 sibling 仓库 `eds-mobile`，**不要**从 npm 安装 `@eds-evergreen/mobile`（registry 包是对外发布用）。
 
 ## 开发命令
 
 | 命令 | 说明 |
 |------|------|
-| `npm run web` | Browser Preview（`:8090`） |
-| `npm start` | Expo Dev Server（Native / Web） |
-| `npm run ios` | iOS Simulator |
-| `npm run android` | Android Emulator |
-| `npm run ios:device` | 真机 Development Build（iOS，首次编译 Native） |
+| `npm start` | 真机 / 模拟器 Metro → **8081**（Expo Go 名称 **EDS UED**） |
+| `npm run ios` | iOS Simulator（Metro 8081） |
+| `npm run android` | Android Emulator（Metro 8081） |
+| `npm run ios:device` | 真机 Development Build（iOS） |
 | `npm run android:device` | 真机 Development Build（Android） |
 | `npm run typecheck` | TypeScript 检查 |
-| `npm run build:pages` | 构建 GitHub Pages 静态产物（`dist/`） |
-| `npm run preview:pages` | 本地模拟 Pages 构建并静态服务 |
 
-## Browser Preview
-
-- **Preview**：正常交互
-- **Inspect**：点选业务卡片，右侧查看 Layout / Styles / Motion（Motion 语义来自 EDS）
-- 设备预设：iPhone / Pro / Pro Max / Android / Small Android
+EDS 组件 preview：`../eds-mobile` · `pnpm dev:showcase`（模拟器/真机 · Metro **8080**）。
 
 ## 五 Tab 占位
 
@@ -84,28 +76,9 @@ npm run web
 src/scenes/          业务场景
 src/navigation/      React Navigation（Tab + Native Stack）
 src/store/           Zustand
-src/services/        Mock / Native adapters（Biometrics · SecureStorage）
-browser-preview/     设备框壳层
-dev-mode/            Inspect 面板
+src/services/        Native adapters（Biometrics · SecureStorage）
 docs/                项目说明文档
 ```
-
-## GitHub Pages 部署
-
-仓库已配置 [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)：`main` 分支 push 后自动构建并发布。
-
-**前置：** CI 同目录检出 [EDS-UED/eds-mobile](https://github.com/EDS-UED/eds-mobile)（workflow 内按 SHA pin 为 sibling `eds-mobile`）。
-
-**预览地址（push 成功后）：** https://eds-ued.github.io/work-cregis-mobile/
-
-本地模拟 Pages 构建：
-
-```bash
-EXPO_BASE_URL=/work-cregis-mobile npm run build:pages
-npx serve dist -p 8091
-```
-
-打开 http://localhost:8091/work-cregis-mobile/
 
 ## 相关仓库
 

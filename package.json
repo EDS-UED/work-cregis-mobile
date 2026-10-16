@@ -4,20 +4,23 @@
   "main": "index.ts",
   "dependencies": {
     "@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile",
-    "@expo/metro-runtime": "~57.0.15",
     "@react-navigation/bottom-tabs": "^7.19.0",
     "@react-navigation/native": "^7.4.0",
     "@react-navigation/native-stack": "^7.19.0",
     "babel-preset-expo": "~57.0.0",
     "expo": "~57.0.22",
+    "expo-asset": "~57.0.20",
+    "expo-blur": "~57.0.3",
     "expo-dev-client": "~57.0.19",
+    "expo-font": "~57.0.4",
     "expo-haptics": "~57.0.3",
+    "expo-linear-gradient": "~57.0.2",
     "expo-local-authentication": "~57.0.3",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
+    "expo-updates": "~57.0.26",
     "i18next": "^26.4.2",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
     "react-i18next": "^17.0.14",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
@@ -25,7 +28,6 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
-    "react-native-web": "^0.21.2",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
@@ -33,15 +35,18 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web --port 8090",
-    "ios:device": "expo run:ios --device",
-    "android:device": "expo run:android --device",
+    "postinstall": "node scripts/prune-expo-router-hoist.mjs",
+    "prestart": "node scripts/ensure-eds-mobile.mjs",
+    "preios": "node scripts/ensure-eds-mobile.mjs",
+    "preandroid": "node scripts/ensure-eds-mobile.mjs",
+    "start": "expo start --port 8081",
+    "android": "expo start --android --port 8081",
+    "ios": "expo start --ios --port 8081",
+    "ios:device": "RCT_METRO_PORT=8081 expo run:ios --device",
+    "android:device": "RCT_METRO_PORT=8081 expo run:android --device",
     "typecheck": "tsc --noEmit",
-    "build:pages": "node scripts/build-pages-artifact.mjs",
-    "preview:pages": "EXPO_BASE_URL=/work-cregis-mobile npm run build:pages && npx serve dist -p 8091"
+    "eas-build-pre-install": "node scripts/eas-preinstall-eds.mjs",
+    "preview:update": "node scripts/ensure-eds-mobile.mjs && eas update --channel preview --auto"
   },
   "private": true
 }

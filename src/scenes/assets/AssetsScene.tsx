@@ -1,8 +1,8 @@
-import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { SceneCard } from '@/scenes/shared/SceneCard';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
+import { SceneText } from '@/scenes/shared/SceneText';
 import { useAssetsStore } from '@/store';
 
 export function AssetsScene() {
@@ -12,20 +12,14 @@ export function AssetsScene() {
 
   return (
     <SceneScaffold title={t('scenes.assetsTitle')} subtitle={t('scenes.assetsSubtitle')}>
-      <SceneCard
-        title={totalBalance}
-        inspect={{
-          label: 'AssetsSummary',
-          motionScene: null,
-          motionPreset: null,
-          layoutLines: ['padding: var(--spacing-4)'],
-          styleLines: ['background: var(--material-card-shallow)'],
-        }}
-      >
-        {assets.map((asset) => (
-          <Text key={asset.symbol}>{`${asset.symbol}  ${asset.balance}`}</Text>
-        ))}
+      <SceneCard title={t('scenes.assetsTotalLabel')}>
+        <SceneText variant="display">{totalBalance}</SceneText>
       </SceneCard>
+      {assets.map((asset) => (
+        <SceneCard key={asset.symbol} title={asset.symbol}>
+          <SceneText variant="bodySemibold">{asset.balance}</SceneText>
+        </SceneCard>
+      ))}
     </SceneScaffold>
   );
 }
