@@ -4,7 +4,15 @@ const { getDefaultConfig } = require('expo/metro-config');
 const { resolve: resolveRequest } = require('metro-resolver');
 
 const projectRoot = __dirname;
-const edsMobileRoot = path.resolve(projectRoot, '../eds-mobile');
+const siblingEdsRoot = path.resolve(projectRoot, '../eds-mobile');
+const easEdsRoot = path.resolve(projectRoot, '.eas-deps/eds-mobile');
+const siblingDist = path.join(siblingEdsRoot, 'packages/mobile/dist/index.js');
+const easDist = path.join(easEdsRoot, 'packages/mobile/dist/index.js');
+const edsMobileRoot = fs.existsSync(siblingDist)
+  ? siblingEdsRoot
+  : fs.existsSync(easDist)
+    ? easEdsRoot
+    : siblingEdsRoot;
 /** Assembled @eds-evergreen/mobile — consumer 只认这一份 dist。 */
 const edsDistRoot = path.resolve(edsMobileRoot, 'packages/mobile/dist');
 const edsComponentsDist = path.join(edsDistRoot, 'components');

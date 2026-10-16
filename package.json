@@ -35,7 +35,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "postinstall": "node scripts/prune-expo-router-hoist.mjs",
+    "postinstall": "node scripts/prune-expo-router-hoist.mjs && node scripts/eas-preinstall-eds.mjs",
     "prestart": "node scripts/ensure-eds-mobile.mjs",
     "preios": "node scripts/ensure-eds-mobile.mjs",
     "preandroid": "node scripts/ensure-eds-mobile.mjs",
