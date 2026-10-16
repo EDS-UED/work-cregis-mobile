@@ -16,7 +16,8 @@ push → EAS Workflow (eas update) → Expo CDN
 
 ### 1. EAS 项目（已创建）
 
-- **Dashboard**：https://expo.dev/accounts/theyangsongs-team/projects/eds-ued  
+- **Expo 显示名**：**Cregis UED**（业务项目；Expo Go 里看到的名称）
+- **Dashboard slug**：`eds-ued`（URL 不变） — https://expo.dev/accounts/theyangsongs-team/projects/eds-ued  
 - **Project ID**：已写入 `app.config.ts`（`6ac19714-fbe5-4de6-ab92-ea1bb47a0ff5`）
 
 本机发 update 无需再 `eas init`。CLI 用法：

@@ -30,12 +30,13 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 
 | 用户说了什么 | Agent 做什么 |
 |--------------|--------------|
+| **「推送」/「推」** | **必须**执行 §3.3 双仓 push + 确认 EAS `preview` update 成功（Agent 亲自跑命令，不只给文案） |
 | 只提业务 Scene / 功能 | 只改 `src/**`（及 i18n / navigation / store） |
 | 只提 token / Eg 组件行为 | **禁止改** `../eds-mobile/**`；告知属 EDS，请用户在 eds-mobile 改完再同步（§3.1） |
 
 **收尾**：两三句——做了什么、还需什么、验证过没过。**禁止**复述全过程。
 
-**心里有数**：含 EDS 改动 → 远程 eds-mobile 已推 + CI pin 一致（§3.3）。区分「本次引入」与「预先存在」。
+**心里有数**：含 EDS 改动 → 远程 eds-mobile 已推 + EAS preview 与本地一致（§3.3）。区分「本次引入」与「预先存在」。
 
 ---
 
@@ -240,15 +241,50 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 
 **问题上报（给 EDS）**：机型 / iOS 版本、`kind` / `iconCount` / `size`、截图、是否外包了 View padding；对齐以 showcase 同配置真机为准。
 
-### 3.3 Git（双仓库）
+### 3.3 Git（双仓库）与 EAS 预览同步
 
-**Agent 纪律**
+**仓库**
 
-- **【禁止】** 主动 `git push`
-- 用户说「推」→ 只给 commit message、预检命令、可复制 push；**用户自己推**
-- 用户未说 commit / push → **不得**提交
+| 仓库 | 远程 | 角色 |
+|------|------|------|
+| `work-cregis-mobile`（本仓） | `EDS-UED/work-cregis-mobile` | Cregis 业务 App |
+| `../eds-mobile` | `EDS-UED/eds-mobile` | 设计系统；EAS 云端 **clone `main` 并 `pnpm build:mobile`** |
 
-含 EDS 改动时：先在 eds-mobile commit/push，再在本仓库 `npm install` 刷新 link。
+**Expo / EAS**
+
+- Team：**theyangsongs-team**
+- 项目显示名：**Cregis UED**（`app.config.ts` → `name`）
+- Slug / Dashboard URL：**`eds-ued`**（勿与已删的个人 `@theyangsong/cregis-ued` 混淆）
+- 同事预览：Expo Go → Dashboard **Deploy → Over-the-air updates** → 最新 **Preview** 二维码（channel **`preview`**）
+
+**Agent 纪律（默认）**
+
+- **【禁止】** 未经用户明确要求就 `git push` / `git commit`
+- 用户未说 commit → **不得**提交
+
+**用户说「推送」「推」「推上去」等 — 【必须】Agent 亲自完成**
+
+目标：**GitHub `main` 与维护者本机一致**，且 **EAS `preview` 与本地 Metro 所见一致**（含 EDS dist）。
+
+1. **预检（本仓）**  
+   `npm run typecheck`；若有未提交改动，按任务范围 **commit**（双仓分别 commit，信息写清业务/EDS 边界）。
+
+2. **顺序：先 EDS，后业务**  
+   ```bash
+   cd ../eds-mobile && git push origin main
+   cd ../work-cregis-mobile && git push origin main
+   ```  
+   **【必须】** 先推 `eds-mobile`：EAS Workflow 在云端按 **`EDS_MOBILE_GIT_REF`（默认 `main`）** 拉设计系统；业务仓先推会导致同事短暂看到**旧 EDS + 新业务**的组合。
+
+3. **触发 preview update**  
+   - **首选**：`work-cregis-mobile` push 后 GitHub 触发 `.eas/workflows/publish-preview-update.yml`（channel `preview`）。  
+   - **【必须】** 用 `npx eas-cli workflow:runs --limit 1` / `workflow:status <runId>` 等到 **SUCCESS**；失败则读 `workflow:logs` 修 CI 后重推。  
+   - **兜底**：本机 `npm run preview:update`（仍须 eds-mobile 已在 GitHub `main`）。
+
+4. **收尾告知用户**  
+   给出 **Updates → Preview** 链接（`https://expo.dev/accounts/theyangsongs-team/projects/eds-ued/deployments` 或当次 update 页），并说明同事需 **Expo Go SDK 57**。
+
+**本地 link（不替代 push）**：`npm install` / `ensure-eds-mobile.mjs` 只对齐**本机** `file:../eds-mobile`；**同事只看 EAS**，不看你的 sibling 目录。
 
 ---
 

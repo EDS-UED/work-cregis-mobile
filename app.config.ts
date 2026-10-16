@@ -2,13 +2,13 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const baseUrl = process.env.EXPO_BASE_URL ?? '';
 
-/** @theyangsongs-team/eds-ued — https://expo.dev/accounts/theyangsongs-team/projects/eds-ued */
+/** Cregis UED · @theyangsongs-team/eds-ued — https://expo.dev/accounts/theyangsongs-team/projects/eds-ued */
 const easProjectId =
   process.env.EAS_PROJECT_ID ?? '6ac19714-fbe5-4de6-ab92-ea1bb47a0ff5';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'EDS UED',
+  name: 'Cregis UED',
   slug: 'eds-ued',
   owner: 'theyangsongs-team',
   version: '1.0.0',

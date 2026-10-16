@@ -57,7 +57,7 @@ npm start
 
 | 命令 | 说明 |
 |------|------|
-| `npm start` | 真机 / 模拟器 Metro → **8081**（Expo Go 名称 **EDS UED**） |
+| `npm start` | 真机 / 模拟器 Metro → **8081**（Expo Go 名称 **Cregis UED**） |
 | `npm run ios` | iOS Simulator（Metro 8081） |
 | `npm run android` | Android Emulator（Metro 8081） |
 | `npm run ios:device` | 真机 Development Build（iOS） |
