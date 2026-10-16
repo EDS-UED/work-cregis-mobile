@@ -13,4 +13,3 @@ jobs:
       EAS_FETCH_EDS: '1'
     params:
       channel: preview
-      branch: ${{ github.ref_name }}
