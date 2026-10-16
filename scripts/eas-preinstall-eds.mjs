@@ -101,3 +101,4 @@ if (!existsSync(easDist)) {
 patchEdsDependency(edsFileDep);
 console.log('[eas-preinstall-eds] ready');
 run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: consumerRoot });
+run('node', ['scripts/prune-expo-router-hoist.mjs'], { cwd: consumerRoot });

@@ -11,5 +11,6 @@ jobs:
     type: update
     env:
       EAS_FETCH_EDS: '1'
+      EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK: '1'
     params:
       channel: preview
