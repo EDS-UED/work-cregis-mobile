@@ -9,6 +9,7 @@ export type RootTabParamList = {
 
 export type HomeStackParamList = {
   HomeMain: undefined;
+  PersonalCenter: undefined;
 };
 
 export type CollaborationStackParamList = {

@@ -1,7 +1,9 @@
 import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/i18n';
+import { EdsFontEpochProvider } from '@/hooks/EdsFontEpochContext';
 import { useEdsFontsLoaded } from '@/hooks/useEdsFontsLoaded';
 import { useReducedMotionListener } from '@/hooks/useReducedMotionListener';
 import { useAppStore } from '@/store';
@@ -21,9 +23,10 @@ function AppBootstrap({ children }: PropsWithChildren) {
   return children;
 }
 
-/** 后台加载字体，不挡首屏；bundle 就绪即可进导航（字体就绪后自动重绘）。 */
+/** 字体后台加载，不挡首屏；就绪后 bump epoch 触发 typography 重绘。 */
 function EdsFontGate({ children }: PropsWithChildren) {
-  const { error } = useEdsFontsLoaded();
+  const { loaded, error } = useEdsFontsLoaded();
+  const fontEpoch = loaded || error ? 1 : 0;
 
   useEffect(() => {
     if (error) {
@@ -31,8 +34,16 @@ function EdsFontGate({ children }: PropsWithChildren) {
     }
   }, [error]);
 
-  return children;
+  return (
+    <EdsFontEpochProvider epoch={fontEpoch}>
+      <View style={styles.fontRoot}>{children}</View>
+    </EdsFontEpochProvider>
+  );
 }
+
+const styles = StyleSheet.create({
+  fontRoot: { flex: 1 },
+});
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (

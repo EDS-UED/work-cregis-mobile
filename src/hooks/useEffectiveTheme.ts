@@ -1,8 +1,17 @@
 import { useColorScheme } from 'react-native';
-import { resolveThemeMode, type ThemeMode } from '@eds-evergreen/mobile';
+import { resolveThemeMode as edsResolveThemeMode, type ThemeMode } from '@/eds/theme';
 
 import { useAppStore } from '@/store';
 import { getCregisThemeColors } from '@/utils/edsTheme';
+
+function resolveThemeMode(
+  systemScheme: 'light' | 'dark' | null,
+): ThemeMode {
+  if (typeof edsResolveThemeMode === 'function') {
+    return edsResolveThemeMode(systemScheme);
+  }
+  return systemScheme === 'dark' ? 'dark' : 'light';
+}
 
 export function useEffectiveThemeMode(): ThemeMode {
   const preference = useAppStore((state) => state.themePreference);
@@ -12,7 +21,9 @@ export function useEffectiveThemeMode(): ThemeMode {
     return preference;
   }
 
-  return resolveThemeMode(systemScheme === 'unspecified' ? null : systemScheme);
+  return resolveThemeMode(
+    systemScheme === 'light' || systemScheme === 'dark' ? systemScheme : null,
+  );
 }
 
 export function useThemeColors() {

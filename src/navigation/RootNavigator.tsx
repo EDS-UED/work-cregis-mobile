@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { GlassBlurScope } from '@eds-evergreen/mobile';
+import { GlassBlurScope } from '@/eds/glass';
 
 import { RootTabNavigator } from '@/navigation/RootTabNavigator';
 import { useEffectiveThemeMode } from '@/hooks/useEffectiveTheme';

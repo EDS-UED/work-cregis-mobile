@@ -12,6 +12,47 @@ const consumerRoot = resolve(__dirname, '..');
 const edsRoot = resolve(consumerRoot, '../eds-mobile');
 const assembledMarker = join(edsRoot, 'packages/mobile/dist/index.js');
 
+if (process.env.CREGIS_ENSURE_EDS === '0') {
+  console.log('[ensure-eds-mobile] skip (CREGIS_ENSURE_EDS=0)');
+  process.exit(0);
+}
+
+const edsSrcGlobs = [
+  'packages/tokens/spec',
+  'packages/components/src',
+  'packages/animations/src',
+];
+
+/** `git ls-files` 比全树 walk 快一个数量级（仅跟踪文件）。 */
+function newestMtimeViaGit() {
+  const gitRoot = spawnSync('git', ['rev-parse', '--show-toplevel'], {
+    cwd: edsRoot,
+    encoding: 'utf8',
+  });
+  if ((gitRoot.status ?? 1) !== 0) return null;
+
+  const root = gitRoot.stdout.trim();
+  if (!root) return null;
+
+  const listed = spawnSync('git', ['ls-files', ...edsSrcGlobs], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  if ((listed.status ?? 1) !== 0) return null;
+
+  let newest = 0;
+  for (const rel of listed.stdout.split('\n')) {
+    const trimmed = rel.trim();
+    if (!trimmed) continue;
+    if (!/\.(ts|tsx|js|mjs|json)$/.test(trimmed)) continue;
+    const full = join(root, trimmed);
+    if (!existsSync(full)) continue;
+    const mtime = statSync(full).mtimeMs;
+    if (mtime > newest) newest = mtime;
+  }
+  return newest;
+}
+
 function newestMtime(root) {
   if (!existsSync(root)) return 0;
   let newest = statSync(root).mtimeMs;
@@ -39,15 +80,17 @@ function newestMtime(root) {
   return newest;
 }
 
+function maxEdsSrcMtime() {
+  const viaGit = newestMtimeViaGit();
+  if (viaGit != null) return viaGit;
+  const srcRoots = edsSrcGlobs.map((rel) => join(edsRoot, rel));
+  return Math.max(0, ...srcRoots.map((root) => newestMtime(root)));
+}
+
 function needsBuild() {
   if (!existsSync(assembledMarker)) return true;
   const distMtime = statSync(assembledMarker).mtimeMs;
-  const srcRoots = [
-    join(edsRoot, 'packages/tokens/spec'),
-    join(edsRoot, 'packages/components/src'),
-    join(edsRoot, 'packages/animations/src'),
-  ];
-  return srcRoots.some((root) => newestMtime(root) > distMtime);
+  return maxEdsSrcMtime() > distMtime;
 }
 
 function linkedMobileDistPath() {

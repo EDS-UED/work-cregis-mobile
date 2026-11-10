@@ -15,7 +15,8 @@ alwaysApply: true
 
 ```text
 业务 UI     → src/scenes/**     用 Eg* + useEdsTheme() + i18n
-设计系统    → ../eds-mobile/**   本仓库禁止改；缺能力先问用户
+设计系统    → ../eds-mobile/**   本仓禁止改；怎么改都不默认牵动业务（§3.1）
+说「同步」   → 才拉最新 @eds-evergreen/mobile dist（§3.1.2 · 非「推」）
 EDS preview → playground（模拟器/真机）；禁止 Web preview
 一套代码    → 同一份 Scene 跑 iOS / Android，禁止第二套 UI
 ```
@@ -31,12 +32,14 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 | 用户说了什么 | Agent 做什么 |
 |--------------|--------------|
 | **「推送」/「推」** | **必须**执行 §3.3 双仓 push + 确认 EAS `preview` update 成功（Agent 亲自跑命令，不只给文案） |
-| 只提业务 Scene / 功能 | 只改 `src/**`（及 i18n / navigation / store） |
-| 只提 token / Eg 组件行为 | **禁止改** `../eds-mobile/**`；告知属 EDS，请用户在 eds-mobile 改完再同步（§3.1） |
+| Expo Go 与项目 SDK 不一致 | 先确认 `package.json` / `work.md` §1 锁定版本；真机 Go 过旧/过新 → 模拟器或 Dev Client（§1） |
+| 只提业务 Scene / 功能 | 只改 `src/**`（及 i18n / navigation / store）；**新页必读 §2.5**；**改 Home 顶栏必先读 §2.3.1**，禁止未读就改 overlay / reserve / `forceRnImplementation` |
+| 只提 token / Eg 组件行为 | **禁止改** `../eds-mobile/**`；把现象与 §3.1.1 核对/增补后 **反馈用户转 DS**，勿在 consumer 手搓 Eg* 行为（§3.1） |
+| **「同步」** | **唯一**授权 §3.1.2：拉最新 `@eds-evergreen/mobile` dist（**非** §3.3「推」）。**禁止** DS 有改动就 build / 改业务 import / 清 Metro — 未说「同步」则业务按**当前 dist** 继续，不受影响 |
 
 **收尾**：两三句——做了什么、还需什么、验证过没过。**禁止**复述全过程。
 
-**心里有数**：含 EDS 改动 → 远程 eds-mobile 已推 + EAS preview 与本地一致（§3.3）。区分「本次引入」与「预先存在」。
+**心里有数**：`../eds-mobile` 改了 ≠ 本仓要更新；只有用户 **「同步」** 才拉 dist。**「推」** 走 §3.3（Git / EAS），与 **「同步」** 不是一回事。区分「本次引入」与「预先存在」。
 
 ---
 
@@ -49,9 +52,14 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 | Expo / 命令 | §1 |
 | EDS 消费、组件/token | §2 |
 | EgButtonGlass iOS 26 内边距 | §2.4 |
+| **EDS ↔ 业务 · 集成契约（DS 改不动业务，除非「同步」）** | **§3.1** |
+| **EDS 联调清单（Agent 只写 work，不改 eds-mobile）** | **§3.1.1** |
+| **拉最新 dist（关键词「同步」）** | **§3.1.2** |
 | 仓库边界、dev、Git/pin | §3 |
+| EDS linked Metro 联调（可选 · 非默认集成） | §3.2 |
 | i18n | §4 |
 | 原生 vs RN、Eg* 边界 | §2.3 |
+| Home 顶栏（Showcase 对齐） | §2.3.1 |
 | 样式、滚动、网络名称 | §5 |
 | Modal / Sheet 生命周期 | §6 |
 | Native 开发与 EDS preview 分工 | §7 |
@@ -78,7 +86,11 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 
 ## 1. Expo
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any Expo / RN API code.
+Read the exact versioned docs at https://docs.expo.dev/versions/v58.0.0/ before writing any Expo / RN API code.
+
+**【必须】** 本仓库锁定 **Expo SDK 58**（`expo` ~58、`package.json` 与 EAS `runtimeVersion.policy: sdkVersion` 一致）。升/降 SDK 须与用户对齐并**同步改** `work.md` §1 与 `docs/eas-expo-go-preview.md`。
+
+**本地验 UI（Expo Go）**：iOS 真机 App Store **Expo Go** 须与 **SDK 58** 一致（与项目锁定对齐）；仍不匹配时用模拟器 `npm run ios` 或 Dev Client `npm run ios:device`。若红屏 **`Cannot find native module 'ExpoFetchModule'`**：`app.config.ts` 已设 `EXPO_PUBLIC_USE_RN_FETCH=1`（RN fetch）；改后须 **Metro `--clear` 重启**。
 
 | 通道 | 命令 | 用途 |
 |------|------|------|
@@ -94,7 +106,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before 
 | 机制 | 说明 |
 |------|------|
 | `postinstall` → `scripts/prune-expo-router-hoist.mjs` | 非直接依赖时删除 hoisted `expo-router` |
-| `metro.config.js` shim | `expo-router/unstable-native-tabs` → `src/shims/…`（EDS barrel 静态引用，运行时不走 Expo Router） |
+| `metro.config.js` | linked 示例 + `expo-router/unstable-native-tabs` → `src/shims/…`；`@/*` → `src/*`（§3.2） |
 | **【禁止】** 安装 `expo-router` 作业务依赖 | 与 RN Navigation 冲突；勿用 `EXPO_ROUTER_DISABLE_*` 代替 prune（除非 Expo 仍误判） |
 
 `npm install` / 同步 EDS 后若仍红屏：**删 hoisted 包后必须重启 Metro `--clear`**（旧进程会缓存误判）。
@@ -105,7 +117,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before 
 
 ### 2.1 Mobile-only
 
-**【必须】** 设计系统**只依赖本地仓库** `../eds-mobile`，经 **`file:` 链接** 的 `@eds-evergreen/mobile`（`file:../eds-mobile/packages/mobile`）消费 assemble `dist`（tokens + animations + components 全量资产）。启动前 `ensure-eds-mobile.mjs` 会在 dist 过期时跑 `pnpm build:mobile`。
+**【必须】** 经 **`file:../eds-mobile/packages/mobile`** 消费 assemble **`dist`**。**集成契约（§3.1）**：Scene 只针对 **当前 dist** 写码；eds-mobile 怎么改 **默认不牵动本仓**，直到用户 **「同步」**（§3.1.2）。`npm start` / §3.2 watch 为可选联调，**不是**默认集成节奏。
 
 **【禁止】** 在 `package.json` 里把 `@eds-evergreen/mobile` 写成 npm registry 版本（如 `"^0.1.0"`、`npm install @eds-evergreen/mobile`）——**npm 上的包是对外发布物**；Cregis 开发/集成阶段**只用本地 eds-mobile**，不跟 registry pin。
 
@@ -167,10 +179,22 @@ withSpring(0, { damping: 18 })  // 硬编码 spring
 
 | 组件 | 业务侧用法 |
 |------|------------|
-| **EgNavBar** | iOS 26+：**栏背景继承原生** — Stack 用 `egNavBarNativeStackScreenOptions`（`background: 'auto'` → `scrollEdgeEffects.top`，与 Showcase 一致），`headerTransparent` + `contentStyle`/`ScrollView` 为 `box-page`；**禁止**自绘 Nav 底或 RN `EgNavBar` 叠在系统栏上。自定义左右（Home）用 `unstable_header*Items` + `EgButtonGlassNav*`，`Stack.Screen options` **首帧**下发。**设计无标题时**：`egNavBarNativeStackOptions({ title: 真实文案, showTitle: false })`，由 EDS 保证非空并透明隐藏（iOS 26 空标题会使 scroll edge 栏背景失效）；业务侧**勿**再手写 `headerTitleStyle` 透明覆盖。验收 scroll edge 时页面内容须超过一屏。主列表 **勿**包 `EdsGlassScreenShell`；`ScrollView` + `contentInsetAdjustmentBehavior="automatic"` 作 scroll edge 采样面。Android / iOS ≤25：RN `EgNavBar` + `EdsGlassScreenShell` + `useEgNavBarScroll`（见 `HomeTopBar` / `SceneScaffold`） |
+| **EgNavBar** | iOS 26+：**栏背景继承原生** — Stack 用 `egNavBarNativeStackScreenOptions`（`background: 'auto'` → `scrollEdgeEffects.top`，与 Showcase 一致），`headerTransparent` + `contentStyle`/`ScrollView` 为 `box-page`；**禁止**自绘 Nav 底或 RN `EgNavBar` 叠在系统栏上。自定义左右（Home）见 **§2.3.1**。**设计无标题时**：`egNavBarNativeStackOptions({ title: 真实文案, showTitle: false })`，由 EDS 保证非空并透明隐藏（iOS 26 空标题会使 scroll edge 栏背景失效）；业务侧**勿**再手写 `headerTitleStyle` 透明覆盖。验收 scroll edge 时页面内容须超过一屏。主列表 **勿**包 `EdsGlassScreenShell`；`ScrollView` + `contentInsetAdjustmentBehavior="automatic"` 作 scroll edge 采样面。Android / iOS ≤25：RN `EgNavBar` + `EdsGlassScreenShell` + `useEgNavBarScroll`（见 `HomeTopBar` / `SceneScaffold`） |
 | **EgTabBar** / **EgCregisTabBar** | `CregisTabBar` 或 iOS 26+ `egCregisTabBarNativeBottomTabsScreenOptions` |
 | **EgGlass** | 仅通过 EDS 组件间接出现，业务不手搓 blur 壳 |
-| **EgButtonGlass**（EgGlassButton） | 见 **§2.4**；iOS 26 **Nav 自定义项**只放内容（Avatar / Symbol 等），**禁止**再包 `EgButtonGlassNav*`（其 RN inset 会与系统 ~4pt 叠成「偏胖一圈」）；栏项间距用内容 `margin`/`gap`，勿 `unstable_header*Items` 的 `spacing` 类型补偿 |
+| **EgButtonGlass**（EgGlassButton） | 见 **§2.4** · Nav 槽 **EDS 定稿**：`host="navigationBar"` → **`EgButtonGlassNavigationBar`（仅内容 + 热区，玻璃由系统栏提供）** + **`unstable_header*Items`** + **`egNavBarNativeStackHeaderGlassItem`**（`hidesSharedBackground: true`）；`iconCount={1}` 一颗一胶囊；栏项间距用内容 `margin`/`gap`，勿 `unstable_header*Items` 的 `spacing` 类型补偿。**禁止** legacy `headerLeft`/`headerRight` 塞栏项（易叠双层玻璃）。浮层 / RN 顶栏用默认 **`host="canvas"`**（`GlassView` / `glass-button-box`） |
+
+### 2.3.1 Home 顶栏 — 与 Showcase 对齐（强制）
+
+**与 Showcase 同闸**：`shouldUseEgNavBarNativeStack()` / `shouldUseEgTabBarNativeStack()`（**勿**业务私造 Expo Go 分流 — iOS 26+ 上 `EgNavBar` RN 不绘制，overlay 会丢栏背景、胶囊发白）。
+
+| 平台 | Stack / Scene | 顶栏 |
+|------|----------------|------|
+| **iOS 26+** | `useCregisNativeStackScreenOptions` · Home 叠加 `useHomeMainScreenOptions` + `useHomeIosNativeHeaderItems` | 系统 Nav + scroll edge；栏钮 `EgButtonGlass` `host="navigationBar"` + `egNavBarNativeStackHeaderGlassItem` · `iconCount={1}` |
+| **Android / iOS ≤25** | `headerShown: false` | `HomeTopBar` · `EgNavBar` + canvas `EgButtonGlass` |
+| **HomeScene** | `shouldUseEgNavBarNativeStack()` | 系统 Nav：**勿** `EdsGlassScreenShell` · `contentInsetAdjustmentBehavior="automatic"` + `useEgNavBarScroll`。否则 shell + `homeScrollTopReserve` |
+
+**【禁止】** iOS 26+ overlay `HomeTopBar`；**禁止** `iconCount={2}` 合并右胶囊；**禁止** `forceRnImplementation`；**禁止** 业务改 EDS 分流。
 
 ### 2.4 EgButtonGlass 内边距（iOS 26+ 必知）
 
@@ -183,6 +207,17 @@ withSpring(0, { damping: 18 })  // 硬编码 spring
 
 头像槽：`avatarSlot` + `EgAvatar size="lg"`。联调验收：圆形 icon、双 icon / 头像槽、文本胶囊与 showcase **同配置真机**一致。
 
+**液态玻璃填充（业务侧 · iOS 26+ 原生材质）**
+
+**【必须】** 业务 Scene 使用液态玻璃（`EgButtonGlass` 走原生栈、`GlassControlShell` / `GlassView` 等 EDS 原生路径）时，`variant` **须为 `regular`**（正常填充，与 `EgButtonGlass` 默认一致）。**禁止**业务侧为「更透」默认写 **`clear`**，除非设计稿 / Showcase **该场景明示** `clear`。
+
+| API | 业务默认 |
+|-----|----------|
+| `EgButtonGlass` | 不传 `variant` 或 `variant="regular"` |
+| `GlassControlShell` 等 | `variant="regular"` |
+
+Effect 栈 **`EgGlass` + `glass-*-box`**（expo-blur · 非系统 Liquid Glass）不适用本表，按 box 类型与 Showcase 对齐。
+
 **【必须】** 上表以外 **全部 RN 技术栈**：`View` · `ScrollView` · `FlatList` · `Pressable` · `StyleSheet` · `SceneText` · Zustand · i18n；尺寸/色用 `useEdsTheme()` + `edsPx()` + `edsPageBackground()` 等 helper。
 
 **【禁止】**
@@ -194,11 +229,72 @@ withSpring(0, { damping: 18 })  // 硬编码 spring
 
 **【必须】** 页面背景全局 **`box-page`**（`edsPageBackground(colors)` ↔ CSS `var(--box-page)`）。
 
+### 2.5 新 Scene / 新页面 — 设计系统资产（强制）
+
+**【必须】** 设计或实现任何新页面时，UI **只**用设计系统已有资产：
+
+| 类别 | 允许 | 禁止 |
+|------|------|------|
+| 组件 | `@eds-evergreen/mobile` 导出的 **Eg\***（及项目已批准的 Scene 壳：`SceneScaffold` · `EdsGlassScreenShell` 等） | 手搓与 Eg* 平行的按钮 / 顶栏 / 分组列表行 / Sheet 头 / 玻璃壳 |
+| Token | `useEdsTheme()` · `edsPx()` · `edsPageBackground` · `SceneText` variant · Eg* 的 color/size prop | 新 semantic 色名、新 spacing/radius 档位、Scene 内 hex / 魔法数「对齐设计稿」 |
+| 图标 | 已 export 的 `EgIcon*`（以 `../eds-mobile` catalog / `dist/components/index.d.ts` 为准） | 临时 SVG / unicode / 第三方 icon 库 |
+| 布局 | 现有 token 间距 + 文档化 helper（如 `edsSceneContentInset`） | 为单页私造 `StyleSheet` 常量冒充 token |
+
+**【必须】** 开工前先对照 Figma Mobile（fileKey `LlB2jT8KdxM6taf5wOSAEM`）与 EDS catalog：**页面里每一类 UI 块**（分组列表、披露行、区段标题、模态顶栏关闭钮等）须能指到 **Eg 组件名** 或 **明确 token 组合**（且该组合已在 Showcase 出现过）。
+
+**缺失资产时 — 【必须】停改并询问用户**，不得自行「先凑合上线」。回复须包含：
+
+1. **缺什么**（组件 / 图标 / token / 模板名）
+2. **参考稿要什么**（结构、状态、一行示例）
+3. **可选路径**（示例）：在 **eds-mobile** 补组件后再集成 · 换用已有最接近 Eg* · 维护者书面例外
+
+**【禁止】** 用 `SceneCard` + 一堆 `Pressable` 拼 iOS「设置」式分组列表来冒充设计系统（缺 **Eg 分组列表 / 披露行** 时属于上述「缺失资产」）。
+
+**【禁止】** Agent 在未获用户对缺失项决策前：写大量 Scene 代码、navigation 接线、或「临时 token」垫样式。
+
+### 2.5.1 个人中心 / 设置页（参考稿 · **待 EDS · 未实现**）
+
+**入口（产品意向）**：Home 右栏用户头像 → **`HomeStack` push** 个人中心（**左返回** + 居中标题；非 modal · 非第五 Tab）。
+
+**信息架构（对齐参考分组列表风格，文案走 i18n）**
+
+| 区段 | 行（示例） | 右侧 |
+|------|------------|------|
+| 账户 | 账户与安全 | chevron |
+| 账户 | 数据与隐私 | chevron |
+| 应用 | 语言 | 当前 locale 文案 + chevron |
+| 应用 | 外观 | `themePreference`（系统/浅/深）+ chevron |
+| 关于 | 检查更新 | 版本号 |
+| 关于 | 服务协议 | chevron |
+
+**EDS 缺口（2026-10-27 对照 `@eds-evergreen/mobile` dist catalog）— 须用户决策后再写 Scene**
+
+| 缺口 | 说明 |
+|------|------|
+| **分组列表 Organism** | 无 `Eg*Grouped*` / Settings 行 / Disclosure 行；仅有 `EgDivider`（module/page）、输入/Button 等，**无法**不手搓复刻参考稿白卡片 + 区内分割线 + 左 icon + 右 chevron/值 |
+| **区段标题** | 无专用 Eg 区段头；`SceneText` footnote 可排字但 **不等价** Figma 设置区段规范（须确认是否由列表 Organism 自带） |
+| **Modal 顶栏** | 无 Eg Sheet 头（居中 title + 圆形 `EgIconClose`）；可用 Stack `presentation: 'modal'` + `SceneScaffold` / 原生 header，但 **关闭钮形态** 须 Eg 或 §6 书面模板 |
+| **图标** | 参考稿多枚（语言/外观/字体/语音等）：dist 中 **无** 一一对应 globe·sun·字体 AA·语音等；仅有部分可映射（如 `EgIconUserSecurity` · `EgIconDatabaseSafety` · `EgIconInformation` · `EgIconClose` · `EgIconArrowRightIos`） |
+| **分组底** | 白卡片组：现有 `material-card-shallow` + `radius-lg` 在 `SceneCard` 用过，但 **卡片内行布局仍缺 Eg 行组件** — 单独 token 不足以合规 |
+
+**实现状态**：Home 用户胶囊 → **`PersonalCenter`** Stack 推入；iOS 26+ 返回由 Stack **`egNavBarNativeStackScreenOptions`**（与 Showcase 同），`SceneScaffold` 只同步 `title`；Android / iOS ≤25 返回为 overlay **`EgNavBar`**。列表 UI 为 Eg* 拼装（`PersonalCenterSettingsGroup/Row`），**待 EDS Organism 收敛**。
+
 ---
 
 ## 3. 仓库边界与工程
 
 ### 3.1 EDS ↔ 业务单向边界
+
+**集成契约（默认）**
+
+Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、集成不受牵连** — 仍以 **当前已 resolve 的 `@eds-evergreen/mobile` dist** 为准开发与验 UI。只有用户在本会话说 **「同步」** 时，才在本仓执行 §3.1.2，拉齐**最新** assemble dist。
+
+| 情况 | 业务 / Agent |
+|------|----------------|
+| eds-mobile 新 commit、改 Eg*、Showcase 已更新 | **不**自动 build、**不**改 `src/**` 追 API、**不**假定要对齐 Showcase 最新行为 |
+| 红屏 / dist 缺 export | 用**当前 dist 已有**公开 API，或 §3.1.1 反馈 DS；**等**「同步」，**不**为修 UI 主动拉 dist |
+| 用户说 **「同步」** | §3.1.2：`ensure-eds-mobile` → `npm install` → 必要时 Metro **`--clear`** |
+| 用户说 **「推」/「推送」** | §3.3 Git / EAS；**不是**拉本地 dist |
 
 | 本仓库可改 | 禁止改 |
 |------------|--------|
@@ -211,35 +307,113 @@ withSpring(0, { damping: 18 })  // 硬编码 spring
 | 改 `../eds-mobile/**` 任意文件 | 组件、token、脚本、showcase、规则等 — **一律不在本任务里动** |
 | 为修 Eg* / token 在 consumer 里「顺手改 EDS」 | 缺能力 → **停改**，说明属 eds-mobile，请用户在 **eds-mobile** 改完并 build |
 | 手改 `node_modules/@eds-evergreen/mobile/dist/**` | dist 只来自上游 build + link；**禁止**当补丁目录改 |
-| 未授权时在 consumer 会话里跑 `pnpm build:mobile` 改 EDS 产物 | 仅允许用已有 dist / `ensure-eds-mobile.mjs` 拉**已构建**结果 |
+| 未授权时在 consumer 会话里跑 `pnpm build:mobile` | 仅 **「同步」** 时 §3.1.2；**禁止** Agent 未说「同步」就 `ensure-eds-mobile` |
 
-**【必须】** EDS 变更只在 **eds-mobile** 仓库完成；本仓库只做集成（import Eg*、`useEdsTheme`、导航/Scene）。上游 build 或 pin 更新后，在本仓库 `npm install` / 重启 Metro 同步。
+**【必须】** EDS 实现变更只在 **eds-mobile** 完成；本仓只做集成。**禁止**因上游改了就把业务 import、联调步骤、验收标准改成「必须最新 dist」。
 
-**唯一例外**：用户在本会话**明确授权**「改 eds-mobile / 切到设计系统仓库改」— 否则 Agent **不得**打开或编辑 `../eds-mobile/**`。
+**唯一例外**：用户明确授权「改 eds-mobile / 切到设计系统仓库改」— 否则 Agent **不得**编辑 `../eds-mobile/**`。
 
-**链接方式（本地，非 npm）**：`package.json` → `"@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile"`（`package-lock.json` 应对应 `../eds-mobile/packages/mobile`，**不是** `registry.npmjs.org`）；`metro.config.js` → `watchFolders: [edsMobileRoot]`。
+**【必须】** Agent 发现 Eg* / 液态玻璃 / 系统 Nav 与 Showcase 不一致时：**只更新本节 §3.1.1 清单（或告知用户增补）并口头反馈**，**禁止**为修 UI 去改 `../eds-mobile/**` 或在业务仓复制第二套玻璃实现。
 
-### 3.2 dev 实时生效
+### 3.1.1 EDS 联调 · 业务反馈清单（Cregis → eds-mobile）
+
+**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 2026-10-29）**
+
+| EDS 约定 | 业务用法 |
+|----------|----------|
+| `egNavBarNativeStackScreenOptions` | `useCregisNativeStackScreenOptions` · i18n `backAccessibilityLabel` |
+| `egNavBarNativeStackOptions` + `unstable_header*Items` | Home · `useHomeMainScreenOptions` + `useHomeIosNativeHeaderItems` |
+| `egNavBarNativeStackHeaderGlassItem` | Home 栏每一项（含公司名容器） |
+| `EgButtonGlass` `host="navigationBar"` | Home 栏按钮 → **系统栏内容组件**（非 Nav 槽内 `GlassView`） |
+| `EgButtonGlass` 默认 canvas | `HomeTopBar` overlay（仅非 iOS 26+） |
+| `readEgButtonGlassStackDiagnostics` | Nav 槽按钮走 NavigationBar 路径；**canvas** 仍看 `stack: native \| rn` |
+
+**业务仓必保依赖**：`expo-glass-effect ~58` · Metro iOS **`expo-glass-effect` shim**。要对齐 eds-mobile **最新** dist → 仅用户 **「同步」** §3.1.2。
+
+**若真机仍发白 / 仍像 RN 白盒 — 先区分再反馈 DS**
+
+| 场景 | 先验 | 可能归属 |
+|------|------|----------|
+| Home / 设置 **栏上胶囊**（`host="navigationBar"`） | 是否 **`hidesSharedBackground`** 每项都有；是否 **legacy `headerLeft`**（业务已禁止）；scroll edge：内容 **> 一屏** · `automatic` inset | DS / RNScreens 栏项材质 · 或 dist 未更新 |
+| **浮层顶栏**（canvas `EgButtonGlass`） | `readEgButtonGlassStackDiagnostics()` → **`stack: 'rn'`** | 缺 `expo-glass-effect` 或未 `--clear` Metro → **工程**；闸门文档 → **DS** |
+| **历史：双返回圈** | dist 是否含 **`unstable_headerLeftItems` 返回**（无 `headerLeft` 内嵌玻璃） | 旧 dist → 用户 **「同步」** §3.1.2 + 清 Metro |
+
+**仍须 DS / Showcase 真机对标时附带**：机型 · iOS 版本 · diagnostics JSON · `host` / `iconCount` · 截图 · eds-mobile **commit**。
+
+**转 DS 时附带**
+
+- 机型 / **iOS 精确版本** / Expo Go 或 Dev Client  
+- `readEgButtonGlassStackDiagnostics()` 完整 JSON  
+- `kind` · `iconCount` · `host` · 截图（Home 左/右、设置返回）  
+- 本仓 `@eds-evergreen/mobile` 对应 **eds-mobile commit / dist 构建时间**（**同步前**以当前 dist 为准，不以 eds-mobile `main` 最新为准）
+
+**需要最新 dist 时**：用户说 **「同步」** → §3.1.2（Agent **勿**在修 Scene / bug 时顺带 build）。
+
+### 3.1.2 同步（拉最新 EDS dist · 仅用户说「同步」）
+
+**关键词「同步」** = 本节。**不是** §3.3 **「推送」/「推」**。
+
+**【必须】** 用户说 **「同步」** 后，Agent 在本仓库：
+
+1. `node scripts/ensure-eds-mobile.mjs`（必要时在 `../eds-mobile` 跑 `pnpm build:mobile`）
+2. `npm install`（`file:` 直连 `../eds-mobile/packages/mobile`）
+3. 若 Metro 已在跑或需验 UI：`npm run start:metro-only -- --clear`（**8081**）
+
+```bash
+cd work-cregis-mobile && node scripts/ensure-eds-mobile.mjs && npm install
+kill -9 $(lsof -ti :8081) 2>/dev/null; npm run start:metro-only -- --clear
+```
+
+**【禁止】** 未说「同步」时 Agent 执行上列步骤 — 含「发现 dist 旧」「DS 刚改完」「要对齐 Showcase」等（见下表）。
+
+| 情况 | Agent 应做 |
+|------|------------|
+| 发现 dist 比 eds-mobile 源码旧 | 告知用户；可选更新 §3.1.1；**等**用户说同步 |
+| 红屏 / 缺 export（如 animations 未 export 某 helper） | 业务侧改用 dist **已导出** API，或 §3.1.1 反馈 DS；**不**为追新 dist 主动 build |
+| 用户刚在 eds-mobile 改完组件 | **不**自动 `ensure-eds-mobile`；提示需要时说「同步」 |
+| 联调、修 Home、用户只说「推」 | **不**用 push 代替「同步」；EAS 走 §3.3 |
+
+**说明**：`npm start` 的 `prestart` / §3.2 EDS watch 是维护者**自愿**联调，**不改变 §3.1 集成契约** — Agent 仍只在用户说 **「同步」** 时拉 dist。日常验业务优先 **`npm run start:metro-only`**，避免无意 build 新 dist。
+
+**链接方式（本地，非 npm）**：`package.json` → `"@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile"`（`package-lock.json` 应对应 `../eds-mobile/packages/mobile`，**不是** `registry.npmjs.org`）。**Metro 必为 linked 配置**（真源 `../eds-mobile/docs/consumer-metro.config.example.cjs`，本仓 `metro.config.js` 已合并 Cregis shim / `@/*`）；详案 **`../eds-mobile/docs/consumer-linked-dev.md`**。
+
+### 3.2 dev 联调（可选 · 非默认集成）
+
+**【默认】** 遵守 §3.1：**eds-mobile 改动不牵动业务集成**；要最新 dist 须用户 **「同步」**（§3.1.2）。验 Cregis Scene、Agent 改 `src/**` 时优先 **`npm run start:metro-only`**（不跑 `prestart` 自动 build）。
+
+**【可选】** 维护者主动联调 DS + 业务时：`npm start`（**8081** · `prestart` → `ensure-eds-mobile.mjs` · 可并行 EDS `watch:linked-consumers`）。关 watch：`CREGIS_EDS_TOKEN_WATCH=0`。这**不等于**「DS 一改业务就该跟」— 仍须用户 **「同步」** 才视为正式拉齐 dist。Metro linked 配置见 **`docs/consumer-linked-dev.md`** · `metro.config.js`。
+
+**Token / 玻璃（如 `.glass-button-box`）**：spec 变更经上述 watch 进 `packages/mobile/dist`；dist Metro 已 `watchFolders` dist/tokens + dist/components。**改 EDS 组件源码** → `CREGIS_EDS_LINKED_METRO=1 npm start` + Fast Refresh。
 
 | 改了什么 | 怎么验 |
 |----------|--------|
-| `src/**` | Metro 保存即刷新；Native 用 Fast Refresh |
-| `../eds-mobile/packages/**` | **仅** eds-mobile 维护者在设计系统仓 `pnpm build:mobile` → `pnpm sync`；业务仓 `npm install`（或 `ensure-eds-mobile.mjs`）拉 dist，**禁止**手改 `node_modules/@eds-evergreen/mobile/dist` |
+| `src/**` | Metro 保存即刷新 |
+| `../eds-mobile` 组件源码 | linked Metro + Fast Refresh；**禁止**在 Cregis 仓改 `../eds-mobile/**` |
+| EDS token / spec | EDS `watch:linked-consumers` → build:tokens → Metro reload |
+| 首屏 / 全量 Reload 变慢 | 业务 **禁止** `@eds-evergreen/mobile` 主 barrel；用 `/nav-bar`、`/home-ui`、`/theme` 等；Metro **FileStore** 缓存 · 非 Home Tab / 个人中心延迟 `require` |
+| 日常开发（要快 + 要实时） | **`npm start`** / **`npm run dev`**（默认不跑 ensure · EDS watch 开 · `src/**` Fast Refresh）；拉 dist 用 **`npm run start:with-ensure`** 或 **「同步」**；纯 Metro **`npm run start:metro-only`** |
+| 仅 dist / 无 linked 入口 | 用户说 **「同步」** 后 §3.1.2；**禁止** Agent 主动 `ensure-eds-mobile`；**禁止**手改 `node_modules/@eds-evergreen/mobile/dist` |
 
-**EDS 更新到业务仓（维护者已 build 后）**
+不用联调时只关 Expo；勿长期留 EDS `watch:linked-consumers` / `dev:showcase` 占资源。
+
+**依赖纪律**：`file:../eds-mobile/packages/mobile`；**未「同步」**前不追新 dist。业务只从 **`@/eds/*`** 引 Eg* / `mobileTheme`（内联 `src/shims/` → dist 细文件）；**禁止** `@eds-evergreen/mobile` 主入口；**禁止**业务直接写 `@eds-evergreen/mobile/xxx` 未在 package exports 声明的子路径。
+
+**维护者自拉 dist（须先说「同步」或由 Agent 执行 §3.1.2）**
 
 ```bash
 # 业务仓
-npm install          # file: 直连 ../eds-mobile/packages/mobile；pnpm store 拷贝 stale 时优先 npm
+npm install          # file: 直连 ../eds-mobile/packages/mobile
 npm run typecheck
 ./node_modules/.bin/expo start --port 8081 --clear
 ```
+
+**EAS / Preview（与 Metro 无关）**：`../eds-mobile` → `pnpm build:mobile`；本仓 → `npm run preview:update` 或 §3.3 Workflow。
 
 Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`（4px），影响 inset 阴影观感。`EgNavBar` / `EgCregisTabBar` iOS 26+ **禁止** `forceRnImplementation` 绕过。
 
 **【禁止】** 没开 dev、没目测，就声称 UI 已完成。
 
-**问题上报（给 EDS）**：机型 / iOS 版本、`kind` / `iconCount` / `size`、截图、是否外包了 View padding；对齐以 showcase 同配置真机为准。
+**问题上报（给 EDS）**：先填 **§3.1.1**；另附机型 / iOS 版本、`readEgButtonGlassStackDiagnostics()`、`kind` / `iconCount` / `host`、截图；对齐以 Showcase 同配置真机为准。
 
 ### 3.3 Git（双仓库）与 EAS 预览同步
 
@@ -282,9 +456,9 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
    - **兜底**：本机 `npm run preview:update`（仍须 eds-mobile 已在 GitHub `main`）。
 
 4. **收尾告知用户**  
-   给出 **Updates → Preview** 链接（`https://expo.dev/accounts/theyangsongs-team/projects/eds-ued/deployments` 或当次 update 页），并说明同事需 **Expo Go SDK 57**。
+   给出 **Updates → Preview** 链接（`https://expo.dev/accounts/theyangsongs-team/projects/eds-ued/deployments` 或当次 update 页），并说明同事需 **Expo Go SDK 58**（与 `work.md` §1 锁定一致）。
 
-**本地 link（不替代 push）**：`npm install` / `ensure-eds-mobile.mjs` 只对齐**本机** `file:../eds-mobile`；**同事只看 EAS**，不看你的 sibling 目录。
+**本地 link（不替代 push）**：用户 **「同步」** 或 §3.1.2 才对齐本机 dist；**同事只看 EAS**，不看 sibling 目录。
 
 ---
 
@@ -323,9 +497,9 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 ### 5.1 Token 与圆角平滑
 
 - 业务：`useEdsTheme()` + `edsPx()` + `src/utils/edsTheme.ts` 命名 helper（`edsPageBackground` · `edsSceneContentInset` · `createEdsTypographyStyles` / `SceneText` variant）
-- **【必须】** Scene 水平内边距统一 `edsSceneContentInset(spacing)`（`EDS_SCENE_CONTENT_INSET`），禁止单页另写 `spacing-*` 当「全局边距」
+- **【必须】** Scene 水平内边距统一 `edsSceneContentInset(spacing)`（`EDS_SCENE_CONTENT_INSET` = **`spacing-5` / 20px**），禁止单页另写 `spacing-*` 当「全局边距」
 - **【必须】** 语义色/字档走 `SceneText` variant 或 Eg* 的 color token prop（如 `text-base-secondary`），禁止 Scene 内 `color: '#…'` 或 `colors[...]` 拼一行覆盖（除非 variant 尚未收录 → 先补 `edsTheme`）
-- **Cregis 品牌色**：浅/深均为 **`#1FC35A`** — 经 `getCregisThemeColors()` / `useEdsTheme()` 覆盖 EDS 默认 `brand` 族（`text-brand` · `material-brand` · `event-focus-brand` 等）；勿在 Scene 手写绿 hex
+- **Cregis 品牌色**：浅/深均为 **`#1FC35A`** — 经 `getCregisThemeColors()` / `applyCregisBrandColors()` 覆盖 EDS `brand` 族；**iOS** 上 `material-brand` 等走 RN `{ space: 'display-p3' }`（`CREGIS_BRAND_DISPLAY_P3` · 与 spec `eds-success` 同源），**Android** 仍为 sRGB hex；勿在 Scene 手写绿 hex
 
 ### 5.2 滚动与顶底虚化
 
@@ -416,6 +590,7 @@ npm run typecheck
 - [ ] StyleSheet 无 hex / 魔法 spacing（§2.3 预览例外除外）
 - [ ] UI 走 i18n；value 不 `t()`
 - [ ] Modal 先动画后清态；动效用 `mobileMotion`
+- [ ] 新 UI 块均有 Eg* / 已批准 token 依据；缺失已问用户（§2.5）
 - [ ] 未擅自改 §7.3 壳层定位
 - [ ] Metro / 模拟器已目测
 - [ ] 有 EDS 改动：远程 SHA 存在且 CI pin 一致
@@ -432,6 +607,10 @@ npm run typecheck
 | 主题 hook | `src/hooks/useEdsTheme.ts` · `src/utils/edsTheme.ts` |
 | i18n | `src/i18n/locales/*.ts` |
 | Stack 动效 | `src/navigation/screenOptions/stackOptions.ts` |
+| **Home 顶栏** | `src/scenes/home/useHomeMainScreenOptions.tsx` · `useHomeIosNativeHeaderItems.tsx` · `HomeTopBar.tsx` · `HomeScene.tsx` · `HomeStackNavigator.tsx` |
+| **Stack Nav（iOS 26+）** | `src/navigation/screenOptions/useCregisNativeStackScreenOptions.tsx` |
+| **EDS 反馈清单** | **§3.1.1**（本文件） |
+| **个人中心（§2.5.1）** | `HomeNavBarParts` 用户胶囊 · `PersonalCenterScene.tsx` · `HomeStackNavigator` |
 | Modal 示例 | `src/scenes/profile/BiometricPromptSheet.tsx` |
 | CI pin | `.github/workflows/deploy-pages.yml` → `ref:` |
 
@@ -441,7 +620,10 @@ npm run typecheck
 
 | 字段 | 值 |
 |------|-----|
-| 文档版本 | 1.1 |
+| 文档版本 | 1.4 |
+| §2.3.1 Home 顶栏 · §3.1.1 EDS 联调清单（Agent 不改 eds-mobile） | 2026-10-29 |
+| §2.5 设计系统资产门禁 · §2.5.1 个人中心缺口 | 2026-10-27 |
+| HomeMain 顶栏三层架构 · 禁止回归表 | 2026-10-27 |
 | 细化可执行示例与目录边界 | 2026-09-16 |
 
 **本规范为业务项目强制约束。违反项须在 PR 修正或取得维护者书面例外。**

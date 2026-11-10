@@ -4,6 +4,7 @@ export type HomeTodoFilter = 'approval' | 'sign' | 'errorCallback';
 
 export type HomeTodoItem = {
   id: string;
+  category: HomeTodoFilter;
   amount: string;
   currency: string;
   /** 副文本加粗前缀（如 Project Name） */
@@ -26,7 +27,7 @@ type HomeState = {
   setTodoFilter: (filter: HomeTodoFilter) => void;
 };
 
-const todoTemplates: Omit<HomeTodoItem, 'id'>[] = [
+const todoTemplates: Omit<HomeTodoItem, 'id' | 'category'>[] = [
   {
     amount: '100.00035',
     currency: 'BCH',
@@ -50,10 +51,38 @@ const todoTemplates: Omit<HomeTodoItem, 'id'>[] = [
   },
 ];
 
-const initialTodoItems: HomeTodoItem[] = Array.from({ length: 24 }, (_, index) => ({
-  ...todoTemplates[index % todoTemplates.length]!,
-  id: `todo-${index + 1}`,
-}));
+function buildInitialTodoItems(): HomeTodoItem[] {
+  const counts: Record<HomeTodoFilter, number> = {
+    approval: 0,
+    sign: 32,
+    errorCallback: 8,
+  };
+  const items: HomeTodoItem[] = [];
+  let seq = 1;
+  for (const category of ['approval', 'sign', 'errorCallback'] as const) {
+    const total = counts[category];
+    for (let i = 0; i < total; i += 1) {
+      const template = todoTemplates[(seq - 1) % todoTemplates.length]!;
+      items.push({
+        ...template,
+        id: `todo-${seq}`,
+        category,
+      });
+      seq += 1;
+    }
+  }
+  return items;
+}
+
+const initialTodoItems = buildInitialTodoItems();
+
+function todoFilterCounts(items: HomeTodoItem[]): Record<HomeTodoFilter, number> {
+  return {
+    approval: items.filter((item) => item.category === 'approval').length,
+    sign: items.filter((item) => item.category === 'sign').length,
+    errorCallback: items.filter((item) => item.category === 'errorCallback').length,
+  };
+}
 
 export const useHomeStore = create<HomeState>((set) => ({
   companyName: 'Quant Inc.',
@@ -62,11 +91,7 @@ export const useHomeStore = create<HomeState>((set) => ({
   totalBalanceDisplay: '$ 730,650.83',
   balanceVisible: true,
   todoFilter: 'approval',
-  filterCounts: {
-    approval: 100,
-    sign: 2,
-    errorCallback: 0,
-  },
+  filterCounts: todoFilterCounts(initialTodoItems),
   todoItems: initialTodoItems,
   toggleBalanceVisible: () => set((state) => ({ balanceVisible: !state.balanceVisible })),
   setTodoFilter: (todoFilter) => set({ todoFilter }),

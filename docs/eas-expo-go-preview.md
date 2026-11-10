@@ -9,7 +9,8 @@ push → EAS Workflow (eas update) → Expo CDN
 同事：Expo Go → expo.dev Updates 页 → Preview 二维码
 ```
 
-- **容器**：官方 **Expo Go**（需与 **SDK 57** 匹配）。
+- **容器**：官方 **Expo Go**（需与 **SDK 58** 匹配，与 `work.md` §1 锁定一致）。
+- **iOS 真机**：使用 App Store **最新 Expo Go**（当前应对齐 SDK 58）；若仍不匹配，用模拟器或 `expo-dev-client` 真机包。
 - **设计系统**：EAS 云端通过 `eas-build-pre-install` clone `EDS-UED/eds-mobile` 并 `pnpm build:mobile`（见 `scripts/eas-preinstall-eds.mjs`）。
 
 ## 一次性 setup（维护者）

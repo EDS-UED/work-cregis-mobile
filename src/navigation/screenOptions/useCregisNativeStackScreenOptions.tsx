@@ -3,7 +3,8 @@ import type { NativeStackNavigationOptions } from '@react-navigation/native-stac
 import {
   egNavBarNativeStackScreenOptions,
   shouldUseEgNavBarNativeStack,
-} from '@eds-evergreen/mobile';
+} from '@/eds/nav-bar';
+import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { edsPageBackground } from '@/utils/edsTheme';
@@ -14,11 +15,9 @@ type StackScreenOptionsArgs = {
   navigation: { goBack: () => void };
 };
 
-/**
- * iOS 26+ — 与 EDS Showcase `useShowcaseStackScreenOptions` 同法：
- * 系统 `UINavigationBar` + `background: 'auto'` → `scrollEdgeEffects`（栏背景随内容滚入，继承原生 Liquid Glass）。
- */
+/** iOS 26+ — 与 EDS Showcase 同用 `egNavBarNativeStackScreenOptions`（返回已走 unstable 栏项，不叠双层玻璃）。 */
 export function useCregisNativeStackScreenOptions() {
+  const { t } = useTranslation();
   const { colors, mode } = useEdsTheme();
   const pageBackground = edsPageBackground(colors);
 
@@ -34,12 +33,13 @@ export function useCregisNativeStackScreenOptions() {
           mode,
           background: 'auto',
           onBack: () => navigation.goBack(),
+          backAccessibilityLabel: t('common.back'),
         }),
         contentStyle: { backgroundColor: pageBackground },
         statusBarTranslucent: true,
         statusBarBackgroundColor: 'transparent',
       };
     },
-    [mode, pageBackground],
+    [mode, pageBackground, t],
   );
 }

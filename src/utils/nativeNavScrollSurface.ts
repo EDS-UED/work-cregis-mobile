@@ -1,5 +1,5 @@
 import type { ViewStyle } from 'react-native';
-import type { getThemeColors } from '@eds-evergreen/mobile';
+import type { getThemeColors } from '@/eds/theme';
 
 import { edsPageBackground } from '@/utils/edsTheme';
 

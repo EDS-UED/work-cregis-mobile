@@ -8,7 +8,7 @@ import {
   egTabBarScrollContentReserveWithSafeArea,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
-} from '@eds-evergreen/mobile';
+} from '@/eds/nav-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 

@@ -1,8 +1,9 @@
 import {
-  EgCregisTabBar,
+  CREGIS_TAB_BAR_ITEMS,
+  EgTabBar,
   EgTabBarBottomTabsDock,
   createEgCregisTabBarBottomTabsBinding,
-} from '@eds-evergreen/mobile';
+} from '@/eds/cregis-tab-bar';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -14,7 +15,13 @@ export function CregisTabBar({ state, navigation }: BottomTabBarProps) {
 
   return (
     <EgTabBarBottomTabsDock>
-      <EgCregisTabBar testID="cregis-tab-bar" mode={mode} {...binding} />
+      <EgTabBar
+        testID="cregis-tab-bar"
+        mode={mode}
+        items={CREGIS_TAB_BAR_ITEMS}
+        selectionAccent="decor"
+        {...binding}
+      />
     </EgTabBarBottomTabsDock>
   );
 }

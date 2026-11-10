@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
-import { GlassBlurBackdrop } from '@eds-evergreen/mobile';
+import { GlassBlurBackdrop } from '@/eds/glass';
 
 type EdsGlassScreenShellProps = {
   children: ReactNode;
@@ -15,7 +15,7 @@ export function EdsGlassScreenShell({ children, overlay, style }: EdsGlassScreen
   const isFocused = useIsFocused();
 
   return (
-    <View collapsable={false} style={[styles.root, style]}>
+    <View collapsable={false} pointerEvents="box-none" style={[styles.root, style]}>
       <GlassBlurBackdrop style={styles.backdrop} active={isFocused}>
         {children}
       </GlassBlurBackdrop>

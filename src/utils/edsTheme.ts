@@ -1,6 +1,15 @@
-import { getThemeColors, mobileTheme } from '@eds-evergreen/mobile';
+import { getThemeColors } from '@/eds/theme';
+import mobileTheme from '@/eds/tokens';
 import type { Theme } from '@react-navigation/native';
-import { Platform } from 'react-native';
+import { Platform, type ColorValue } from 'react-native';
+
+import {
+  applyCregisBrandColors,
+  CREGIS_BRAND_COLOR,
+  CREGIS_BRAND_DISPLAY_P3,
+} from '@/utils/cregisBrandColors';
+
+export { CREGIS_BRAND_COLOR, CREGIS_BRAND_DISPLAY_P3, applyCregisBrandColors };
 
 type ThemeColors = ReturnType<typeof getThemeColors>;
 type Typography = typeof mobileTheme.typography.base;
@@ -19,8 +28,8 @@ export function edsPx(value: string | number) {
   return typeof value === 'number' ? value : Number.parseFloat(value);
 }
 
-/** 业务 Scene 默认水平内容边距 — `spacing-6`（24）。 */
-export const EDS_SCENE_CONTENT_INSET = 'spacing-6' as const;
+/** 业务 Scene 默认水平内容边距 — `spacing-5`（20px · `var(--spacing-5)`）。 */
+export const EDS_SCENE_CONTENT_INSET = 'spacing-5' as const;
 
 export function edsSceneContentInset(spacing: typeof mobileTheme.spacing) {
   return edsPx(spacing[EDS_SCENE_CONTENT_INSET]);
@@ -31,26 +40,6 @@ export const EDS_NAV_BAR_HORIZONTAL_INSET = 'spacing-4' as const;
 
 export function edsNavBarHorizontalInset(spacing: typeof mobileTheme.spacing) {
   return edsPx(spacing[EDS_NAV_BAR_HORIZONTAL_INSET]);
-}
-
-/** Cregis 品牌主色 — 浅色 / 深色均为 `#1FC35A`（覆盖 EDS 默认 `brand` 族 token）。 */
-export const CREGIS_BRAND_COLOR = '#1FC35A';
-
-/** 将 EDS `getThemeColors` 结果中的 brand 相关 semantic 替换为 Cregis 品牌色。 */
-export function applyCregisBrandColors(colors: ThemeColors): ThemeColors {
-  const brand = CREGIS_BRAND_COLOR;
-  return {
-    ...colors,
-    brand,
-    'text-brand': brand,
-    'material-brand': brand,
-    'material-brand-weaken': `${brand}1f`,
-    'stroke-color-brand': brand,
-    'status-disable-brand': `${brand}66`,
-    'status-disable-brand-weaken': `${brand}33`,
-    'event-tap-brand': `${brand}66`,
-    'event-focus-brand': `${brand}1a`,
-  };
 }
 
 export function getCregisThemeColors(mode: 'light' | 'dark'): ThemeColors {
@@ -84,13 +73,10 @@ function edsTextStyle(
   weight: FontWeightKey,
   color: keyof ThemeColors,
 ) {
-  const fontFamily = edsNativeFontFamily(typography, weight);
-  const fontWeight = edsFontWeight(typography, weight);
   return {
-    fontFamily,
+    fontFamily: edsNativeFontFamily(typography, weight),
     fontSize: edsPx(typography[size]),
     lineHeight: edsPx(typography[lineHeight]),
-    ...(Platform.OS === 'android' ? {} : { fontWeight }),
     color: String(colors[color]),
   };
 }
@@ -179,6 +165,15 @@ export function createEdsTypographyStyles(
       'line-height-footnote',
       'weight-regular',
       'text-base-secondary',
+    ),
+    /** 13 — `size-footnote` + primary（如快捷入口标签）。 */
+    footnotePrimary: edsTextStyle(
+      typography,
+      colors,
+      'size-footnote',
+      'line-height-footnote',
+      'weight-regular',
+      'text-base-primary',
     ),
     bodySmall: edsTextStyle(
       typography,

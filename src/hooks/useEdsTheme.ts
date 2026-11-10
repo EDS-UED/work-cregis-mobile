@@ -1,4 +1,4 @@
-import { mobileTheme } from '@eds-evergreen/mobile';
+import mobileTheme from '@/eds/tokens';
 
 import { useEffectiveThemeMode } from '@/hooks/useEffectiveTheme';
 import { getCregisThemeColors } from '@/utils/edsTheme';
