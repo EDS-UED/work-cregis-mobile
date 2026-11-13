@@ -1,15 +1,21 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createCregisPageStackNavigator } from "@/navigation/createCregisPageStackNavigator";
 
 import type { ComponentType } from "react";
-import { HomeScene } from "@/scenes/home/HomeScene";
-import { useHomeMainScreenOptions } from "@/scenes/home/useHomeMainScreenOptions";
+import { HomeMainScreen } from "@/scenes/home/HomeMainScreen";
 import { usePersonalCenterScreenOptions } from "@/scenes/profile/usePersonalCenterScreenOptions";
-import { useCregisNativeStackScreenOptions } from "@/navigation/screenOptions/useCregisNativeStackScreenOptions";
+import { useTeamCenterScreenOptions } from "@/scenes/team/useTeamCenterScreenOptions";
+import { useMessagesScreenOptions } from "@/scenes/messages/useMessagesScreenOptions";
+import { useScanScreenOptions } from "@/scenes/scan/useScanScreenOptions";
+import { edsPageStackNavigatorExtraProps } from "@/navigation/screenOptions/edsPageStackNavigatorConfig";
+import { useCregisStackScreenOptions } from "@/navigation/screenOptions/useCregisStackScreenOptions";
 import type { HomeStackParamList } from "@/navigation/types";
 
-const Stack = createNativeStackNavigator<HomeStackParamList>();
+const Stack = createCregisPageStackNavigator<HomeStackParamList>();
 
 let personalCenterScreen: ComponentType<object> | null = null;
+let teamCenterScreen: ComponentType<object> | null = null;
+let messagesScreen: ComponentType<object> | null = null;
+let scanScreen: ComponentType<object> | null = null;
 
 function PersonalCenterRoute(props: object) {
   if (!personalCenterScreen) {
@@ -20,27 +26,75 @@ function PersonalCenterRoute(props: object) {
   return <Screen {...props} />;
 }
 
+function TeamCenterRoute(props: object) {
+  if (!teamCenterScreen) {
+    teamCenterScreen = require("@/scenes/team/TeamCenterScene")
+      .TeamCenterScene as ComponentType<object>;
+  }
+  const Screen = teamCenterScreen;
+  return <Screen {...props} />;
+}
+
+function MessagesRoute(props: object) {
+  if (!messagesScreen) {
+    messagesScreen = require("@/scenes/messages/MessagesScene")
+      .MessagesScene as ComponentType<object>;
+  }
+  const Screen = messagesScreen;
+  return <Screen {...props} />;
+}
+
+function ScanRoute(props: object) {
+  if (!scanScreen) {
+    scanScreen = require("@/scenes/scan/ScanScene").ScanScene as ComponentType<object>;
+  }
+  const Screen = scanScreen;
+  return <Screen {...props} />;
+}
+
 export function HomeStackNavigator() {
-  const homeMainOptions = useHomeMainScreenOptions();
   const personalCenterOptions = usePersonalCenterScreenOptions();
-  const screenOptions = useCregisNativeStackScreenOptions();
+  const teamCenterOptions = useTeamCenterScreenOptions();
+  const messagesOptions = useMessagesScreenOptions();
+  const scanOptions = useScanScreenOptions();
+  const screenOptions = useCregisStackScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="HomeMain"
-        component={HomeScene}
-        options={(props) => ({
-          ...screenOptions(props),
-          ...homeMainOptions,
-        })}
-      />
+    <Stack.Navigator
+      {...edsPageStackNavigatorExtraProps()}
+      screenOptions={screenOptions}
+    >
+      <Stack.Screen name="HomeMain" component={HomeMainScreen} />
       <Stack.Screen
         name="PersonalCenter"
         component={PersonalCenterRoute}
         options={(props) => ({
           ...screenOptions(props),
           ...personalCenterOptions,
+        })}
+      />
+      <Stack.Screen
+        name="TeamCenter"
+        component={TeamCenterRoute}
+        options={(props) => ({
+          ...screenOptions(props),
+          ...teamCenterOptions(props),
+        })}
+      />
+      <Stack.Screen
+        name="Messages"
+        component={MessagesRoute}
+        options={(props) => ({
+          ...screenOptions(props),
+          ...messagesOptions,
+        })}
+      />
+      <Stack.Screen
+        name="Scan"
+        component={ScanRoute}
+        options={(props) => ({
+          ...screenOptions(props),
+          ...scanOptions,
         })}
       />
     </Stack.Navigator>

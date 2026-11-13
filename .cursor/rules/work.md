@@ -34,7 +34,8 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 | **「推送」/「推」** | **必须**执行 §3.3 双仓 push + 确认 EAS `preview` update 成功（Agent 亲自跑命令，不只给文案） |
 | Expo Go 与项目 SDK 不一致 | 先确认 `package.json` / `work.md` §1 锁定版本；真机 Go 过旧/过新 → 模拟器或 Dev Client（§1） |
 | 只提业务 Scene / 功能 | 只改 `src/**`（及 i18n / navigation / store）；**新页必读 §2.5**；**改 Home 顶栏必先读 §2.3.1**，禁止未读就改 overlay / reserve / `forceRnImplementation` |
-| 只提 token / Eg 组件行为 | **禁止改** `../eds-mobile/**`；把现象与 §3.1.1 核对/增补后 **反馈用户转 DS**，勿在 consumer 手搓 Eg* 行为（§3.1） |
+| **设计 / 生成新页面** | **参考** [`docs/design.md`](../docs/design.md) §5.0（非强制改造既有页） |
+| 只提 token / Eg 组件行为 | **禁止改** `../eds-mobile/**`（**须先询问授权**，见 §3.1）；未授权则 §3.1.1 反馈或业务 workaround，勿手搓 Eg*（§3.1） |
 | **「同步」** | **唯一**授权 §3.1.2：拉最新 `@eds-evergreen/mobile` dist（**非** §3.3「推」）。**禁止** DS 有改动就 build / 改业务 import / 清 Metro — 未说「同步」则业务按**当前 dist** 继续，不受影响 |
 
 **收尾**：两三句——做了什么、还需什么、验证过没过。**禁止**复述全过程。
@@ -60,12 +61,15 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 | i18n | §4 |
 | 原生 vs RN、Eg* 边界 | §2.3 |
 | Home 顶栏（Showcase 对齐） | §2.3.1 |
+| **业务页视觉默认** | **`docs/design.md`** · §5.0 |
+| 稿面数值 → 字阶/色解码 | §5.0.1 |
 | 样式、滚动、网络名称 | §5 |
 | Modal / Sheet 生命周期 | §6 |
 | Native 开发与 EDS preview 分工 | §7 |
 | Motion | §8 |
 | 校验与 PR | §9 |
 | 文件索引 | §10 |
+| **踩坑记录（Expo 边界 · 手势 · 坐标 · 验证）** | **§12** |
 
 ### 0.1 目录边界
 
@@ -311,24 +315,35 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 
 **【必须】** EDS 实现变更只在 **eds-mobile** 完成；本仓只做集成。**禁止**因上游改了就把业务 import、联调步骤、验收标准改成「必须最新 dist」。
 
-**唯一例外**：用户明确授权「改 eds-mobile / 切到设计系统仓库改」— 否则 Agent **不得**编辑 `../eds-mobile/**`。
+**唯一例外 · 改 DS 须先授权（2026-11-13 起严格执行）**
+
+| 步骤 | 要求 |
+|------|------|
+| 1 | 业务需要 Eg* / token / dist 不具备的能力 → **先说明原因与拟改范围**，**询问用户是否授权改 `../eds-mobile/**`** |
+| 2 | 用户**未明确同意**（如「可以改 DS」「授权」）→ **只**走业务 workaround 或 §3.1.1 反馈清单，**禁止**动 DS |
+| 3 | 用户**已授权** → 方可编辑 `../eds-mobile/**`；完成后须用户说 **「同步」** 再 §3.1.2 拉 dist（**禁止**未说「同步」就擅自 `build:mobile`） |
+
+**【禁止】** 未经上表第 1–2 步直接改 DS（含 `EgSheets`、`EgNavBar`、token、glass 等），即使判断「业务侧无法做」也不行。
 
 **【必须】** Agent 发现 Eg* / 液态玻璃 / 系统 Nav 与 Showcase 不一致时：**只更新本节 §3.1.1 清单（或告知用户增补）并口头反馈**，**禁止**为修 UI 去改 `../eds-mobile/**` 或在业务仓复制第二套玻璃实现。
 
 ### 3.1.1 EDS 联调 · 业务反馈清单（Cregis → eds-mobile）
 
-**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 2026-10-29）**
+**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 同步 2026-11-13 · eds-mobile `22080d1`）**
 
 | EDS 约定 | 业务用法 |
 |----------|----------|
-| `egNavBarNativeStackScreenOptions` | `useCregisNativeStackScreenOptions` · i18n `backAccessibilityLabel` |
+| `createEgEdsAnimaPageNavigator` + `EgEdsAnimaPage` | `createCregisPageStackNavigator` · `useCregisStackScreenOptions`；`horizontal` / `horizontal-reverse` / `vertical` |
+| `EgEdsAnimaPageShot` + `EgEdsAnimaPageShotTrigger` | `@/eds/page-shot`（业务按需；团队中心当前仍为 Stack `TeamCenter`） |
+| `egNavBarNativeStackScreenOptions` | `useCregisStackScreenOptions`（`EgEdsAnimaPage` 内建 iOS 26+） |
 | `egNavBarNativeStackOptions` + `unstable_header*Items` | Home · `useHomeMainScreenOptions` + `useHomeIosNativeHeaderItems` |
 | `egNavBarNativeStackHeaderGlassItem` | Home 栏每一项（含公司名容器） |
 | `EgButtonGlass` `host="navigationBar"` | Home 栏按钮 → **系统栏内容组件**（非 Nav 槽内 `GlassView`） |
 | `EgButtonGlass` 默认 canvas | `HomeTopBar` overlay（仅非 iOS 26+） |
 | `readEgButtonGlassStackDiagnostics` | Nav 槽按钮走 NavigationBar 路径；**canvas** 仍看 `stack: native \| rn` |
+| Semantic **`radius-md` / `radius-lg`** | **列表行点按底** · DL · 设置行 → **`radius-md`**（20px · `scale-5`）；**分组白卡** → **`radius-lg`**（24px · `scale-6`）。与 Showcase `list row` / shallow card 语义一致 · `docs/design.md` §3 |
 
-**业务仓必保依赖**：`expo-glass-effect ~58` · Metro iOS **`expo-glass-effect` shim**。要对齐 eds-mobile **最新** dist → 仅用户 **「同步」** §3.1.2。
+**业务仓必保依赖**：`expo-glass-effect ~58` · Metro iOS **`expo-glass-effect` shim** · `@expo/ui ~58`（iOS 26+ `EgMenu` 走系统菜单，与 Showcase 一致；缺失则回退 RN 浮层）。要对齐 eds-mobile **最新** dist → 仅用户 **「同步」** §3.1.2。
 
 **若真机仍发白 / 仍像 RN 白盒 — 先区分再反馈 DS**
 
@@ -337,6 +352,7 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 | Home / 设置 **栏上胶囊**（`host="navigationBar"`） | 是否 **`hidesSharedBackground`** 每项都有；是否 **legacy `headerLeft`**（业务已禁止）；scroll edge：内容 **> 一屏** · `automatic` inset | DS / RNScreens 栏项材质 · 或 dist 未更新 |
 | **浮层顶栏**（canvas `EgButtonGlass`） | `readEgButtonGlassStackDiagnostics()` → **`stack: 'rn'`** | 缺 `expo-glass-effect` 或未 `--clear` Metro → **工程**；闸门文档 → **DS** |
 | **历史：双返回圈** | dist 是否含 **`unstable_headerLeftItems` 返回**（无 `headerLeft` 内嵌玻璃） | 旧 dist → 用户 **「同步」** §3.1.2 + 清 Metro |
+| **`EgMenu` RN 浮层空白**（2026-11-12 · 已在 DS 修复并同步） | 原因：`EgMenuPanel` 内容放在 `absoluteFill` 里（面板高度 0），且 iOS `BlurView` 叠在内容之上把文字糊掉。修复：内容回到布局流、玻璃层置于内容之下 | 已修（eds-mobile `EgMenuAnchored.tsx`） |
 
 **仍须 DS / Showcase 真机对标时附带**：机型 · iOS 版本 · diagnostics JSON · `host` / `iconCount` · 截图 · eds-mobile **commit**。
 
@@ -494,10 +510,48 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 
 ## 5. 样式与展示
 
+### 5.0 业务页视觉默认（`docs/design.md` · 参考）
+
+[`docs/design.md`](../docs/design.md) 与 `.cursor/rules/design.md` 供 **新页设计 / 从零生成** 时作 typography、间距、尺寸**参考**，可持续扩展。
+
+**【禁止】** 未经用户准许，以该文档为由**替换**已有 Scene 的布局、样式、字阶等（既有实现以稿面 / 已验收为准）。
+
+**【必须】** 用户明确「按 design.md 对齐」或新建页面时：采用下表默认（全文见 `docs/design.md` §0）：
+
+摘要：
+
+| 类型 | 默认 |
+|------|------|
+| 分段标题 | `typography-title` · `text-base-primary` → `SceneText variant="title"` |
+| 正文 | `typography-body-medium` · primary → `bodyMedium` |
+| 副文本 | `typography-body-small` · secondary → `bodySmallSecondary` |
+| Item 主文案 | `typography-body-medium-strong` · primary → `bodyMediumStrong` |
+| 页边距 | 上 `spacing-4`（`EDS_NAV_CONTENT_GAP`）· 左右 `spacing-5`（`EDS_SCENE_CONTENT_INSET`）· 下 `spacing-8` |
+| 块/卡片间距 | `spacing-7` |
+| Item 内间距 | 标题–副文本 `spacing-1`；左图/头像/icon–文案 `spacing-3` |
+| 尺寸 | 头像/币种 `avatar-lg`；icon `symbol-md` |
+
+### 5.0.1 稿面数值 → EDS 字阶 / 色（Agent 解码）
+
+用户口述 **px / 字重数字** 时，**【必须】** 先查 `../eds-mobile/packages/tokens/spec`（`typography/semantic.json` · `text/styles.json` · `CSS-TOKENS.md`）映射 **Figma class / CSS 变量**，再用 `SceneText` variant + 色 token实现，禁止手搓 `fontSize: 17` · `fontWeight: '500'`。
+
+| 用户常说 | EDS 字阶（class） | RN `SceneText` |
+|----------|-------------------|----------------|
+| 17 · **400** | `typography-body-medium` | `body` / `bodyMedium` |
+| 17 · **500** | `typography-body-medium-strong` | `bodyMediumStrong` |
+| 17 · **600** | `typography-body-medium-heavy` | `bodySemibold` |
+| 主色 **100%** | `var(--text-base-primary)` | variant 默认 primary |
+| 主色 **60%** | `var(--text-base-secondary)` | `bodySmallSecondary` 或 `secondary` |
+| 主色 **40%** | `var(--text-base-tertiary)` | `bodyMediumStrong` 等 + `colors['text-base-tertiary']`（spec α 40% · 非 `opacity` 手写） |
+
+权威对照见 EDS `packages/tokens/spec/css-dist-reference.md` 透明度档（如 `66` → 40% → tertiary）。
+
 ### 5.1 Token 与圆角平滑
 
 - 业务：`useEdsTheme()` + `edsPx()` + `src/utils/edsTheme.ts` 命名 helper（`edsPageBackground` · `edsSceneContentInset` · `createEdsTypographyStyles` / `SceneText` variant）
 - **【必须】** Scene 水平内边距统一 `edsSceneContentInset(spacing)`（`EDS_SCENE_CONTENT_INSET` = **`spacing-5` / 20px**），禁止单页另写 `spacing-*` 当「全局边距」
+- **【必须】** 导航底到首屏内容间距统一 `edsNavContentGap(spacing)`（`EDS_NAV_CONTENT_GAP` = **`spacing-4` / 16px**）；`SceneScaffold` · 首页 `HomeScene` 已接，新页勿另算
+- 新页若采用 `docs/design.md`：下边距 `spacing-8`、块间距 `spacing-7`；水平边距仍以 `EDS_SCENE_CONTENT_INSET` 为全局左右标准（**不**因此对已有页做追溯替换）
 - **【必须】** 语义色/字档走 `SceneText` variant 或 Eg* 的 color token prop（如 `text-base-secondary`），禁止 Scene 内 `color: '#…'` 或 `colors[...]` 拼一行覆盖（除非 variant 尚未收录 → 先补 `edsTheme`）
 - **Cregis 品牌色**：浅/深均为 **`#1FC35A`** — 经 `getCregisThemeColors()` / `applyCregisBrandColors()` 覆盖 EDS `brand` 族；**iOS** 上 `material-brand` 等走 RN `{ space: 'display-p3' }`（`CREGIS_BRAND_DISPLAY_P3` · 与 spec `eds-success` 同源），**Android** 仍为 sRGB hex；勿在 Scene 手写绿 hex
 
@@ -601,6 +655,7 @@ npm run typecheck
 
 | 主题 | 路径 |
 |------|------|
+| **业务页视觉默认** | `docs/design.md` · `.cursor/rules/design.md` · §5.0 |
 | 项目详案 | `docs/cregis-mobile-project-brief.md` |
 | 预览架构 | `docs/eds-preview-architecture.md` |
 | EDS 规范 | `../eds-mobile/.cursor/rules/work.mdc` |
@@ -620,10 +675,93 @@ npm run typecheck
 
 | 字段 | 值 |
 |------|-----|
-| 文档版本 | 1.4 |
+| 文档版本 | 1.5 |
+| §12 踩坑记录 | 2026-11-12 |
 | §2.3.1 Home 顶栏 · §3.1.1 EDS 联调清单（Agent 不改 eds-mobile） | 2026-10-29 |
 | §2.5 设计系统资产门禁 · §2.5.1 个人中心缺口 | 2026-10-27 |
 | HomeMain 顶栏三层架构 · 禁止回归表 | 2026-10-27 |
 | 细化可执行示例与目录边界 | 2026-09-16 |
 
 **本规范为业务项目强制约束。违反项须在 PR 修正或取得维护者书面例外。**
+
+---
+
+## 12. 踩坑记录（2026-11-12 · 修过的坑勿回归）
+
+### 12.1 Expo 边界（先查后做）
+
+**【必须】** 「原生能力」先确认 **Expo SDK 58 / Expo Go 是否支持**（Expo 自带库如 react-native-screens · RNGH · Reanimated 可用）。不支持就**不做**——混合开发，后续全走 Expo 发包。
+
+**【禁止】** 改 `node_modules/**` 原生代码（`.mm` / `.kt` / `.java`）或用 `postinstall` 打原生补丁：Expo Go 与 OTA（`eas update`）都带不上，只在自建包生效。修复只能在 **JS 层 / DS JS 实现**。
+
+**先确认测试环境**：模拟器 / 真机跑的是 **Expo Go**（`host.exp.Exponent`），不是 Dev Client — 原生改动在 Expo Go 里一律无效。
+
+### 12.2 iOS 26+ · RN `Modal` 内禁止嵌 react-native-screens 原生栈
+
+| 现象 | 根因 | 正解 |
+|------|------|------|
+| `EgSheets` 内容**点击全部无反应**，但**拖拽正常**（团队切换、快捷入口「编辑」） | `ScreenStack`（scroll edge 宿主 `GlassMaskScrollEdgeHost`）放在 RN `Modal` 里 → `RNSScreen` 挂入窗口时找不到 RN 根，**再挂一个** `RCTSurfaceTouchHandler`，与 Modal 自带的重复派发 → `Pressable` 失效；RNGH 不走 RN 触摸系统所以拖拽仍好 | 浮层用 DS `EgEdsAnimaOverlayModal`（iOS 26+ → `transparentModal`，Android · iOS ≤25 → RN `Modal`）；`EgSheets` 已经 `SheetsModalHost` 处理 |
+
+**排查法**：点不了但能拖 → 先查是否「原生栈套在 RN Modal 里」。对照实验：临时让 `GlassMaskScrollEdgeHost` 直接 `return children`，点击恢复即确认。
+
+**【禁止】** 为修点击而删掉原生 scroll edge（iOS 26+ 原生顶栏会失效）。
+
+### 12.3 Sheet 手势：不要用「换组件 / 改长按」绕点击问题
+
+| 错误做法 | 后果 |
+|----------|------|
+| Sheet 内列表行改用 RNGH `Pressable` | RNGH 原生按钮 `disallowInterruption = YES` → 手指按在行上时 Sheet 的 Pan 被取消，**中档拖不到大档** |
+| `EgSheets` `contentPan` 恒用长按（`buildPan(true)`） | 中档无法直接拖拽换档 |
+
+**【必须】** Sheet 内行保持 RN `Pressable`（`DataListRow`）；`contentPan = buildPan(contentScrollable)`（仅最高档且内容溢出时长按拖）。
+
+### 12.4 RNGH 3 × `@react-navigation/stack` 7.12
+
+- RNGH 3 `PanGestureHandler` **丢弃**旧参数 `minOffsetX` / `maxDeltaX` / `maxDeltaY` / `minOffsetY`，stack 7.12 仍在传 → 卡片 Pan 失去方向约束，Android RN 栈页**无法滚动**。
+- **【必须】** 保留 Metro 重定向 `src/shims/react-navigation-stack-gesture-activation-criteria.js`（`metro.config.js` 内 `gestureActivationCriteria.js` 规则），改为 `activeOffset*` / `failOffset*`。改 `metro.config.js` 后须 Metro `--clear` 重启。
+- 升级 stack / RNGH 后先复核该 shim 是否仍需要。
+
+### 12.5 Android · 动效页（`EgEdsAnimaPage`）
+
+| 现象 | 根因 | 正解 |
+|------|------|------|
+| 团队中心 / 设置等页**滚动时整页左右剧烈晃** | 整页拖拽返回的 Pan 与原生 ScrollView 抢同一批触摸；拇指弧线滚动横向分量大，Pan 被激活 → 卡片横移再回弹。调阈值只能降概率 | DS：Android 上 `gestureEnabled` 恒 false，返回交给系统返回手势 / 返回键（iOS ≤25 整页侧滑保留）。**【禁止】** 业务或 DS 在 Android 重新打开 |
+| 页面不能滚 | 主 `ScrollView` 缺 `flex: 1` + `minHeight: 0` | `overlayNavScrollSurfaceStyle()` + `nestedScrollEnabled`（`SceneScaffold` / `HomeScene` 已接） |
+
+### 12.6 坐标系（page-shot 飞入 / 飞回）
+
+- **Android** `measureInWindow` 会**扣掉状态栏**（窗口可见区顶）；page-shot 弹层 Modal 开了 `statusBarTranslucent`，原点在**屏幕顶** → 不补偿则飞回落高一个状态栏（实测 47dp），浮层撤掉后真卡片「跳」回原位。DS `measureShotRect` 已补 `StatusBar.currentHeight`。
+- **Fabric**：`Modal` 是独立根（`RootNodeKind`），Modal 内 `measureInWindow` 恒相对 Modal，宿主偏移永远是 0 — **别**用「量 Modal 内宿主偏移再相减」去修坐标。
+- **iOS 26+**：系统栏 `unstable_header*Items` 渲染在 Screen 树外，**拿不到** page-shot context → 栏上触发器须降级（如扫码改 `navigation.navigate('Scan')`，见 `HomeScanPageShotTrigger`），否则红屏 `must be rendered inside EgEdsAnimaPageShot`。
+
+### 12.7 验证方法（「在模拟器里验证」）
+
+| 场景 | 做法 |
+|------|------|
+| iOS 模拟器点击 / 滑动 | Xcode 27 无 Simulator.app 窗口、Cursor 无辅助功能权限 → 用 [AXe](https://github.com/cameroncooke/AXe) 注入触摸：`axe tap -x <pt> -y <pt> --udid <UDID>` · `axe swipe …`；截图 `xcrun simctl io booted screenshot` 后缩到逻辑点宽度（iPhone 17 = 402×874pt）坐标即可直接对照 |
+| 打开 App | `xcrun simctl openurl booted exp://127.0.0.1:8081` |
+| 真机问题（Android 无本地环境） | 让用户录屏 → 用 AVFoundation 抽帧拼图逐帧量位移；DS 内临时 `__DEV__` 日志经 Metro 终端回传真机坐标，**定位后必须删除** |
+| DS `build:mobile` 期间红屏「None of these files exist …」 | assemble 清空重建 dist 的瞬时状态；构建完 `simctl terminate` + 重开 App 即可，不是代码问题。重开仍红屏 → Metro 文件映射已过期，`--clear` 重启 Metro |
+| 打开 / 切换时「跳一下」类问题 | `simctl io <UDID> recordVideo` 录屏 → AVFoundation（`AVAssetImageGenerator`）按 17ms 抽帧 → 逐帧量**相对位移**（如内容块顶 − 卡片顶）。只看「卡片在动」分不出是动画还是内容自己在动 |
+
+**【必须】** 修一处回归一处：点击、拖拽换档、滚动、原生顶栏效果在同一次验证里一起过，避免「修好 A 坏了 B」。
+
+### 12.8 iOS 26+ · `EgSheets` 打开时内容上下跳动（2026-11-13）
+
+| 现象 | 根因 | 正解（DS 已修） |
+|------|------|-----------------|
+| 打开 Sheet，卡片滑入时内容在卡片里**额外滑约 60px 再回弹**；标题不动 | ① 外层有原生 Tab（`TabsScreen`）时，RNS 在原生栈挂载时把首个 ScrollView 的 `contentInsetAdjustmentBehavior` 从 `never` **强制改成** `automatic` → 系统栏显示即加 ~64px inset。② `GlassMaskScrollEdgeHost` 每次挂载须先**显示**系统栏测高、测到再**隐藏**；隐藏与宿主响应同一提交 → UIKit 动画把 inset / offset 变化做成滑动 | ① `EgSheets` 每次呈现先以 `automatic` 挂载（RNS 只改写 `never`），收到栏高（原生栈已挂好）再切 `never` 并 `scrollTo(0)`，期间内容透明。② Host 测到栏高后**晚两帧**再隐藏系统栏 |
+
+**排查要点**：
+
+- 不是业务布局问题 — 改业务 `margin` / `padding` 无效（本次先错改快捷入口外边距，已撤回）。
+- 区分「RN 侧值在变」还是「原生在推」：DS 内临时打 `contentTopInset` / `nativeEdgeHeight` 日志；若 RN 值稳定而内容仍动 → 查 ScrollView `onScroll` 的 `contentOffset`（本例切换前 `-64`）。
+- `axe describe-ui` 看元素 frame：ScrollArea 位置正常而内部文本下移 = **content inset**，不是布局。
+- 系统栏首帧可能回传含状态栏的高度（实测 116 → 64），只用最终值。
+
+**【禁止】**
+
+- 把 ScrollView 移出 RNS「首个子视图链」来躲强制 `automatic` — scroll edge 效果也靠同一条链找 ScrollView，会一起失效。
+- 业务侧关 `TabsScreen` 的 `overrideScrollViewContentInsetAdjustmentBehavior` — 影响所有 Tab 页的滚动 inset。
+- 只靠「透明到测得栏高」遮盖 — 挡不住随后的系统栏隐藏动画。
+- 在同一提交里「隐藏系统栏 + 改 ScrollView inset 行为」。

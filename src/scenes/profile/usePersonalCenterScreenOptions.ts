@@ -1,27 +1,33 @@
 import { useMemo } from 'react';
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
+import type { StackNavigationOptions } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
+import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { edsPageBackground } from '@/utils/edsTheme';
+import { edsPageCardBackground } from '@/utils/edsTheme';
 
-import { pushSlideScreenOptions } from '@/navigation/screenOptions/stackOptions';
+import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-/** 个人中心 — 覆盖栈默认动效为横向 push；顶栏与协作详情同由 Stack + `SceneScaffold` 负责。 */
-export function usePersonalCenterScreenOptions(): NativeStackNavigationOptions {
+/** 个人中心 — EDS page + `box-page-card`；标题走 Stack / EgEdsAnimaPage 顶栏。 */
+export function usePersonalCenterScreenOptions(): StackNavigationOptions {
   const { colors } = useEdsTheme();
-  const pageBackground = edsPageBackground(colors);
+  const { t } = useTranslation();
+  const pageBackground = edsPageCardBackground(colors);
 
   return useMemo(() => {
-    const base: NativeStackNavigationOptions = {
-      ...pushSlideScreenOptions,
-      contentStyle: { backgroundColor: pageBackground },
-    };
+    const title = t('profile.title');
 
-    if (!shouldUseEgNavBarNativeStack()) {
-      return { ...base, headerShown: false };
+    if (shouldUseEgEdsAnimaNativePage()) {
+      return {
+        title,
+        contentStyle: { backgroundColor: pageBackground },
+      } as StackNavigationOptions;
     }
 
-    return base;
-  }, [pageBackground]);
+    return {
+      title,
+      ...edsPagePushedScreenOptions,
+      cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
+    };
+  }, [pageBackground, t]);
 }

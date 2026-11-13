@@ -1,27 +1,10 @@
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Platform } from 'react-native';
-import { edsNavigationPushDurationMs } from '@/utils/edsMotion';
+import { EgEdsAnimaPage } from '@/eds/page-motion';
+import { edsPagePushedScreenOptions, edsPageRootScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-const pushDurationMs = edsNavigationPushDurationMs();
+/** Tab / Stack 根屏 — 无下层压暗（RN 栈 `cardOverlayEnabled`）。 */
+export { edsPageRootScreenOptions, edsPagePushedScreenOptions };
 
-export const stackScreenOptions: NativeStackNavigationOptions = {
-  headerShown: false,
-  animation: Platform.OS === 'android' ? 'fade_from_bottom' : 'slide_from_right',
-  gestureEnabled: true,
-  fullScreenGestureEnabled: Platform.OS === 'ios',
-  animationDuration: pushDurationMs,
-};
-
-/** 子页 push（如个人中心）— 双端统一右进右出，避免 Android `fade_from_bottom` 像 modal。 */
-export const pushSlideScreenOptions: NativeStackNavigationOptions = {
-  animation: 'slide_from_right',
-  gestureEnabled: true,
-  fullScreenGestureEnabled: Platform.OS === 'ios',
-  animationDuration: pushDurationMs,
-};
-
-export const modalScreenOptions: NativeStackNavigationOptions = {
-  presentation: 'modal',
-  animation: 'slide_from_bottom',
-  gestureEnabled: true,
-};
+/** 纵向全屏推入（modal 形态页）— 传入 Stack `screenOptions` 工厂。 */
+export function cregisModalPageScreenOptions(mode: 'light' | 'dark' = 'light') {
+  return EgEdsAnimaPage({ direction: 'vertical', mode });
+}

@@ -1,0 +1,18 @@
+export {
+  EgIconAdd,
+  EgIconAddRole,
+  EgIconArrowDownIos,
+  EgIconAppEcology,
+  EgIconArrowDownMiniIos,
+  EgIconArrowLaunchSquare,
+  EgIconArrowRightMiniIos,
+  EgIconBill,
+  EgIconCirculation,
+  EgIconUsdAccounting,
+  EgDivider,
+  EgIconEditor,
+  EgIconPayee,
+  EgIconUserMultipleGroup,
+  EgIconUserSecurity,
+  MotionPressable,
+} from '@/shims/eds-mobile-team-icons';

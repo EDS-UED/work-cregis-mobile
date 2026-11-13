@@ -1,0 +1,34 @@
+import { useCallback, type PropsWithChildren } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import {
+  EgEdsAnimaPageShot,
+  type EgEdsAnimaPageShotRootApi,
+  type EgEdsAnimaPageShotSource,
+} from '@/eds/page-shot';
+import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { ScanPageShotRoot } from '@/scenes/home/ScanPageShotRoot';
+import { HOME_SCAN_PAGE_SHOT_ID } from '@/scenes/home/homeScanPageShot';
+
+/** 首页 · page-shot 宿主（顶栏扫码触发 · 不包 Stack Nav）。 */
+export function HomePageShotHost({ children }: PropsWithChildren) {
+  const { t } = useTranslation();
+  const { mode } = useEdsTheme();
+
+  const renderRoot = useCallback(
+    (api: EgEdsAnimaPageShotRootApi) => <ScanPageShotRoot api={api} />,
+    [],
+  );
+
+  const title = useCallback(
+    (source: EgEdsAnimaPageShotSource, pageKey: string | null) =>
+      pageKey === null && source.id === HOME_SCAN_PAGE_SHOT_ID ? t('home.scan') : undefined,
+    [t],
+  );
+
+  return (
+    <EgEdsAnimaPageShot mode={mode} title={title} renderRoot={renderRoot}>
+      {children}
+    </EgEdsAnimaPageShot>
+  );
+}

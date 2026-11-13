@@ -12,3 +12,11 @@ export function nativeNavScrollSurfaceStyle(colors: ThemeColors): ViewStyle {
     backgroundColor: edsPageBackground(colors),
   };
 }
+
+/** Android / iOS ≤25 · `EdsGlassScreenShell` 内主 ScrollView（须 constrained 高度方能滚动手势）。 */
+export function overlayNavScrollSurfaceStyle(): ViewStyle {
+  return {
+    flex: 1,
+    minHeight: 0,
+  };
+}

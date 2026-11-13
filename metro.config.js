@@ -79,6 +79,11 @@ const expoRouterUnstableNativeTabsShim = path.join(
   'src/shims/expo-router-unstable-native-tabs.tsx',
 );
 const expoGlassEffectShim = path.join(projectRoot, 'src/shims/expo-glass-effect.js');
+/** RNGH 3 丢弃 stack 旧版 Pan 属性名 → 卡片手势无方向约束、抢纵向滚动。 */
+const stackGestureActivationCriteriaShim = path.join(
+  projectRoot,
+  'src/shims/react-navigation-stack-gesture-activation-criteria.js',
+);
 
 /** 必须在 projectRoot 内，避免 dist 外链 workspace 包名解析失败。 */
 const edsWorkspaceShims = {
@@ -93,6 +98,7 @@ const edsWorkspaceShims = {
   '@eds-evergreen/mobile/home-ui': path.join(projectRoot, 'src/shims/eds-mobile-home-ui.ts'),
   '@eds-evergreen/mobile/sheets': path.join(projectRoot, 'src/shims/eds-mobile-sheets.ts'),
   '@eds-evergreen/mobile/profile-icons': path.join(projectRoot, 'src/shims/eds-mobile-profile-icons.ts'),
+  '@eds-evergreen/mobile/menu': path.join(projectRoot, 'src/shims/eds-mobile-menu.ts'),
 };
 
 const consumerNodeModules = path.resolve(projectRoot, 'node_modules');
@@ -149,12 +155,22 @@ config.cacheStores = [
   }),
 ];
 
-config.transformer.getTransformOptions = async () => ({
-  transform: {
-    experimentalImportSupport: false,
-    inlineRequires: true,
-  },
-});
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
+  getTransformOptions: async () => ({
+    transform: {
+      experimentalImportSupport: false,
+      inlineRequires: true,
+    },
+  }),
+};
+
+config.resolver = {
+  ...config.resolver,
+  assetExts: config.resolver.assetExts.filter((ext) => ext !== 'svg'),
+  sourceExts: [...config.resolver.sourceExts, 'svg'],
+};
 
 if (useLinkedMetro) {
   config.watchFolders = [
@@ -251,6 +267,15 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
         return { type: 'sourceFile', filePath: mainPath };
       }
     }
+  }
+
+  if (
+    moduleName.endsWith('/utils/gestureActivationCriteria.js') &&
+    context.originModulePath.includes(
+      `${path.sep}@react-navigation${path.sep}stack${path.sep}`,
+    )
+  ) {
+    return { type: 'sourceFile', filePath: stackGestureActivationCriteriaShim };
   }
 
   if (moduleName === 'expo-router/unstable-native-tabs') {

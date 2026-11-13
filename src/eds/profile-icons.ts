@@ -1,5 +1,6 @@
 export {
   EgDivider,
+  EgSymbol,
   EgIconArrowRightMiniIos,
   EgIconBill,
   EgIconDatabaseSafety,

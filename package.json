@@ -4,9 +4,11 @@
   "main": "index.ts",
   "dependencies": {
     "@eds-evergreen/mobile": "file:../eds-mobile/packages/mobile",
+    "@expo/ui": "~58.0.28",
     "@react-navigation/bottom-tabs": "^7.19.0",
     "@react-navigation/native": "^7.4.0",
     "@react-navigation/native-stack": "^7.19.0",
+    "@react-navigation/stack": "^7.12.1",
     "babel-preset-expo": "~58.0.0",
     "expo": "~58.0.20",
     "expo-asset": "~58.0.19",
@@ -33,6 +35,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "react-native-svg-transformer": "^1.5.3",
     "typescript": "~6.0.3"
   },
   "scripts": {

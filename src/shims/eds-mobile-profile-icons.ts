@@ -1,3 +1,4 @@
+export { EgSymbol } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/_shared/symbol/EgSymbol.js';
 export { EgDivider } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/divider/divider/index.js';
 export { EgIconArrowRightMiniIos } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/icon/icon-arrow-right-mini-ios/index.js';
 export { EgIconBill } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/icon/icon-bill/index.js';
@@ -9,4 +10,4 @@ export { EgIconFloderFavorite } from '../../node_modules/@eds-evergreen/mobile/d
 export { EgIconGlobalPayments } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/icon/icon-global-payments/index.js';
 export { EgIconInformation } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/icon/icon-information/index.js';
 export { EgIconUserSecurity } from '../../node_modules/@eds-evergreen/mobile/dist/components/atoms/icon/icon-user-security/index.js';
-export { MotionPressable } from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/MotionPressable.js';
+export { EgEdsAnimaPress as MotionPressable } from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/motion/EgEdsAnimaPress.js';

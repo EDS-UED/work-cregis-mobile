@@ -26,12 +26,14 @@ export function PersonalCenterSettingsGroup({
           gap: edsPx(spacing['spacing-2']),
           marginBottom: edsPx(spacing['spacing-4']),
         },
+        sectionTitle: {
+          marginLeft: edsPx(spacing['spacing-5']),
+        },
         card: {
-          backgroundColor: colors['material-card-shallow'],
+          backgroundColor: colors['material-card-same-white'],
           borderRadius: edsPx(spacing['radius-lg']),
+          padding: edsPx(spacing['spacing-1']),
           overflow: 'hidden',
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: colors['stroke-divider'],
         },
       }),
     [colors, spacing],
@@ -39,7 +41,12 @@ export function PersonalCenterSettingsGroup({
 
   return (
     <View style={styles.section}>
-      <SceneText variant="footnote">{sectionTitle}</SceneText>
+      <SceneText
+        variant="bodySmallSemibold"
+        style={[styles.sectionTitle, { color: colors['text-base-secondary'] }]}
+      >
+        {sectionTitle}
+      </SceneText>
       <View style={styles.card}>{children}</View>
     </View>
   );

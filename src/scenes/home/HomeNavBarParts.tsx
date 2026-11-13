@@ -1,17 +1,30 @@
+import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { EgAvatar, EgButtonGlass } from '@/eds/button-glass';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
-import type { HomeStackParamList } from '@/navigation/types';
-
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { HomeScanPageShotTrigger } from '@/scenes/home/HomeScanPageShotTrigger';
+import { useHomeStackNavigation } from '@/scenes/home/useHomeStackNavigation';
 import { SceneText } from '@/scenes/shared/SceneText';
+import {
+  useHomeUserAvatarColorIndex,
+  useHomeUserDisplayName,
+} from '@/scenes/shared/homeUserIdentity';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
 
 import companyAvatar from '../../../assets/company-avatar.png';
+
+function useOpenTeamCenter() {
+  const navigation = useHomeStackNavigation();
+  return useCallback(() => navigation.navigate('TeamCenter'), [navigation]);
+}
+
+function useOpenMessages() {
+  const navigation = useHomeStackNavigation();
+  return useCallback(() => navigation.navigate('Messages'), [navigation]);
+}
 
 function HomeCompanyAvatar() {
   const companyName = useHomeStore((state) => state.companyName);
@@ -26,8 +39,8 @@ function HomeCompanyAvatar() {
 }
 
 function HomeUserAvatar() {
-  const userDisplayName = useHomeStore((state) => state.userDisplayName);
-  const userAvatarColorIndex = useHomeStore((state) => state.userAvatarColorIndex);
+  const userDisplayName = useHomeUserDisplayName();
+  const userAvatarColorIndex = useHomeUserAvatarColorIndex();
 
   return (
     <EgAvatar
@@ -40,7 +53,7 @@ function HomeUserAvatar() {
 }
 
 /** 顶栏公司名 — 最大 104pt，超出单行尾部省略。 */
-const HOME_COMPANY_NAME_MAX_WIDTH = 104;
+export const HOME_COMPANY_NAME_MAX_WIDTH = 104;
 
 function HomeCompanyName() {
   const companyName = useHomeStore((state) => state.companyName);
@@ -69,13 +82,14 @@ const glassIconDefaults = {
 export function HomeNavCompanyGlassNav() {
   const { mode } = useEdsTheme();
   const companyName = useHomeStore((state) => state.companyName);
+  const openTeamCenter = useOpenTeamCenter();
 
   return (
     <EgButtonGlass
       {...glassIconDefaults}
       mode={mode}
       avatarSlot={<HomeCompanyAvatar />}
-      onPress={() => undefined}
+      onPress={openTeamCenter}
       accessibilityLabel={companyName}
       testID="home-nav-company-glass"
     />
@@ -92,14 +106,15 @@ export function HomeNavScanGlassNav() {
   const { mode } = useEdsTheme();
 
   return (
-    <EgButtonGlass
-      {...glassIconDefaults}
-      icon="eds-scan-code"
-      mode={mode}
-      onPress={() => undefined}
-      accessibilityLabel={t('home.scan')}
-      testID="home-nav-scan-glass"
-    />
+    <HomeScanPageShotTrigger>
+      <EgButtonGlass
+        {...glassIconDefaults}
+        icon="eds-scan-code"
+        mode={mode}
+        accessibilityLabel={t('home.scan')}
+        testID="home-nav-scan-glass"
+      />
+    </HomeScanPageShotTrigger>
   );
 }
 
@@ -108,12 +123,14 @@ export function HomeNavNoticeGlassNav() {
   const { t } = useTranslation();
   const { mode } = useEdsTheme();
 
+  const openMessages = useOpenMessages();
+
   return (
     <EgButtonGlass
       {...glassIconDefaults}
       icon="eds-notice"
       mode={mode}
-      onPress={() => undefined}
+      onPress={openMessages}
       accessibilityLabel={t('home.notifications')}
       testID="home-nav-notice-glass"
     />
@@ -123,9 +140,9 @@ export function HomeNavNoticeGlassNav() {
 /** iOS 26+ 系统栏 — 用户头像。 */
 export function HomeNavUserGlassNav() {
   const { t } = useTranslation();
-  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const navigation = useHomeStackNavigation();
   const { mode } = useEdsTheme();
-  const userDisplayName = useHomeStore((state) => state.userDisplayName);
+  const userDisplayName = useHomeUserDisplayName();
 
   return (
     <EgButtonGlass
@@ -142,26 +159,28 @@ export function HomeNavUserGlassNav() {
 /** Overlay 顶栏右栏 — 三颗 `EgButtonGlass`（扫码、通知、个人），间距 `spacing-2-5`（10px）。 */
 function HomeNavTrailingGlass() {
   const { t } = useTranslation();
-  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const navigation = useHomeStackNavigation();
+  const openMessages = useOpenMessages();
   const { mode, spacing } = useEdsTheme();
-  const userDisplayName = useHomeStore((state) => state.userDisplayName);
+  const userDisplayName = useHomeUserDisplayName();
   const gap = edsPx(spacing['spacing-2-5']);
 
   return (
     <View style={[styles.trailingCapsules, { gap }]}>
-      <EgButtonGlass
-        {...glassIconDefaults}
-        icon="eds-scan-code"
-        mode={mode}
-        onPress={() => undefined}
-        accessibilityLabel={t('home.scan')}
-        testID="home-nav-scan-glass"
-      />
+      <HomeScanPageShotTrigger>
+        <EgButtonGlass
+          {...glassIconDefaults}
+          icon="eds-scan-code"
+          mode={mode}
+          accessibilityLabel={t('home.scan')}
+          testID="home-nav-scan-glass"
+        />
+      </HomeScanPageShotTrigger>
       <EgButtonGlass
         {...glassIconDefaults}
         icon="eds-notice"
         mode={mode}
-        onPress={() => undefined}
+        onPress={openMessages}
         accessibilityLabel={t('home.notifications')}
         testID="home-nav-notice-glass"
       />
@@ -181,6 +200,7 @@ function HomeNavTrailingGlass() {
 export function HomeNavLeading() {
   const { mode, spacing } = useEdsTheme();
   const companyName = useHomeStore((state) => state.companyName);
+  const openTeamCenter = useOpenTeamCenter();
 
   return (
     <View style={[styles.leading, { gap: edsPx(spacing['spacing-2']) }]}>
@@ -188,7 +208,7 @@ export function HomeNavLeading() {
         {...glassIconDefaults}
         mode={mode}
         accessibilityLabel={companyName}
-        onPress={() => undefined}
+        onPress={openTeamCenter}
         testID="home-nav-company-glass"
         avatarSlot={<HomeCompanyAvatar />}
       />

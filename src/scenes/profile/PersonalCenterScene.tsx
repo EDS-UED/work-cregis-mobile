@@ -1,27 +1,16 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Constants from 'expo-constants';
-import {
-  EgDivider,
-  EgIconBill,
-  EgIconDatabaseSafety,
-  EgIconEarphone,
-  EgIconEditor,
-  EgIconEye,
-  EgIconFloderFavorite,
-  EgIconGlobalPayments,
-  EgIconInformation,
-  EgIconUserSecurity,
-} from '@/eds/profile-icons';
+import { EgSymbol } from '@/eds/profile-icons';
+import type { EgMenuItem } from '@/eds/menu';
 import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useAppStore } from '@/store';
 import type { LocaleCode, ThemePreference } from '@/types/app';
-import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
+import { PersonalCenterAccountProfileRow } from '@/scenes/profile/PersonalCenterAccountProfileRow';
+import { PersonalCenterMenuPickRow } from '@/scenes/profile/PersonalCenterMenuPickRow';
 import { PersonalCenterSettingsGroup } from '@/scenes/profile/PersonalCenterSettingsGroup';
 import { PersonalCenterSettingsRow } from '@/scenes/profile/PersonalCenterSettingsRow';
-import { edsPx } from '@/utils/edsTheme';
+import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
 
 const LOCALE_LABEL_KEY: Record<LocaleCode, `profile.${string}`> = {
   'zh-CN': 'profile.localeValueZhCN',
@@ -38,97 +27,156 @@ const THEME_LABEL_KEY: Record<ThemePreference, `profile.${string}`> = {
 /** 个人中心 — 分组设置列表；栈动效见 `usePersonalCenterScreenOptions`。 */
 export function PersonalCenterScene() {
   const { t } = useTranslation();
-  const { mode, spacing } = useEdsTheme();
+  const { mode } = useEdsTheme();
   const locale = useAppStore((state) => state.locale);
   const themePreference = useAppStore((state) => state.themePreference);
+  const setLocale = useAppStore((state) => state.setLocale);
+  const setThemePreference = useAppStore((state) => state.setThemePreference);
 
-  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
-  const buildSuffix =
-    Constants.expoConfig?.ios?.buildNumber ?? Constants.expoConfig?.android?.versionCode;
-  const versionLabel =
-    buildSuffix != null && buildSuffix !== ''
-      ? `${appVersion}(${buildSuffix})`
-      : appVersion;
-
-  const pageDividerStyle = useMemo(
-    () => ({ marginVertical: edsPx(spacing['spacing-2']) }),
-    [spacing],
+  const appearanceMenuItems = useMemo(
+    (): EgMenuItem[] => [
+      { id: 'system', label: t('profile.themeValueSystem') },
+      { id: 'light', label: t('profile.themeValueLight') },
+      { id: 'dark', label: t('profile.themeValueDark') },
+    ],
+    [t],
   );
 
-  const iconProps = { mode, size: 'md' as const };
+  const languageMenuItems = useMemo(
+    (): EgMenuItem[] => [
+      { id: 'en-US', label: t('profile.localeValueEnUS') },
+      { id: 'zh-CN', label: t('profile.localeValueZhCN') },
+      { id: 'zh-TW', label: t('profile.localeValueZhTW') },
+    ],
+    [t],
+  );
+
+  const rowIcon = (
+    <EgSymbol
+      name="eds-pentagram"
+      mode={mode}
+      size="md"
+      accessibilityLabel=""
+    />
+  );
 
   return (
-    <SceneScaffold title={t('profile.title')} showNavBack>
+    <SceneScaffold title={t('profile.title')} showNavBack pageBackground="card">
       <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionAccount')}>
+        <PersonalCenterAccountProfileRow />
         <PersonalCenterSettingsRow
-          testID="profile-row-account-security"
-          icon={<EgIconUserSecurity {...iconProps} accessibilityLabel="" />}
-          label={t('profile.accountSecurity')}
-          onPress={() => undefined}
-        />
-        <PersonalCenterSettingsRow
-          testID="profile-row-data-privacy"
-          icon={<EgIconDatabaseSafety {...iconProps} accessibilityLabel="" />}
-          label={t('profile.dataPrivacy')}
+          testID="profile-row-change-nickname"
+          icon={rowIcon}
+          label={t('profile.changeNickname')}
           onPress={() => undefined}
           isLast
         />
       </PersonalCenterSettingsGroup>
 
-      <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionApp')}>
-        <PersonalCenterSettingsRow
-          testID="profile-row-language"
-          icon={<EgIconGlobalPayments {...iconProps} accessibilityLabel="" />}
-          label={t('profile.language')}
-          value={t(LOCALE_LABEL_KEY[locale])}
-          onPress={() => undefined}
-        />
-        <PersonalCenterSettingsRow
+      <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionPreferences')}>
+        <PersonalCenterMenuPickRow
           testID="profile-row-appearance"
-          icon={<EgIconEye {...iconProps} accessibilityLabel="" />}
+          icon={rowIcon}
           label={t('profile.appearance')}
           value={t(THEME_LABEL_KEY[themePreference])}
-          onPress={() => undefined}
+          items={appearanceMenuItems}
+          selectedId={themePreference}
+          onSelect={(id) => setThemePreference(id as ThemePreference)}
+        />
+        <PersonalCenterMenuPickRow
+          testID="profile-row-language"
+          icon={rowIcon}
+          label={t('profile.language')}
+          value={t(LOCALE_LABEL_KEY[locale])}
+          items={languageMenuItems}
+          selectedId={locale}
+          onSelect={(id) => setLocale(id as LocaleCode)}
         />
         <PersonalCenterSettingsRow
           testID="profile-row-font-size"
-          icon={<EgIconEditor {...iconProps} accessibilityLabel="" />}
+          icon={rowIcon}
           label={t('profile.fontSize')}
           value={t('profile.fontSizeDefault')}
           onPress={() => undefined}
         />
         <PersonalCenterSettingsRow
-          testID="profile-row-personalization"
-          icon={<EgIconFloderFavorite {...iconProps} accessibilityLabel="" />}
-          label={t('profile.personalization')}
+          testID="profile-row-currency-unit"
+          icon={rowIcon}
+          label={t('profile.currencyUnit')}
           onPress={() => undefined}
         />
         <PersonalCenterSettingsRow
-          testID="profile-row-voice"
-          icon={<EgIconEarphone {...iconProps} accessibilityLabel="" />}
-          label={t('profile.voice')}
+          testID="profile-row-timezone"
+          icon={rowIcon}
+          label={t('profile.timezone')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-mpc-network"
+          icon={rowIcon}
+          label={t('profile.mpcNetworkSettings')}
           onPress={() => undefined}
           isLast
         />
       </PersonalCenterSettingsGroup>
 
-      <View style={pageDividerStyle}>
-        <EgDivider variant="page" mode={mode} />
-      </View>
-
-      <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionAbout')}>
+      <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionSecurity')}>
         <PersonalCenterSettingsRow
-          testID="profile-row-check-updates"
-          icon={<EgIconInformation {...iconProps} accessibilityLabel="" />}
-          label={t('profile.checkUpdates')}
-          value={versionLabel}
-          showChevron={false}
+          testID="profile-row-identity"
+          icon={rowIcon}
+          label={t('profile.identityVerification')}
           onPress={() => undefined}
         />
         <PersonalCenterSettingsRow
-          testID="profile-row-service-agreement"
-          icon={<EgIconBill {...iconProps} accessibilityLabel="" />}
-          label={t('profile.serviceAgreement')}
+          testID="profile-row-pin"
+          icon={rowIcon}
+          label={t('profile.pinCode')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-email"
+          icon={rowIcon}
+          label={t('profile.email')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-google-auth"
+          icon={rowIcon}
+          label={t('profile.googleAuthenticator')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-transaction-password"
+          icon={rowIcon}
+          label={t('profile.transactionPassword')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-device"
+          icon={rowIcon}
+          label={t('profile.device')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-biometric"
+          icon={rowIcon}
+          label={t('profile.biometric')}
+          onPress={() => undefined}
+          isLast
+        />
+      </PersonalCenterSettingsGroup>
+
+      <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionCregis')}>
+        <PersonalCenterSettingsRow
+          testID="profile-row-customer-support"
+          icon={rowIcon}
+          label={t('profile.customerSupport')}
+          onPress={() => undefined}
+        />
+        <PersonalCenterSettingsRow
+          testID="profile-row-about"
+          icon={rowIcon}
+          label={t('profile.about')}
           onPress={() => undefined}
           isLast
         />

@@ -1,82 +1,52 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { EgSheets } from '@/eds/sheets';
-import { EgSymbol } from '@/eds/home-ui';
+import { EgDecorButton } from '@/eds/scene-buttons';
+import type { EgSheetsDetent, EgSheetsProps } from '@/eds/sheets';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { QuickEntryEditSlotGrid } from '@/scenes/home/QuickEntryEditSlotGrid';
+import { QuickEntryPinnedIconRow } from '@/scenes/home/QuickEntryPinnedIconRow';
+import {
+  HOME_QUICK_ENTRY_MAX,
+  QUICK_SERVICE_SECTIONS,
+  resolveQuickServices,
+  type QuickServiceDef,
+  type QuickServiceId,
+} from '@/scenes/home/homeQuickServicesCatalog';
+import { QuickServiceHomeIcon } from '@/scenes/home/homeQuickServiceIcons';
+import { QuickServiceActionBadge } from '@/scenes/home/quickServiceBadges';
+import { useHomeStore } from '@/store';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
 
 const GRID_COLUMNS = 4;
-const DEFAULT_PINNED = ['send', 'receive', 'paymentRequest'] as const;
-
-type QuickServiceId =
-  | (typeof DEFAULT_PINNED)[number]
-  | 'exchange'
-  | 'aml'
-  | 'bill'
-  | 'signMessage'
-  | `pool-a-${number}`
-  | `pool-b-${number}`;
-
-type QuickServiceDef = {
-  id: QuickServiceId;
-  icon: string;
-  labelKey: string;
-};
-
-const TRANSACTION_TOOLS: QuickServiceDef[] = [
-  { id: 'send', icon: 'eds-arrow-up', labelKey: 'home.send' },
-  { id: 'receive', icon: 'eds-arrow-down', labelKey: 'home.receive' },
-  {
-    id: 'paymentRequest',
-    icon: 'eds-arrow-deposit',
-    labelKey: 'home.quickServicePaymentRequest',
-  },
-  { id: 'exchange', icon: 'eds-square', labelKey: 'home.quickServiceExchange' },
-];
-
-const SECURITY_TOOLS: QuickServiceDef[] = [
-  { id: 'aml', icon: 'eds-aml-search', labelKey: 'home.quickServiceAml' },
-];
-
-const OTHER_TOOLS: QuickServiceDef[] = [
-  { id: 'bill', icon: 'eds-square', labelKey: 'home.quickServiceBill' },
-  {
-    id: 'signMessage',
-    icon: 'eds-square',
-    labelKey: 'home.quickServiceSignMessage',
-  },
-];
-
-function buildPoolItems(prefix: 'pool-a' | 'pool-b', count: number): QuickServiceDef[] {
-  return Array.from({ length: count }, (_, index) => ({
-    id: `${prefix}-${index}` as QuickServiceId,
-    icon: 'eds-square',
-    labelKey: prefix === 'pool-a' ? 'home.quickServiceListA' : 'home.quickServiceListB',
-  }));
-}
+const GRID_COLUMN_PERCENT = `${100 / GRID_COLUMNS}%` as const;
 
 type HomeQuickServicesSheetProps = {
   visible: boolean;
   onDismiss: () => void;
 };
 
+function QuickServiceSectionTitle({ children }: { children: string }) {
+  return <SceneText variant="bodyMediumStrong">{children}</SceneText>;
+}
+
 type ServiceTileProps = {
-  icon: string;
+  service?: QuickServiceDef;
   label: string;
   tileSize: number;
   tilePadding: number;
   labelGap: number;
   mode: ReturnType<typeof useEdsTheme>['mode'];
-  badge?: 'add' | 'remove';
+  badge?: 'add' | 'remove' | 'addDisabled';
   onBadgePress?: () => void;
   onPress?: () => void;
 };
 
 function QuickServiceTile({
-  icon,
+  service,
   label,
   tileSize,
   tilePadding,
@@ -88,72 +58,52 @@ function QuickServiceTile({
 }: ServiceTileProps) {
   const { colors, spacing } = useEdsTheme();
   const badgeSize = edsPx(spacing['spacing-5']);
+  const tileBackground = String(colors['material-card-deep']);
+
+  const tileIcon = service ? (
+    <QuickServiceHomeIcon id={service.id} icon={service.icon} mode={mode} />
+  ) : null;
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={onPress ?? onBadgePress}
       disabled={!onPress && !onBadgePress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={{
-        width: tileSize,
-        alignItems: 'center',
-      }}
+      style={{ alignSelf: 'stretch', alignItems: 'center' }}
     >
       <View style={{ width: tileSize, alignItems: 'center' }}>
-        <View
-          style={{
-            width: tileSize,
-            height: tileSize,
-            borderRadius: edsPx(spacing['radius-full']),
-            backgroundColor: String(colors['material-card-moderate']),
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: tilePadding,
-          }}
-        >
-          <EgSymbol name={icon} size="md" mode={mode} fillTone="primary" />
-        </View>
-        {badge ? (
-          <Pressable
-            onPress={onBadgePress}
-            accessibilityRole="button"
-            accessibilityLabel={
-              badge === 'add' ? label : label
-            }
-            hitSlop={8}
+        <View style={{ width: tileSize, height: tileSize, position: 'relative' }}>
+          <View
             style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: badgeSize,
-              height: badgeSize,
+              width: tileSize,
+              height: tileSize,
               borderRadius: edsPx(spacing['radius-full']),
+              backgroundColor: tileBackground,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: String(
-                badge === 'add'
-                  ? colors['text-base-primary']
-                  : colors['text-base-tertiary'],
-              ),
+              padding: tilePadding,
             }}
           >
-            <SceneText
-              variant="bodySmallSemibold"
-              style={{ color: colors['box-page'] }}
-            >
-              {badge === 'add' ? '+' : '−'}
-            </SceneText>
-          </Pressable>
-        ) : null}
+            {tileIcon}
+          </View>
+          {badge ? (
+            <QuickServiceActionBadge
+              kind={badge}
+              mode={mode}
+              size={badgeSize}
+              onPress={onBadgePress}
+              accessibilityLabel={label}
+            />
+          ) : null}
+        </View>
       </View>
       <SceneText
-        variant="bodySmall"
-        numberOfLines={1}
+        variant="footnotePrimary"
         style={{
           marginTop: labelGap,
           textAlign: 'center',
-          width: tileSize,
+          alignSelf: 'stretch',
         }}
       >
         {label}
@@ -173,93 +123,168 @@ function SectionBlock({
 }) {
   return (
     <View style={{ gap, alignSelf: 'stretch' }}>
-      <SceneText variant="title">{title}</SceneText>
+      <QuickServiceSectionTitle>{title}</QuickServiceSectionTitle>
       {children}
     </View>
   );
 }
 
-/** 快捷服务 · 更多入口 EgSheets（浏览 / 编辑两态，稿面 1 / 2）。 */
+/** 快捷服务 · 浏览 / 编辑；编辑保存后写入 `useHomeStore.quickEntryIds`。 */
 export function HomeQuickServicesSheet({
   visible,
   onDismiss,
 }: HomeQuickServicesSheetProps) {
   const { t } = useTranslation();
   const { mode, colors, spacing } = useEdsTheme();
-  const { width: windowWidth } = useWindowDimensions();
+  const quickEntryIds = useHomeStore((state) => state.quickEntryIds);
+  const setQuickEntryIds = useHomeStore((state) => state.setQuickEntryIds);
+
   const [editing, setEditing] = useState(false);
-  const [pinnedIds, setPinnedIds] = useState<QuickServiceId[]>([...DEFAULT_PINNED]);
+  const [sheetDetent, setSheetDetent] = useState<EgSheetsDetent>('medium');
+  const [draftEntryIds, setDraftEntryIds] = useState<QuickServiceId[]>([
+    ...quickEntryIds,
+  ]);
 
   const tileSize = edsPx(spacing['capsule-xl']);
   const tilePadding = edsPx(spacing['spacing-4']);
   const labelGap = edsPx(spacing['spacing-2']);
-  const sectionGap = edsPx(spacing['spacing-6']);
-  const gridRowGap = edsPx(spacing['spacing-5']);
+  const sectionGap = edsPx(spacing['spacing-8']);
+  const sectionTitleGap = edsPx(spacing['spacing-4']);
+  const gridRowGap = edsPx(spacing['spacing-6']);
   const gridColGap = edsPx(spacing['spacing-4']);
-  const cardRadius = edsPx(spacing['radius-md']);
-  const contentInset = edsPx(spacing['spacing-5']);
+  const gridGutterHalf = gridColGap / 2;
+  const barPadLeft = edsPx(spacing['spacing-6']);
+  const barPadOther = edsPx(spacing['spacing-4']);
 
-  const contentWidth = windowWidth - contentInset * 2;
-  const gridItemStride =
-    (contentWidth - gridColGap * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
-
-  const poolA = useMemo(() => buildPoolItems('pool-a', 8), []);
-  const poolB = useMemo(() => buildPoolItems('pool-b', 8), []);
-
-  const allCatalog = useMemo(
-    () => [...TRANSACTION_TOOLS, ...SECURITY_TOOLS, ...OTHER_TOOLS],
-    [],
+  const pinnedBarShellStyle = useMemo(
+    () => ({
+      borderRadius: edsPx(spacing['radius-md']),
+      backgroundColor: String(colors['material-brand-weaken']),
+    }),
+    [colors, spacing],
   );
 
+  const activeIds = editing ? draftEntryIds : quickEntryIds;
   const pinnedTools = useMemo(
-    () =>
-      pinnedIds
-        .map((id) => allCatalog.find((item) => item.id === id))
-        .filter((item): item is QuickServiceDef => item != null),
-    [allCatalog, pinnedIds],
+    () => resolveQuickServices(activeIds),
+    [activeIds],
   );
+  const draftIdSet = useMemo(() => new Set(draftEntryIds), [draftEntryIds]);
 
   useEffect(() => {
     if (!visible) {
       setEditing(false);
+      setSheetDetent('medium');
     }
   }, [visible]);
 
-  const resetPinned = useCallback(() => {
-    setPinnedIds([...DEFAULT_PINNED]);
+  useEffect(() => {
+    if (!editing) {
+      setDraftEntryIds([...quickEntryIds]);
+    }
+  }, [editing, quickEntryIds]);
+
+  const openEdit = useCallback(() => {
+    setDraftEntryIds([...quickEntryIds]);
+    setEditing(true);
+    setSheetDetent('large');
+  }, [quickEntryIds]);
+
+  const cancelEdit = useCallback(() => {
+    setDraftEntryIds([...quickEntryIds]);
     setEditing(false);
+  }, [quickEntryIds]);
+
+  const saveAndClose = useCallback(() => {
+    setQuickEntryIds(draftEntryIds);
+    setEditing(false);
+    onDismiss();
+  }, [draftEntryIds, onDismiss, setQuickEntryIds]);
+
+  const editRightAction = useMemo((): EgSheetsProps['rightAction'] => {
+    if (!editing) return undefined;
+    const label = t('home.quickServiceSave');
+    return {
+      kind: 'text',
+      label,
+      onPress: saveAndClose,
+      accessibilityLabel: label,
+    };
+  }, [editing, saveAndClose, t]);
+
+  const addToDraft = useCallback((id: QuickServiceId) => {
+    setDraftEntryIds((current) => {
+      if (current.length >= HOME_QUICK_ENTRY_MAX || current.includes(id)) {
+        return current;
+      }
+      return [...current, id];
+    });
   }, []);
 
-  const renderGrid = (items: QuickServiceDef[], badge?: 'add' | 'remove') => (
+  const removeFromDraft = useCallback((id: QuickServiceId) => {
+    setDraftEntryIds((current) => current.filter((entryId) => entryId !== id));
+  }, []);
+
+  const renderGrid = (
+    items: QuickServiceDef[],
+    options?: {
+      badge?: 'add' | 'remove';
+      canAdd?: boolean;
+    },
+  ) => (
     <View
       style={{
         flexDirection: 'row',
         flexWrap: 'wrap',
-        columnGap: gridColGap,
+        alignSelf: 'stretch',
+        marginHorizontal: -gridGutterHalf,
         rowGap: gridRowGap,
       }}
     >
-      {items.map((item) => (
-        <View key={item.id} style={{ width: gridItemStride, alignItems: 'center' }}>
-          <QuickServiceTile
-            icon={item.icon}
-            label={t(item.labelKey)}
-            tileSize={tileSize}
-            tilePadding={tilePadding}
-            labelGap={labelGap}
-            mode={mode}
-            badge={badge}
-            onBadgePress={
-              badge === 'remove'
-                ? () =>
-                    setPinnedIds((current) =>
-                      current.filter((id) => id !== item.id),
-                    )
-                : undefined
-            }
-          />
-        </View>
-      ))}
+      {items.map((item) => {
+        const addMode = options?.badge === 'add' && options.canAdd;
+        const slotsFull = draftEntryIds.length >= HOME_QUICK_ENTRY_MAX;
+        const inDraft = draftIdSet.has(item.id);
+        const showAdd = addMode && !inDraft && !slotsFull;
+        const showAddDisabled = addMode && (inDraft || slotsFull);
+        const showRemove = options?.badge === 'remove';
+
+        return (
+          <View
+            key={item.id}
+            style={{
+              width: GRID_COLUMN_PERCENT,
+              paddingHorizontal: gridGutterHalf,
+              alignItems: 'center',
+            }}
+          >
+            <QuickServiceTile
+              service={item}
+              label={t(item.labelKey)}
+              tileSize={tileSize}
+              tilePadding={tilePadding}
+              labelGap={labelGap}
+              mode={mode}
+              badge={
+                showAdd
+                  ? 'add'
+                  : showAddDisabled
+                    ? 'addDisabled'
+                    : showRemove
+                      ? 'remove'
+                      : undefined
+              }
+              onBadgePress={
+                showAdd
+                  ? () => addToDraft(item.id)
+                  : showRemove
+                    ? () => removeFromDraft(item.id)
+                    : undefined
+              }
+            />
+          </View>
+        );
+      })}
     </View>
   );
 
@@ -267,70 +292,44 @@ export function HomeQuickServicesSheet({
     <View style={{ gap: sectionGap, alignSelf: 'stretch' }}>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: edsPx(spacing['spacing-4']),
-          borderRadius: cardRadius,
-          backgroundColor: String(colors['material-card-moderate']),
-          gap: edsPx(spacing['spacing-3']),
+          gap: edsPx(spacing['spacing-2']),
+          alignSelf: 'stretch',
+          marginTop: edsPx(spacing['spacing-3']),
         }}
       >
+        <QuickServiceSectionTitle>
+          {t('home.quickServicePinnedSection')}
+        </QuickServiceSectionTitle>
         <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: edsPx(spacing['spacing-3']),
-          }}
+          style={[
+            pinnedBarShellStyle,
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingLeft: barPadLeft,
+              paddingRight: barPadOther,
+              paddingVertical: barPadOther,
+              gap: edsPx(spacing['spacing-3']),
+            },
+          ]}
         >
-          {pinnedTools.map((item) => (
-            <View
-              key={item.id}
-              style={{
-                width: edsPx(spacing['spacing-10']),
-                height: edsPx(spacing['spacing-10']),
-                borderRadius: edsPx(spacing['radius-full']),
-                backgroundColor: String(colors['material-hide']),
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <EgSymbol
-                name={item.icon}
-                displayPx={edsPx(spacing['avatar-sm'])}
-                mode={mode}
-                fillTone="primary"
-              />
-            </View>
-          ))}
+          <QuickEntryPinnedIconRow items={pinnedTools} />
+          <EgDecorButton
+            label={t('home.quickServiceEdit')}
+            mode={mode}
+            size="sm"
+            onPress={openEdit}
+            testID="quick-services-edit"
+          />
         </View>
-        <Pressable
-          onPress={() => setEditing(true)}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.quickServiceEdit')}
-          style={{
-            paddingHorizontal: edsPx(spacing['spacing-5']),
-            paddingVertical: edsPx(spacing['spacing-2']),
-            borderRadius: edsPx(spacing['radius-full']),
-            backgroundColor: String(colors['text-base-primary']),
-          }}
-        >
-          <SceneText variant="bodySmallMedium" style={{ color: colors['box-page'] }}>
-            {t('home.quickServiceEdit')}
-          </SceneText>
-        </Pressable>
       </View>
 
-      <SectionBlock title={t('home.quickServiceSectionTransaction')} gap={gridRowGap}>
-        {renderGrid(TRANSACTION_TOOLS)}
-      </SectionBlock>
-      <SectionBlock title={t('home.quickServiceSectionSecurity')} gap={gridRowGap}>
-        {renderGrid(SECURITY_TOOLS)}
-      </SectionBlock>
-      <SectionBlock title={t('home.quickServiceSectionOther')} gap={gridRowGap}>
-        {renderGrid(OTHER_TOOLS)}
-      </SectionBlock>
+      {QUICK_SERVICE_SECTIONS.map((section) => (
+        <SectionBlock key={section.id} title={t(section.titleKey)} gap={sectionTitleGap}>
+          {renderGrid(section.items)}
+        </SectionBlock>
+      ))}
     </View>
   );
 
@@ -338,24 +337,26 @@ export function HomeQuickServicesSheet({
     <View style={{ gap: sectionGap, alignSelf: 'stretch' }}>
       <View
         style={{
-          padding: edsPx(spacing['spacing-4']),
-          borderRadius: cardRadius,
-          backgroundColor: String(colors['material-card-moderate']),
-          gap: edsPx(spacing['spacing-4']),
+          gap: edsPx(spacing['spacing-2']),
+          alignSelf: 'stretch',
+          marginTop: edsPx(spacing['spacing-3']),
         }}
       >
-        <SceneText variant="bodySmallTertiary">
-          {t('home.quickServiceEditHint')}
-        </SceneText>
-        {renderGrid(pinnedTools, 'remove')}
+        <QuickServiceSectionTitle>
+          {t('home.quickServicePinnedSection')}
+        </QuickServiceSectionTitle>
+        <QuickEntryEditSlotGrid
+          entryIds={draftEntryIds}
+          onChange={setDraftEntryIds}
+          onRemove={removeFromDraft}
+        />
       </View>
 
-      <SectionBlock title={t('home.quickServiceListA')} gap={gridRowGap}>
-        {renderGrid(poolA, 'add')}
-      </SectionBlock>
-      <SectionBlock title={t('home.quickServiceListB')} gap={gridRowGap}>
-        {renderGrid(poolB, 'add')}
-      </SectionBlock>
+      {QUICK_SERVICE_SECTIONS.map((section) => (
+        <SectionBlock key={section.id} title={t(section.titleKey)} gap={sectionTitleGap}>
+          {renderGrid(section.items, { badge: 'add', canAdd: true })}
+        </SectionBlock>
+      ))}
     </View>
   );
 
@@ -364,20 +365,18 @@ export function HomeQuickServicesSheet({
       visible={visible}
       onDismiss={onDismiss}
       mode={mode}
-      detents={['small', 'medium', 'large']}
+      detents={['medium', 'large']}
       initialDetent="medium"
+      detent={sheetDetent}
+      onDetentChange={setSheetDetent}
       title={t('home.quickServicesTitle')}
       showTitle
-      showLeft={false}
+      showLeft={editing}
+      onBack={cancelEdit}
       showRight
+      rightAction={editRightAction}
       dismissible
-      right={{
-        kind: 'text',
-        icon: 'eds-arrow-refresh',
-        label: t('home.quickServiceReset'),
-        onPress: resetPinned,
-        accessibilityLabel: t('home.quickServiceReset'),
-      }}
+      showActions={false}
     >
       {editing ? editBody : browseBody}
     </EgSheets>

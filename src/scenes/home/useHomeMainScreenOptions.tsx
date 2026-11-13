@@ -1,48 +1,43 @@
 import { useMemo } from 'react';
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import {
-  egNavBarNativeStackOptions,
-  shouldUseEgNavBarNativeStack,
-} from '@/eds/nav-bar';
+import type { StackNavigationOptions } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 
-import { useHomeIosNativeHeaderItems } from '@/scenes/home/useHomeIosNativeHeaderItems';
+import { egNavBarNativeStackOptions } from '@/eds/nav-bar';
+import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { edsPageRootScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 import { edsPageBackground } from '@/utils/edsTheme';
 
+import { useHomeIosNativeHeaderItems } from '@/scenes/home/useHomeIosNativeHeaderItems';
+
 /**
- * HomeMain — iOS 26+：`egNavBarNativeStackOptions` + 系统栏 `EgButtonGlass host="navigationBar"`；
- * 其它平台：`headerShown: false` + `HomeTopBar` overlay（canvas 原生玻璃 / RN）。
+ * HomeMain — iOS 26+ 系统 Nav + scroll edge；其余 `headerShown: false` + `HomeTopBar` overlay。
  */
-export function useHomeMainScreenOptions(): NativeStackNavigationOptions {
-  const { t } = useTranslation();
+export function useHomeMainScreenOptions(): StackNavigationOptions {
   const { colors, mode } = useEdsTheme();
+  const { t } = useTranslation();
   const pageBackground = edsPageBackground(colors);
-  const iosHeaderItems = useHomeIosNativeHeaderItems();
+  const iosItems = useHomeIosNativeHeaderItems();
 
   return useMemo(() => {
-    if (!shouldUseEgNavBarNativeStack()) {
+    if (shouldUseEgEdsAnimaNativePage()) {
       return {
-        headerShown: false,
+        ...egNavBarNativeStackOptions({
+          title: t('tabs.home'),
+          showTitle: false,
+          showLeft: false,
+          showRight: false,
+          mode,
+        }),
+        ...iosItems,
         contentStyle: { backgroundColor: pageBackground },
-      };
+      } as StackNavigationOptions;
     }
 
-    const nativeNav = egNavBarNativeStackOptions({
-      title: t('tabs.home'),
-      showLeft: false,
-      showTitle: false,
-      showRight: false,
-      background: 'auto',
-      mode,
-    });
-
     return {
-      ...nativeNav,
-      ...iosHeaderItems,
-      contentStyle: { backgroundColor: pageBackground },
-      statusBarTranslucent: true,
-      statusBarBackgroundColor: 'transparent',
+      ...edsPageRootScreenOptions,
+      headerShown: false,
+      cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
     };
-  }, [iosHeaderItems, mode, pageBackground, t]);
+  }, [iosItems, mode, pageBackground, t]);
 }

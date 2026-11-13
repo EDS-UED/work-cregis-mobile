@@ -10,15 +10,17 @@ import { useAppStore } from '@/store';
 
 function AppBootstrap({ children }: PropsWithChildren) {
   const hydratePreferences = useAppStore((state) => state.hydratePreferences);
+  const locale = useAppStore((state) => state.locale);
 
   useReducedMotionListener();
 
   useEffect(() => {
-    void hydratePreferences().then(() => {
-      const locale = useAppStore.getState().locale;
-      void i18n.changeLanguage(locale);
-    });
+    void hydratePreferences();
   }, [hydratePreferences]);
+
+  useEffect(() => {
+    void i18n.changeLanguage(locale);
+  }, [locale]);
 
   return children;
 }

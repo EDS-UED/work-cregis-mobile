@@ -31,8 +31,15 @@ export function edsPx(value: string | number) {
 /** 业务 Scene 默认水平内容边距 — `spacing-5`（20px · `var(--spacing-5)`）。 */
 export const EDS_SCENE_CONTENT_INSET = 'spacing-5' as const;
 
+/** 导航底到首屏内容 — `spacing-4`（16px · `var(--spacing-4)`）。全站默认。 */
+export const EDS_NAV_CONTENT_GAP = 'spacing-4' as const;
+
 export function edsSceneContentInset(spacing: typeof mobileTheme.spacing) {
   return edsPx(spacing[EDS_SCENE_CONTENT_INSET]);
+}
+
+export function edsNavContentGap(spacing: typeof mobileTheme.spacing) {
+  return edsPx(spacing[EDS_NAV_CONTENT_GAP]);
 }
 
 /** `EgNavBar` 水平 padding — `spacing-4`（16），与 `EG_NAV_BAR_PADDING_HORIZONTAL` 一致。 */
@@ -48,9 +55,15 @@ export function getCregisThemeColors(mode: 'light' | 'dark'): ThemeColors {
 
 /** 页面背景 — 与 CSS `var(--box-page)` 同源 token `box-page`。 */
 export const EDS_PAGE_BACKGROUND = 'box-page' as const;
+/** 卡片分组页背景 — `var(--box-page-card)`。 */
+export const EDS_PAGE_CARD_BACKGROUND = 'box-page-card' as const;
 
 export function edsPageBackground(colors: ThemeColors) {
   return String(colors[EDS_PAGE_BACKGROUND]);
+}
+
+export function edsPageCardBackground(colors: ThemeColors) {
+  return String(colors[EDS_PAGE_CARD_BACKGROUND]);
 }
 
 export function edsFontWeight(typography: Typography, weight: FontWeightKey) {
@@ -134,7 +147,17 @@ export function createEdsTypographyStyles(
       'weight-semibold',
       'text-base-primary',
     ),
+    /** `typography-body-medium` · weight-regular (400) */
     bodyMedium: edsTextStyle(
+      typography,
+      colors,
+      'size-body-medium',
+      'line-height-body-medium',
+      'weight-regular',
+      'text-base-primary',
+    ),
+    /** `typography-body-medium-strong` · weight-medium (500) */
+    bodyMediumStrong: edsTextStyle(
       typography,
       colors,
       'size-body-medium',
@@ -142,6 +165,7 @@ export function createEdsTypographyStyles(
       'weight-medium',
       'text-base-primary',
     ),
+    /** `typography-body-medium-heavy` · weight-semibold (600) */
     bodySemibold: edsTextStyle(
       typography,
       colors,
@@ -215,6 +239,15 @@ export function createEdsTypographyStyles(
       'weight-semibold',
       'text-base-primary',
     ),
+    /** `typography-body-small-heavy` · tertiary 40% */
+    bodySmallHeavy: edsTextStyle(
+      typography,
+      colors,
+      'size-body-small',
+      'line-height-body-small',
+      'weight-semibold',
+      'text-base-tertiary',
+    ),
     bar: edsTextStyle(typography, colors, 'size-bar', 'line-height-bar', 'weight-medium', 'text-base-secondary'),
     brand: {
       ...edsTextStyle(
@@ -227,6 +260,7 @@ export function createEdsTypographyStyles(
       ),
       color: String(colors.brand),
     },
+    /** body-medium · regular · `text-base-secondary`（α 60%） */
     secondary: {
       ...edsTextStyle(
         typography,

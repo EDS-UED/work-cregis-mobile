@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { StackScreenProps } from '@react-navigation/stack';
 
 import { SceneCard } from '@/scenes/shared/SceneCard';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
 import { SceneText } from '@/scenes/shared/SceneText';
 import type { CollaborationStackParamList } from '@/navigation/types';
 
-type Props = NativeStackScreenProps<CollaborationStackParamList, 'CollaborationDetail'>;
+type Props = StackScreenProps<CollaborationStackParamList, 'CollaborationDetail'>;
 
 export function CollaborationDetailScene({ route }: Props) {
   const { t } = useTranslation();

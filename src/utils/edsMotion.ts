@@ -1,5 +1,11 @@
 import { useCallback, useState } from 'react';
-import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  type WithTimingConfig,
+} from 'react-native-reanimated';
 import {
   EdsRecipeAnima,
   EdsSemanticAnima,
@@ -106,6 +112,38 @@ export function edsNavigationPushDurationMs(): number {
     /* ignore */
   }
   return EDS_NAVIGATION_PUSH_DURATION_MS;
+}
+
+type EdsMotionTimingName =
+  | 'ios-layout-deform-content-opacity'
+  | 'ios-layout-deform-content-transform'
+  | 'ios-sheets-dismiss';
+
+function edsTimingBezier(name: EdsMotionTimingName): [number, number, number, number] | null {
+  const timings = mobileTheme.motion.timings as Record<
+    string,
+    { easing?: string } | undefined
+  >;
+  const match = timings[name]?.easing?.match(/cubic-bezier\(([^)]+)\)/);
+  if (!match) return null;
+  const points = match[1]!.split(',').map(Number);
+  return points.length === 4 && points.every((n) => Number.isFinite(n))
+    ? (points as [number, number, number, number])
+    : null;
+}
+
+/** `motion.timings[name].easing`（`cubic-bezier(...)`）→ Reanimated easing。 */
+export function edsTimingEasing(
+  name: EdsMotionTimingName,
+): NonNullable<WithTimingConfig['easing']> {
+  const points = edsTimingBezier(name);
+  return points ? Easing.bezier(...points) : Easing.inOut(Easing.ease);
+}
+
+/** 同上 · 可在 worklet 内直接调用的曲线函数。 */
+export function edsTimingEasingFn(name: EdsMotionTimingName): (x: number) => number {
+  const points = edsTimingBezier(name);
+  return points ? Easing.bezierFn(...points) : Easing.inOut(Easing.ease);
 }
 
 export function edsMotionSpring(name: 'press' | 'snappy' | 'press-release' | 'control' | 'drag') {

@@ -1,17 +1,28 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createCregisPageStackNavigator } from '@/navigation/createCregisPageStackNavigator';
 
 import { AssetsScene } from '@/scenes/assets/AssetsScene';
-import { useCregisNativeStackScreenOptions } from '@/navigation/screenOptions/useCregisNativeStackScreenOptions';
+import {
+  edsPageRootScreenOptions,
+  edsPageStackNavigatorExtraProps,
+} from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
+import { useCregisStackScreenOptions } from '@/navigation/screenOptions/useCregisStackScreenOptions';
 import type { AssetsStackParamList } from '@/navigation/types';
 
-const Stack = createNativeStackNavigator<AssetsStackParamList>();
+const Stack = createCregisPageStackNavigator<AssetsStackParamList>();
 
 export function AssetsStackNavigator() {
-  const screenOptions = useCregisNativeStackScreenOptions();
+  const screenOptions = useCregisStackScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen name="AssetsMain" component={AssetsScene} />
+    <Stack.Navigator
+      {...edsPageStackNavigatorExtraProps()}
+      screenOptions={screenOptions}
+    >
+      <Stack.Screen
+        name="AssetsMain"
+        component={AssetsScene}
+        options={{ ...edsPageRootScreenOptions }}
+      />
     </Stack.Navigator>
   );
 }

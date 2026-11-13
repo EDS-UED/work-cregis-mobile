@@ -7,19 +7,17 @@ import Animated, {
 } from "react-native-reanimated";
 import {
   EgDivider,
-  EgIconArrowUp,
   EgIconListLatticeMobile,
   EgSymbol,
-  GlassControlShell,
 } from "@/eds/home-ui";
 import {
   egTabBarScrollContentReserveWithSafeArea,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
 } from "@/eds/nav-bar";
-import { resolveEgButtonGlassRenderStack } from "@/eds/runtime";
+import { shouldUseEgTabBarNativeStack } from "@/eds/runtime";
 import mobileTheme from "@/eds/tokens";
-import { edsMotionSpring, useEdsTapPressMotion } from "@/utils/edsMotion";
+import { edsMotionSpring } from "@/utils/edsMotion";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
@@ -27,23 +25,33 @@ import { useEdsTheme } from "@/hooks/useEdsTheme";
 import { useEdsTypography } from "@/hooks/useEdsTypography";
 import { HomeTodoEmptyState } from "@/scenes/home/HomeTodoEmptyState";
 import { HomeQuickServicesSheet } from "@/scenes/home/HomeQuickServicesSheet";
+import {
+  HOME_QUICK_ENTRY_PER_ROW,
+  resolveQuickServices,
+  type QuickServiceDef,
+} from "@/scenes/home/homeQuickServicesCatalog";
+import { QuickServiceHomeIcon } from "@/scenes/home/homeQuickServiceIcons";
 import { HomeTodoFilterBar } from "@/scenes/home/HomeTodoFilterBar";
 import { HomeTopBar, homeScrollTopReserve } from "@/scenes/home/HomeTopBar";
 import { EdsGlassScreenShell } from "@/scenes/shared/EdsGlassScreenShell";
 import { SceneText } from "@/scenes/shared/SceneText";
 import { useHomeStore, type HomeTodoFilter, type HomeTodoItem } from "@/store";
+import { nativeNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
+import { DataListRow } from "@/scenes/shared/DataListRow";
+import { dataListSectionStyle } from "@/scenes/shared/dataListLayout";
 import {
+  edsNavContentGap,
   edsPageBackground,
   edsPx,
   edsSceneContentInset,
 } from "@/utils/edsTheme";
-import { nativeNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
 import { edsCryptoSymbolForCurrency } from "@/utils/edsCryptoSymbol";
+import { overlayNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
 
 const pressSnappySpring = edsMotionSpring("snappy");
 const pressMotionSpring = edsMotionSpring("press");
-const pressScaleMd = mobileTheme.motion.scale["scale-press-md"] as number;
-const pressScaleDownXs =
+/** 快捷入口点按缩小 · `scale-press-down-xs`。 */
+const quickActionPressScale =
   mobileTheme.motion.scale["scale-press-down-xs"] as number;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -173,6 +181,7 @@ type QuickActionProps = {
   onPress?: () => void;
 };
 
+/** 快捷入口 — 全平台 RN 圆底（`material-card-deep`），iOS 26+ 不走原生 Liquid Glass。 */
 function HomeQuickAction({
   label,
   accessibilityLabel,
@@ -184,76 +193,11 @@ function HomeQuickAction({
   const tileSize = edsPx(spacing["capsule-xl"]);
   const tilePadding = edsPx(spacing["spacing-4"]);
   const labelGap = edsPx(spacing["spacing-2"]);
-  const useNativeLiquidGlass = resolveEgButtonGlassRenderStack() === "native";
   const { animatedStyle, onPressIn, onPressOut, pressing } = usePressScaleMotion(
-    pressScaleMd,
+    quickActionPressScale,
     pressSnappySpring,
   );
-  const tileSlack = pressScaleSlack(tileSize, pressScaleMd);
-
-  const labelNode = (
-    <SceneText
-      variant="bodySmall"
-      numberOfLines={1}
-      style={{
-        marginTop: labelGap,
-        textAlign: "center",
-        width: tileSize,
-      }}
-    >
-      {label}
-    </SceneText>
-  );
-
-  if (useNativeLiquidGlass) {
-    const icon = iconSlot ?? (
-      iconName ? (
-        <EgSymbol name={iconName} size="md" mode={mode} fillTone="primary" />
-      ) : null
-    );
-
-    return (
-      <View
-        style={{
-          width: tileSize,
-          alignItems: "center",
-          overflow: "visible",
-        }}
-      >
-        <GlassControlShell
-          shape="circle"
-          variant="regular"
-          mode={mode}
-          onPress={onPress}
-          accessibilityLabel={accessibilityLabel}
-          testID="home-quick-action-glass"
-          style={{
-            width: tileSize,
-            height: tileSize,
-            borderRadius: edsPx(spacing["radius-full"]),
-          }}
-          contentStyle={{
-            padding: tilePadding,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {icon}
-        </GlassControlShell>
-        {onPress ? (
-          <Pressable
-            onPress={onPress}
-            accessible={false}
-            importantForAccessibility="no-hide-descendants"
-          >
-            {labelNode}
-          </Pressable>
-        ) : (
-          labelNode
-        )}
-      </View>
-    );
-  }
+  const tileSlack = pressScaleSlack(tileSize, quickActionPressScale);
 
   const icon = iconSlot ?? (
     iconName ? (
@@ -297,7 +241,7 @@ function HomeQuickAction({
                 borderRadius: edsPx(spacing["radius-full"]),
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: String(colors["material-card-moderate"]),
+                backgroundColor: String(colors["material-card-deep"]),
               },
               animatedStyle,
             ]}
@@ -325,7 +269,6 @@ type HomeTodoRowProps = {
   item: HomeTodoItem;
   mode: ReturnType<typeof useEdsTheme>["mode"];
   spacing: ReturnType<typeof useEdsTheme>["spacing"];
-  colors: ReturnType<typeof useEdsTheme>["colors"];
   onPress?: () => void;
 };
 
@@ -333,60 +276,24 @@ function HomeTodoRow({
   item,
   mode,
   spacing,
-  colors,
   onPress,
 }: HomeTodoRowProps) {
   const text = useEdsTypography();
   const cryptoSymbol = edsCryptoSymbolForCurrency(item.currency);
   const amountA11y = `${item.amount} ${item.currency}`;
 
-  const { animatedStyle, onPressIn, onPressOut, pressing } =
-    useEdsTapPressMotion("xs");
-
-  const pageInset = edsSceneContentInset(spacing);
-  const rowPaddingVertical = edsPx(spacing["spacing-4"]);
-  const rowPaddingHorizontal = edsPx(spacing["spacing-3"]);
-  /** 列表区抵消 scene 水平 padding 后，外 margin + 行内 padding = 20px 内容边距。 */
-  const rowMarginHorizontal = pageInset - rowPaddingHorizontal;
-  const rowRadius = edsPx(spacing["radius-md"]);
   const iconToAmountGap = edsPx(spacing["spacing-1-5"]);
   const amountToCurrencyGap = edsPx(spacing["spacing-2"]);
   const amountRowToSubtextGap = edsPx(spacing["spacing-1-5"]);
   const subtextToTimeGap = edsPx(spacing["spacing-05"]);
-  const rowBackground = String(
-    colors[pressing ? "event-tap" : "material-hide"],
-  );
-  const rowSlack = pressScaleSlack(72, pressScaleDownXs);
 
   return (
-    <View
-      style={{
-        marginHorizontal: rowMarginHorizontal,
-        alignSelf: "stretch",
-        overflow: "visible",
-        zIndex: pressing ? 1 : 0,
-        paddingVertical: rowSlack,
-      }}
+    <DataListRow
+      axis="column"
+      gap={amountRowToSubtextGap}
+      onPress={onPress}
+      accessibilityLabel={amountA11y}
     >
-      <AnimatedPressable
-        onPress={onPress}
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        accessibilityRole="button"
-        accessibilityLabel={amountA11y}
-        style={[
-          {
-            gap: amountRowToSubtextGap,
-            alignSelf: "stretch",
-            paddingVertical: rowPaddingVertical,
-            paddingHorizontal: rowPaddingHorizontal,
-            borderRadius: rowRadius,
-            backgroundColor: rowBackground,
-            overflow: "visible",
-          },
-          animatedStyle,
-        ]}
-      >
         <View
           style={{
             flexDirection: "row",
@@ -419,15 +326,14 @@ function HomeTodoRow({
         </View>
         <View style={{ gap: subtextToTimeGap, alignSelf: "stretch" }}>
           <Text style={[text.body, { textAlign: "left" }]}>
-            <Text style={text.bodyMedium}>{item.descriptionHighlight}</Text>
+            <Text style={text.bodyMediumStrong}>{item.descriptionHighlight}</Text>
             <Text style={text.body}>{item.descriptionRest}</Text>
           </Text>
           <SceneText variant="bodySmallSecondary" style={{ textAlign: "left" }}>
             {item.timestamp}
           </SceneText>
         </View>
-      </AnimatedPressable>
-    </View>
+    </DataListRow>
   );
 }
 
@@ -451,21 +357,53 @@ export function HomeScene() {
     (state) => state.toggleBalanceVisible,
   );
   const setTodoFilter = useHomeStore((state) => state.setTodoFilter);
+  const quickEntryIds = useHomeStore((state) => state.quickEntryIds);
   const [quickServicesVisible, setQuickServicesVisible] = useState(false);
 
-  const navContentGap = edsPx(spacing["spacing-4"]);
+  const quickEntryServices = useMemo(
+    () => resolveQuickServices(quickEntryIds),
+    [quickEntryIds],
+  );
+  const quickActionTileSize = edsPx(spacing["capsule-xl"]);
+  const [quickActionsTrackWidth, setQuickActionsTrackWidth] = useState(0);
+  const quickActionColumnGap = useMemo(() => {
+    if (quickActionsTrackWidth <= 0) {
+      return edsPx(spacing["spacing-4"]);
+    }
+    const free =
+      quickActionsTrackWidth -
+      HOME_QUICK_ENTRY_PER_ROW * quickActionTileSize;
+    return Math.max(0, free / (HOME_QUICK_ENTRY_PER_ROW - 1));
+  }, [quickActionTileSize, quickActionsTrackWidth, spacing]);
+
+  const quickActionRows = useMemo(() => {
+    type QuickActionCell =
+      | { kind: "service"; service: QuickServiceDef }
+      | { kind: "more" };
+    const cells: QuickActionCell[] = quickEntryServices.map((service) => ({
+      kind: "service",
+      service,
+    }));
+    cells.push({ kind: "more" });
+    const rows: QuickActionCell[][] = [];
+    for (let index = 0; index < cells.length; index += HOME_QUICK_ENTRY_PER_ROW) {
+      rows.push(cells.slice(index, index + HOME_QUICK_ENTRY_PER_ROW));
+    }
+    return rows;
+  }, [quickEntryServices]);
+
+  const navContentGap = edsNavContentGap(spacing);
   const sceneContentInset = edsSceneContentInset(spacing);
   const balanceLabelToAmountGap = edsPx(spacing["spacing-2"]);
   const balanceToQuickActionsGap = edsPx(spacing["spacing-5"]);
   const pageDividerMarginTop = edsPx(spacing["spacing-8"]);
   const pageDividerMarginBottom = edsPx(spacing["spacing-6"]);
   const nativeNavBar = shouldUseEgNavBarNativeStack();
-  const tabBarReserve = nativeNavBar
+  const nativeTabBar = shouldUseEgTabBarNativeStack();
+  const tabBarReserve = nativeTabBar
     ? 0
     : egTabBarScrollContentReserveWithSafeArea(insets.bottom);
-  const topReserve = nativeNavBar
-    ? edsPx(spacing["spacing-4"])
-    : homeScrollTopReserve(insets.top, navContentGap);
+  const topReserve = homeScrollTopReserve(insets.top, navContentGap);
 
   const balanceText = balanceVisible ? totalBalanceDisplay : "**********";
   const styles = useMemo(
@@ -477,19 +415,16 @@ export function HomeScene() {
         },
         balanceSection: {},
         quickActions: {
-          gap: edsPx(spacing["spacing-4"]),
+          gap: edsPx(spacing["spacing-5"]),
           alignSelf: "stretch",
           marginTop: balanceToQuickActionsGap,
         },
         quickActionsRow: {
           flexDirection: "row",
+          flexWrap: "nowrap",
           alignItems: "flex-start",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           alignSelf: "stretch",
-          overflow: "visible",
-        },
-        quickActionSlot: {
-          width: edsPx(spacing["capsule-xl"]),
           overflow: "visible",
         },
         quickActionsToTodoDivider: {
@@ -502,12 +437,7 @@ export function HomeScene() {
           gap: edsPx(spacing["spacing-3"]),
           alignSelf: "stretch",
         },
-        todoList: {
-          gap: 0,
-          marginHorizontal: -sceneContentInset,
-          alignSelf: "stretch",
-          overflow: "visible",
-        },
+        todoList: dataListSectionStyle(spacing),
       }),
     [
       balanceToQuickActionsGap,
@@ -557,38 +487,47 @@ export function HomeScene() {
         />
       </View>
 
-      <View style={styles.quickActions}>
-        <View style={styles.quickActionsRow}>
-          <HomeQuickAction
-            label={t("home.send")}
-            accessibilityLabel={t("home.send")}
-            iconSlot={
-              <EgIconArrowUp mode={mode} size="md" fillTone="primary" />
-            }
-          />
-          <HomeQuickAction
-            label={t("home.receive")}
-            accessibilityLabel={t("home.receive")}
-            iconName="eds-arrow-down"
-          />
-          <HomeQuickAction
-            label={t("home.whitelist")}
-            accessibilityLabel={t("home.whitelist")}
-            iconName="eds-white-list"
-          />
-          <HomeQuickAction
-            label={t("home.more")}
-            accessibilityLabel={t("home.more")}
-            onPress={() => setQuickServicesVisible(true)}
-            iconSlot={
-              <EgIconListLatticeMobile
-                mode={mode}
-                size="md"
-                fillTone="primary"
-              />
-            }
-          />
-        </View>
+      <View
+        style={styles.quickActions}
+        onLayout={(event) => setQuickActionsTrackWidth(event.nativeEvent.layout.width)}
+      >
+        {quickActionRows.map((row, rowIndex) => (
+          <View
+            key={`home-quick-row-${rowIndex}`}
+            style={[styles.quickActionsRow, { gap: quickActionColumnGap }]}
+          >
+            {row.map((cell) =>
+              cell.kind === "service" ? (
+                <HomeQuickAction
+                  key={cell.service.id}
+                  label={t(cell.service.labelKey)}
+                  accessibilityLabel={t(cell.service.labelKey)}
+                  iconSlot={
+                    <QuickServiceHomeIcon
+                      id={cell.service.id}
+                      icon={cell.service.icon}
+                      mode={mode}
+                    />
+                  }
+                />
+              ) : (
+                <HomeQuickAction
+                  key={`home-quick-more-${rowIndex}`}
+                  label={t("home.more")}
+                  accessibilityLabel={t("home.more")}
+                  onPress={() => setQuickServicesVisible(true)}
+                  iconSlot={
+                    <EgIconListLatticeMobile
+                      mode={mode}
+                      size="md"
+                      fillTone="primary"
+                    />
+                  }
+                />
+              ),
+            )}
+          </View>
+        ))}
       </View>
 
       <HomeQuickServicesSheet
@@ -617,7 +556,6 @@ export function HomeScene() {
                 item={item}
                 mode={mode}
                 spacing={spacing}
-                colors={colors}
                 onPress={() => undefined}
               />
             ))
@@ -627,23 +565,21 @@ export function HomeScene() {
     </>
   );
 
-  const scroll = (
-    <ScrollView
-      style={nativeNavBar ? nativeNavScrollSurfaceStyle(colors) : undefined}
-      contentInsetAdjustmentBehavior={nativeNavBar ? "automatic" : "never"}
-      onScroll={onScroll}
-      scrollEventThrottle={scrollEventThrottle}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: topReserve, paddingBottom: tabBarReserve },
-      ]}
-    >
-      {scrollBody}
-    </ScrollView>
-  );
-
   if (nativeNavBar) {
-    return <View style={styles.root}>{scroll}</View>;
+    return (
+      <ScrollView
+        style={[nativeNavScrollSurfaceStyle(colors), styles.root]}
+        contentInsetAdjustmentBehavior="automatic"
+        onScroll={onScroll}
+        scrollEventThrottle={scrollEventThrottle}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: navContentGap, paddingBottom: tabBarReserve },
+        ]}
+      >
+        {scrollBody}
+      </ScrollView>
+    );
   }
 
   return (
@@ -651,7 +587,19 @@ export function HomeScene() {
       style={styles.root}
       overlay={<HomeTopBar scrollOffset={scrollOffset} />}
     >
-      {scroll}
+      <ScrollView
+        style={overlayNavScrollSurfaceStyle()}
+        nestedScrollEnabled
+        contentInsetAdjustmentBehavior="never"
+        onScroll={onScroll}
+        scrollEventThrottle={scrollEventThrottle}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: topReserve, paddingBottom: tabBarReserve },
+        ]}
+      >
+        {scrollBody}
+      </ScrollView>
     </EdsGlassScreenShell>
   );
 }

@@ -19,18 +19,12 @@ type HomeTopBarProps = {
   scrollOffset: EgNavBarScrollOffset;
 };
 
-/**
- * Android / iOS ≤25 — overlay：`EgNavBar` + canvas `EgButtonGlass`（`iconCount={1}`）。
- * iOS 26+ 不渲染（系统 Nav + `useHomeMainScreenOptions`）。
- */
+/** 首页顶栏 overlay：`EgNavBar` + canvas `EgButtonGlass`（Android / iOS ≤25）。 */
 export function HomeTopBar({ scrollOffset }: HomeTopBarProps) {
-  if (shouldUseEgNavBarNativeStack()) {
-    return null;
-  }
-
   const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
+  const nativeNavBar = shouldUseEgNavBarNativeStack();
   const shellHeight = egNavBarScrollContentReserve(insets.top);
 
   const styles = StyleSheet.create({
@@ -64,9 +58,14 @@ export function HomeTopBar({ scrollOffset }: HomeTopBarProps) {
     },
   });
 
+  if (nativeNavBar) {
+    return null;
+  }
+
   return (
     <View style={styles.shell} collapsable={false} pointerEvents="box-none">
       <EgNavBar
+        chromeContext="overlay"
         mode={mode}
         title={t('tabs.home')}
         showLeft={false}
