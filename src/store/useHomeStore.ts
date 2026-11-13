@@ -73,29 +73,45 @@ type HomeState = {
   setTodoFilter: (filter: HomeTodoFilter) => void;
 };
 
-const todoTemplates: Omit<HomeTodoItem, 'id' | 'category'>[] = [
+/** @see `.cursor/rules/work.md` §4.3 */
+export const HOME_TODO_MOCK_CURRENCIES_FIRST_10 = [
+  'HYPE',
+  'TON',
+  'ZEC',
+  'USDT',
+  'AAVE',
+  'MNT',
+  'GBG',
+  '1INCH',
+  'DEEP',
+  'AVAX',
+] as const;
+
+const todoTemplates: Omit<HomeTodoItem, 'id' | 'category' | 'currency'>[] = [
   {
     amount: '100.00035',
-    currency: 'BCH',
     descriptionHighlight: 'Project Name',
     descriptionRest: ' Request for withdrawal',
     timestamp: 'Jun 08, 16:07',
   },
   {
     amount: '2.000000078',
-    currency: 'LTC',
     descriptionHighlight: 'Alex Mah.',
     descriptionRest: ' Initiated a payment request',
     timestamp: 'Jun 08, 16:07',
   },
   {
     amount: '5,087.005',
-    currency: 'AVAX',
     descriptionHighlight: 'Name',
     descriptionRest: ' withdrawal via',
     timestamp: 'Jun 08, 16:07',
   },
 ];
+
+function mockTodoCurrencyForSeq(seq: number): string {
+  const order = HOME_TODO_MOCK_CURRENCIES_FIRST_10;
+  return order[(seq - 1) % order.length]!;
+}
 
 function buildInitialTodoItems(): HomeTodoItem[] {
   const counts: Record<HomeTodoFilter, number> = {
@@ -111,6 +127,7 @@ function buildInitialTodoItems(): HomeTodoItem[] {
       const template = todoTemplates[(seq - 1) % todoTemplates.length]!;
       items.push({
         ...template,
+        currency: mockTodoCurrencyForSeq(seq),
         id: `todo-${seq}`,
         category,
       });

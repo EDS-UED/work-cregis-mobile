@@ -10,5 +10,5 @@ export {
   egNavBarScrollContentReserve,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/organisms/tab-bar/nav-bar/index.js';
-export { egTabBarScrollContentReserveWithSafeArea } from '../../node_modules/@eds-evergreen/mobile/dist/components/organisms/tab-bar/_shared/tabBarMetrics.js';
+} from '@eds/internal/dist/components/organisms/tab-bar/nav-bar/index.js';
+export { egTabBarScrollContentReserveWithSafeArea } from '@eds/internal/dist/components/organisms/tab-bar/_shared/tabBarMetrics.js';

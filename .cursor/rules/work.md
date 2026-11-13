@@ -342,6 +342,7 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 | `EgButtonGlass` 默认 canvas | `HomeTopBar` overlay（仅非 iOS 26+） |
 | `readEgButtonGlassStackDiagnostics` | Nav 槽按钮走 NavigationBar 路径；**canvas** 仍看 `stack: native \| rn` |
 | Semantic **`radius-md` / `radius-lg`** | **列表行点按底** · DL · 设置行 → **`radius-md`**（20px · `scale-5`）；**分组白卡** → **`radius-lg`**（24px · `scale-6`）。与 Showcase `list row` / shallow card 语义一致 · `docs/design.md` §3 |
+| **`EgTabBlock`** | 首页待办 / 通知胶囊分段 · `@/eds/tab-block`；`children` + `contentKey` 自带 layout-content 正文动效与左右滑切（对齐 `EgTab`）。独立正文区仍可用 **`useEgHorizontalSegmentSwipe`**。下划线样式用 **`EgTab`**。 |
 
 **业务仓必保依赖**：`expo-glass-effect ~58` · Metro iOS **`expo-glass-effect` shim** · `@expo/ui ~58`（iOS 26+ `EgMenu` 走系统菜单，与 Showcase 一致；缺失则回退 RN 浮层）。要对齐 eds-mobile **最新** dist → 仅用户 **「同步」** §3.1.2。
 
@@ -506,6 +507,16 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 2. **同一 key** 同步写入 `en-US.ts` · `zh-TW.ts`（无翻译时暂填 zh-CN 同文案，便于肉眼发现缺失）
 3. Scene 里只用 `t('...')`，不写 fallback 硬编码
 
+### 4.3 Mock 数据 · 首页待办币种（`useHomeStore`）
+
+**【必须】** 待办列表数据生产时，**全局序号 1–10**（按 `buildInitialTodoItems` 生成顺序、跨 `approval` / `sign` / `errorCallback` 合计）的 `currency` **依次为**（Ticker 大写）：
+
+`HYPE` → `TON` → `ZEC` → `USDT` → `AAVE` → `MNT` → `GBG` → `1INCH` → `DEEP` → `AVAX`
+
+- 常量：`src/store/useHomeStore.ts` · `HOME_TODO_MOCK_CURRENCIES_FIRST_10`
+- 序号 &gt; 10：按上表 **循环**（`(seq - 1) % 10`）
+- `GBG`：业务 Mock ticker；EDS `EgSymbol` 映射 **Bitget Token**（`eds-bgb-bitget token`）见 `src/utils/edsCryptoSymbol.ts`
+
 ---
 
 ## 5. 样式与展示
@@ -529,7 +540,7 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 | 页边距 | 上 `spacing-4`（`EDS_NAV_CONTENT_GAP`）· 左右 `spacing-5`（`EDS_SCENE_CONTENT_INSET`）· 下 `spacing-8` |
 | 块/卡片间距 | `spacing-7` |
 | Item 内间距 | 标题–副文本 `spacing-1`；左图/头像/icon–文案 `spacing-3` |
-| 尺寸 | 头像/币种 `avatar-lg`；icon `symbol-md` |
+| 尺寸 | 头像/币种默认 `avatar-lg`（首页待办币种图 `avatar-xl`）；icon `symbol-md` |
 
 ### 5.0.1 稿面数值 → EDS 字阶 / 色（Agent 解码）
 
@@ -741,7 +752,7 @@ npm run typecheck
 | iOS 模拟器点击 / 滑动 | Xcode 27 无 Simulator.app 窗口、Cursor 无辅助功能权限 → 用 [AXe](https://github.com/cameroncooke/AXe) 注入触摸：`axe tap -x <pt> -y <pt> --udid <UDID>` · `axe swipe …`；截图 `xcrun simctl io booted screenshot` 后缩到逻辑点宽度（iPhone 17 = 402×874pt）坐标即可直接对照 |
 | 打开 App | `xcrun simctl openurl booted exp://127.0.0.1:8081` |
 | 真机问题（Android 无本地环境） | 让用户录屏 → 用 AVFoundation 抽帧拼图逐帧量位移；DS 内临时 `__DEV__` 日志经 Metro 终端回传真机坐标，**定位后必须删除** |
-| DS `build:mobile` 期间红屏「None of these files exist …」 | assemble 清空重建 dist 的瞬时状态；构建完 `simctl terminate` + 重开 App 即可，不是代码问题。重开仍红屏 → Metro 文件映射已过期，`--clear` 重启 Metro |
+| DS `build:mobile` 期间红屏「None of these files exist …」 | assemble 清空重建 dist 的瞬时状态（EDS 已改逐文件原子替换，**禁止**整目录 rename — Metro 会卡在旧代码）；构建完 `simctl terminate` + 重开 App。shim **禁止** `../../node_modules/@eds-evergreen/mobile/dist/...` — 用 **`@eds/internal/dist/...`**（Metro 直解析 `eds-mobile/packages/mobile/dist`） |
 | 打开 / 切换时「跳一下」类问题 | `simctl io <UDID> recordVideo` 录屏 → AVFoundation（`AVAssetImageGenerator`）按 17ms 抽帧 → 逐帧量**相对位移**（如内容块顶 − 卡片顶）。只看「卡片在动」分不出是动画还是内容自己在动 |
 
 **【必须】** 修一处回归一处：点击、拖拽换档、滚动、原生顶栏效果在同一次验证里一起过，避免「修好 A 坏了 B」。
@@ -765,3 +776,16 @@ npm run typecheck
 - 业务侧关 `TabsScreen` 的 `overrideScrollViewContentInsetAdjustmentBehavior` — 影响所有 Tab 页的滚动 inset。
 - 只靠「透明到测得栏高」遮盖 — 挡不住随后的系统栏隐藏动画。
 - 在同一提交里「隐藏系统栏 + 改 ScrollView inset 行为」。
+
+### 12.9 iOS 26+ · `EgTabBlock` 正文区点击全无（2026-11-13）
+
+| 现象 | 根因 | 正解（DS） |
+|------|------|-----------|
+| 首页待办 / 通知等含 `EgTabBlock` `children` 的列表 **`Pressable` 点不动**，左右滑切仍可用 | 正文外包 `Gesture.Pan()`（默认在 `BEGAN` 即占触摸）；iOS 26 原生 Nav/Tab 栈下 RN 点按不走 RNGH，Pan 占满 → 点击被吃掉 | `useEgHorizontalSegmentSwipe` · `manualActivation(true)` + `cancelsTouchesInView(false)`，横向超过阈值才 `activate`；轻点才交给子级 |
+
+| 列表下方空白处**左右滑不切** | 手势宿主只有正文内容高 | DS：`EgTabBlock` 正文 `flexGrow: 1` 撑满；业务**从滚动容器到 `EgTabBlock` 每一层**都要 `flexGrow: 1`（`SceneScaffold` content · 首页 `content` + `todoSection`）。验证：临时给 dist 里 `bodyGestureHost` 加半透明底色看是否铺到底 |
+| 正文右滑与整页返回抢手势 | `EgEdsAnimaPage` 整页任意位置拖拽返回 | DS：仅屏幕左缘侧滑返回（iOS 26+ `fullScreenGestureEnabled: false`） |
+| Android · iOS ≤25 右滑后**页面右缘往左走一段**（越过原位露底再弹回） | 侧滑未达阈值松手 → open spring 继承手势速度弹回原位而越位；拖动中回拉过起点同理 | DS：`EgEdsAnimaPage` 每路由 `gestureSettle`（`gestureStart` 置 1 → `transitionEnd` 复 0），期间上层页位移夹取在 [原位, 离场位]。**【必须】** 推入 / 返回的 spring 轻回弹保留（`page-push` · `page-pop` 不改临界阻尼、不 `overshootClamping`）— 回弹是 page 动效本体 |
+| 改了 DS、重建后**业务仍是旧效果** | 旧 assemble 整目录 rename 换 dist → Metro 监听不到，持续供旧模块 | DS `assemble.mjs` 已改为**逐文件**临时文件 + rename；验证：`curl` Metro bundle `grep` 新代码。遇到旧 Metro 先 `--clear` 重启一次 |
+
+**【禁止】** 业务长期 `contentSwipeToSwitch={false}` 当最终方案（可临时对照验证）。

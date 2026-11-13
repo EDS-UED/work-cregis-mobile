@@ -4,7 +4,8 @@
     "strict": true,
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@eds/internal/dist/*": ["./node_modules/@eds-evergreen/mobile/dist/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]

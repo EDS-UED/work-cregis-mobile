@@ -11,4 +11,4 @@ export {
   type EdsDisplayP3Components,
   type MobileTheme,
   type ThemeMode,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/theme/index.js';
+} from '@eds/internal/dist/components/theme/index.js';

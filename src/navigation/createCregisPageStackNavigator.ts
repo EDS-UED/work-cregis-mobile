@@ -8,7 +8,7 @@ import { createEgEdsAnimaPageNavigator } from '@/eds/page-motion';
  * 类型侧统一按 `@react-navigation/stack` 收敛（与 Showcase `as object` 扩展 options 同思路）。
  */
 export function createCregisPageStackNavigator<ParamList extends ParamListBase>() {
-  return createEgEdsAnimaPageNavigator<ParamList>() as ReturnType<
+  return createEgEdsAnimaPageNavigator<ParamList>() as unknown as ReturnType<
     typeof createStackNavigator<ParamList>
   >;
 }

@@ -50,9 +50,10 @@ import { overlayNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
 
 const pressSnappySpring = edsMotionSpring("snappy");
 const pressMotionSpring = edsMotionSpring("press");
-/** 快捷入口点按缩小 · `scale-press-down-xs`。 */
+
+/** 快捷入口点按缩小 · `scale-press-down-lg`。 */
 const quickActionPressScale =
-  mobileTheme.motion.scale["scale-press-down-xs"] as number;
+  mobileTheme.motion.scale["scale-press-down-lg"] as number;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function pressScaleSlack(layoutPx: number, activeScale: number) {
@@ -95,9 +96,6 @@ function HomeBalanceVisibilityIcon({
 }) {
   const { spacing } = useEdsTheme();
   const iconPx = edsPx(spacing["symbol-xs"]);
-  const strokeSm = edsPx(spacing["stroke-sm"]);
-  const strokeLg = edsPx(spacing["stroke-lg"]);
-  const renderPx = iconPx * (strokeLg / strokeSm);
 
   return (
     <View
@@ -110,10 +108,10 @@ function HomeBalanceVisibilityIcon({
     >
       <EgSymbol
         name={balanceVisible ? "eds-close-eye" : "eds-eye"}
-        displayPx={renderPx}
+        displayPx={iconPx}
         mode={mode}
-        strokeColorToken="text-base-primary"
-        style={{ transform: [{ scale: iconPx / renderPx }] }}
+        strokeColorToken="text-base-secondary"
+        strokeScaleToken="stroke-xl"
       />
     </View>
   );
@@ -159,7 +157,12 @@ function HomeBalanceBlock({
             gap: labelIconGap,
           }}
         >
-          <SceneText variant="body">{estTotalValueLabel}</SceneText>
+          <SceneText
+            variant="bodyMediumStrong"
+            style={{ color: String(colors["text-base-secondary"]) }}
+          >
+            {estTotalValueLabel}
+          </SceneText>
           <HomeBalanceVisibilityIcon
             balanceVisible={balanceVisible}
             mode={mode}
@@ -279,60 +282,74 @@ function HomeTodoRow({
   onPress,
 }: HomeTodoRowProps) {
   const text = useEdsTypography();
+  const { colors } = useEdsTheme();
+  const secondaryColor = String(colors["text-base-secondary"]);
   const cryptoSymbol = edsCryptoSymbolForCurrency(item.currency);
   const amountA11y = `${item.amount} ${item.currency}`;
 
-  const iconToAmountGap = edsPx(spacing["spacing-1-5"]);
+  const mediaGap = edsPx(spacing["spacing-3"]);
+  const avatarSize = edsPx(spacing["avatar-xl"]);
   const amountToCurrencyGap = edsPx(spacing["spacing-2"]);
-  const amountRowToSubtextGap = edsPx(spacing["spacing-1-5"]);
-  const subtextToTimeGap = edsPx(spacing["spacing-05"]);
+  const textStackGap = edsPx(spacing["spacing-05"]);
 
   return (
     <DataListRow
-      axis="column"
-      gap={amountRowToSubtextGap}
+      axis="row"
+      gap={mediaGap}
       onPress={onPress}
       accessibilityLabel={amountA11y}
     >
+      {cryptoSymbol ? (
+        <View
+          style={{
+            width: avatarSize,
+            height: avatarSize,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <EgSymbol
+            name={cryptoSymbol}
+            mode={mode}
+            displayPx={avatarSize}
+            accessibilityLabel={item.currency}
+          />
+        </View>
+      ) : (
+        <View style={{ width: avatarSize, height: avatarSize }} />
+      )}
+      <View
+        style={{
+          flex: 1,
+          minWidth: 0,
+          gap: textStackGap,
+          alignSelf: "stretch",
+        }}
+      >
         <View
           style={{
             flexDirection: "row",
-            alignItems: "center",
-            gap: iconToAmountGap,
+            alignItems: "baseline",
+            flexWrap: "wrap",
+            gap: amountToCurrencyGap,
             alignSelf: "stretch",
           }}
         >
-          {cryptoSymbol ? (
-            <EgSymbol
-              name={cryptoSymbol}
-              mode={mode}
-              displayPx={28}
-              accessibilityLabel={item.currency}
-            />
-          ) : null}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "baseline",
-              flexWrap: "wrap",
-              gap: amountToCurrencyGap,
-              flexShrink: 1,
-              minWidth: 0,
-            }}
-          >
-            <SceneText variant="bodySemibold">{item.amount}</SceneText>
-            <SceneText variant="bodySemibold">{item.currency}</SceneText>
-          </View>
+          <SceneText variant="bodySemibold">{item.amount}</SceneText>
+          <SceneText variant="bodySemibold">{item.currency}</SceneText>
         </View>
-        <View style={{ gap: subtextToTimeGap, alignSelf: "stretch" }}>
-          <Text style={[text.body, { textAlign: "left" }]}>
-            <Text style={text.bodyMediumStrong}>{item.descriptionHighlight}</Text>
-            <Text style={text.body}>{item.descriptionRest}</Text>
+        <Text style={[text.body, { textAlign: "left", color: secondaryColor }]}>
+          <Text style={[text.bodyMediumStrong, { color: secondaryColor }]}>
+            {item.descriptionHighlight}
           </Text>
-          <SceneText variant="bodySmallSecondary" style={{ textAlign: "left" }}>
-            {item.timestamp}
-          </SceneText>
-        </View>
+          <Text style={[text.body, { color: secondaryColor }]}>
+            {item.descriptionRest}
+          </Text>
+        </Text>
+        <SceneText variant="bodySmallSecondary" style={{ textAlign: "left" }}>
+          {item.timestamp}
+        </SceneText>
+      </View>
     </DataListRow>
   );
 }
@@ -411,6 +428,7 @@ export function HomeScene() {
       StyleSheet.create({
         root: { flex: 1, backgroundColor: edsPageBackground(colors) },
         content: {
+          flexGrow: 1,
           paddingHorizontal: sceneContentInset,
         },
         balanceSection: {},
@@ -434,6 +452,7 @@ export function HomeScene() {
           alignSelf: "stretch",
         },
         todoSection: {
+          flexGrow: 1,
           gap: edsPx(spacing["spacing-3"]),
           alignSelf: "stretch",
         },
@@ -545,22 +564,24 @@ export function HomeScene() {
           options={todoFilterOptions}
           selectedId={todoFilter}
           onSelect={setTodoFilter}
-        />
-        <View style={styles.todoList}>
-          {visibleTodoItems.length === 0 ? (
-            <HomeTodoEmptyState />
-          ) : (
-            visibleTodoItems.map((item) => (
-              <HomeTodoRow
-                key={item.id}
-                item={item}
-                mode={mode}
-                spacing={spacing}
-                onPress={() => undefined}
-              />
-            ))
-          )}
-        </View>
+          contentKey={todoFilter}
+        >
+          <View style={styles.todoList}>
+            {visibleTodoItems.length === 0 ? (
+              <HomeTodoEmptyState />
+            ) : (
+              visibleTodoItems.map((item) => (
+                <HomeTodoRow
+                  key={item.id}
+                  item={item}
+                  mode={mode}
+                  spacing={spacing}
+                  onPress={() => undefined}
+                />
+              ))
+            )}
+          </View>
+        </HomeTodoFilterBar>
       </View>
     </>
   );

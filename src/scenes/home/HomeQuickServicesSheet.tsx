@@ -140,7 +140,7 @@ export function HomeQuickServicesSheet({
   const setQuickEntryIds = useHomeStore((state) => state.setQuickEntryIds);
 
   const [editing, setEditing] = useState(false);
-  const [sheetDetent, setSheetDetent] = useState<EgSheetsDetent>('medium');
+  const [sheetDetent, setSheetDetent] = useState<EgSheetsDetent>('large');
   const [draftEntryIds, setDraftEntryIds] = useState<QuickServiceId[]>([
     ...quickEntryIds,
   ]);
@@ -174,7 +174,7 @@ export function HomeQuickServicesSheet({
   useEffect(() => {
     if (!visible) {
       setEditing(false);
-      setSheetDetent('medium');
+      setSheetDetent('large');
     }
   }, [visible]);
 
@@ -366,7 +366,7 @@ export function HomeQuickServicesSheet({
       onDismiss={onDismiss}
       mode={mode}
       detents={['medium', 'large']}
-      initialDetent="medium"
+      initialDetent="large"
       detent={sheetDetent}
       onDetentChange={setSheetDetent}
       title={t('home.quickServicesTitle')}

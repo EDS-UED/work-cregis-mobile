@@ -1,6 +1,6 @@
 import { createCregisPageStackNavigator } from '@/navigation/createCregisPageStackNavigator';
 
-import { AssetsScene } from '@/scenes/assets/AssetsScene';
+import { WalletMainScreen } from '@/scenes/assets/WalletMainScreen';
 import {
   edsPageRootScreenOptions,
   edsPageStackNavigatorExtraProps,
@@ -20,7 +20,7 @@ export function AssetsStackNavigator() {
     >
       <Stack.Screen
         name="AssetsMain"
-        component={AssetsScene}
+        component={WalletMainScreen}
         options={{ ...edsPageRootScreenOptions }}
       />
     </Stack.Navigator>

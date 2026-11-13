@@ -1,7 +1,7 @@
 export {
   EgEdsAnimaPageShot,
   EgEdsAnimaPageShotTrigger,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/motion/EgEdsAnimaPageShot.js';
+} from '@eds/internal/dist/components/shared/motion/EgEdsAnimaPageShot.js';
 
 export type {
   EgEdsAnimaPageShotPageApi,
@@ -9,4 +9,4 @@ export type {
   EgEdsAnimaPageShotRootApi,
   EgEdsAnimaPageShotSource,
   EgEdsAnimaPageShotTriggerProps,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/motion/EgEdsAnimaPageShot.d.ts';
+} from '@eds/internal/dist/components/shared/motion/EgEdsAnimaPageShot.d.ts';

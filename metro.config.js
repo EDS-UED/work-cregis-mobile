@@ -33,6 +33,7 @@ const animationsRoot = path.join(edsMobileRoot, 'packages/animations');
 const tokensRoot = path.join(edsMobileRoot, 'packages/tokens');
 const edsDistRoot = path.join(edsMobileRoot, 'packages/mobile/dist');
 const edsComponentsDist = path.join(edsDistRoot, 'components');
+const EDS_INTERNAL_DIST_PREFIX = '@eds/internal/dist/';
 
 /** 默认 dist（稳）；联调 EDS 源码：`CREGIS_EDS_LINKED_METRO=1 npm start` */
 const useLinkedMetro =
@@ -189,8 +190,7 @@ if (useLinkedMetro) {
   // 仅监听 assemble 产物（token watch → dist/tokens）；少扫整棵 components 树，加快 reload。
   config.watchFolders = [
     projectRoot,
-    path.join(edsDistRoot, 'tokens'),
-    path.join(edsDistRoot, 'components'),
+    edsDistRoot,
     path.join(tokensRoot, 'dist'),
     path.join(animationsRoot, 'dist'),
   ];
@@ -219,6 +219,46 @@ function resolveRelativeJsToTs(context, moduleName) {
 }
 
 /** `tsconfig` paths：`@/*` → `src/*` */
+/** `src/shims/eds-mobile-*.ts` → 真源 dist（绕过 file: symlink · node_modules 相对路径间歇解析失败）。 */
+function resolveEdsInternalDist(moduleName) {
+  if (!moduleName.startsWith(EDS_INTERNAL_DIST_PREFIX)) {
+    return null;
+  }
+  const rel = moduleName.slice(EDS_INTERNAL_DIST_PREFIX.length);
+  const candidates = [path.join(edsDistRoot, rel)];
+  if (!rel.endsWith('.js') && !rel.endsWith('.d.ts')) {
+    candidates.push(`${path.join(edsDistRoot, rel)}.js`, path.join(edsDistRoot, rel, 'index.js'));
+  }
+  for (const filePath of candidates) {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      return { type: 'sourceFile', filePath };
+    }
+  }
+  return null;
+}
+
+function resolveEdsShimLegacyNodeModules(context, moduleName) {
+  if (!moduleName.startsWith('.') || !moduleName.includes('@eds-evergreen/mobile/dist/')) {
+    return null;
+  }
+  if (!context.originModulePath.includes(`${path.sep}src${path.sep}shims${path.sep}`)) {
+    return null;
+  }
+  const abs = path.resolve(path.dirname(context.originModulePath), moduleName);
+  if (fs.existsSync(abs) && fs.statSync(abs).isFile()) {
+    return { type: 'sourceFile', filePath: abs };
+  }
+  const marker = `${path.sep}dist${path.sep}`;
+  const distIdx = abs.indexOf(marker);
+  if (distIdx >= 0) {
+    const direct = path.join(edsDistRoot, abs.slice(distIdx + marker.length));
+    if (fs.existsSync(direct) && fs.statSync(direct).isFile()) {
+      return { type: 'sourceFile', filePath: direct };
+    }
+  }
+  return null;
+}
+
 function resolveProjectAlias(moduleName) {
   if (!moduleName.startsWith('@/')) {
     return null;
@@ -244,6 +284,16 @@ function resolveProjectAlias(moduleName) {
 const upstreamResolveRequest = config.resolver.resolveRequest;
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  const edsDist = resolveEdsInternalDist(moduleName);
+  if (edsDist) {
+    return edsDist;
+  }
+
+  const edsLegacyShim = resolveEdsShimLegacyNodeModules(context, moduleName);
+  if (edsLegacyShim) {
+    return edsLegacyShim;
+  }
+
   const workspaceShim = edsWorkspaceShims[moduleName];
   if (workspaceShim && fs.existsSync(workspaceShim)) {
     return { type: 'sourceFile', filePath: workspaceShim };

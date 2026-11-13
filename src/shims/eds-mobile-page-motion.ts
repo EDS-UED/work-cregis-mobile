@@ -2,9 +2,9 @@ export {
   EgEdsAnimaPage,
   createEgEdsAnimaPageNavigator,
   shouldUseEgEdsAnimaNativePage,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/motion/EgEdsAnimaPage.js';
+} from '@eds/internal/dist/components/shared/motion/EgEdsAnimaPage.js';
 
 export type {
   EgEdsAnimaPageDirection,
   EgEdsAnimaPageOptions,
-} from '../../node_modules/@eds-evergreen/mobile/dist/components/shared/motion/EgEdsAnimaPage.d.ts';
+} from '@eds/internal/dist/components/shared/motion/EgEdsAnimaPage.d.ts';

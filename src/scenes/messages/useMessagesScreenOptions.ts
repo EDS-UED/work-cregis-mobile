@@ -8,7 +8,7 @@ import { edsPageBackground } from '@/utils/edsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-/** 消息 — EDS page + `box-page`。 */
+/** 通知 — EDS page + `box-page`。 */
 export function useMessagesScreenOptions(): StackNavigationOptions {
   const { colors } = useEdsTheme();
   const { t } = useTranslation();

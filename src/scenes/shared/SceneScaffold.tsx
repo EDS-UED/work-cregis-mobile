@@ -90,6 +90,7 @@ export function SceneScaffold({
       StyleSheet.create({
         root: { flex: 1 },
         content: {
+          flexGrow: 1,
           paddingHorizontal:
             contentPaddingHorizontal ?? edsSceneContentInset(spacing),
           paddingBottom: edsSceneContentInset(spacing),

@@ -1,7 +1,7 @@
 import { createCregisPageStackNavigator } from '@/navigation/createCregisPageStackNavigator';
 
 import { CollaborationDetailScene } from '@/scenes/collaboration/CollaborationDetailScene';
-import { CollaborationListScene } from '@/scenes/collaboration/CollaborationListScene';
+import { CollaborationMainScreen } from '@/scenes/collaboration/CollaborationMainScreen';
 import {
   edsPagePushedScreenOptions,
   edsPageRootScreenOptions,
@@ -22,7 +22,7 @@ export function CollaborationStackNavigator() {
     >
       <Stack.Screen
         name="CollaborationList"
-        component={CollaborationListScene}
+        component={CollaborationMainScreen}
         options={{ ...edsPageRootScreenOptions }}
       />
       <Stack.Screen

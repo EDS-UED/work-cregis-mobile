@@ -1,4 +1,9 @@
-export type MessageCategory = 'team' | 'transaction' | 'system';
+export type MessageCategory =
+  | 'transaction'
+  | 'teamActivity'
+  | 'collaboration'
+  | 'announcement'
+  | 'amlAlert';
 
 export type MessageListItem = {
   id: string;
@@ -14,12 +19,14 @@ export type MessageListItem = {
 };
 
 export const MESSAGE_CATEGORY_BADGE: Record<MessageCategory, number> = {
-  team: 32,
   transaction: 7,
-  system: 80,
+  teamActivity: 32,
+  collaboration: 5,
+  announcement: 80,
+  amlAlert: 3,
 };
 
-/** Mock · 文案在组件内用 i18n key 映射（见 `MessagesListSection`）。 */
+/** Mock · 文案在组件内用 i18n key 映射（见 `MessagesScene`）。 */
 export type MessageListItemDef = Omit<MessageListItem, 'title' | 'subtitle' | 'timeLabel'> & {
   titleKey: `messages.${string}`;
   subtitleKey: `messages.${string}`;
@@ -29,7 +36,7 @@ export type MessageListItemDef = Omit<MessageListItem, 'title' | 'subtitle' | 't
 export const MESSAGE_MOCK_ITEMS: MessageListItemDef[] = [
   {
     id: 'msg-1',
-    category: 'team',
+    category: 'teamActivity',
     sectionKey: 'today',
     titleKey: 'messages.mockAlexTitle',
     subtitleKey: 'messages.mockAlexSub',
@@ -40,7 +47,7 @@ export const MESSAGE_MOCK_ITEMS: MessageListItemDef[] = [
   },
   {
     id: 'msg-2',
-    category: 'team',
+    category: 'teamActivity',
     sectionKey: 'today',
     titleKey: 'messages.mockCooperTitle',
     subtitleKey: 'messages.mockCooperSub',
@@ -50,8 +57,29 @@ export const MESSAGE_MOCK_ITEMS: MessageListItemDef[] = [
     avatarColorIndex: 3,
   },
   {
+    id: 'msg-tx-1',
+    category: 'transaction',
+    sectionKey: 'today',
+    titleKey: 'messages.mockTxTitle',
+    subtitleKey: 'messages.mockTxSub',
+    timeLabelKey: 'messages.mockTime1023',
+    unread: true,
+    leadSymbol: 'eds-scan-code',
+  },
+  {
+    id: 'msg-col-1',
+    category: 'collaboration',
+    sectionKey: 'today',
+    titleKey: 'messages.mockCollabTitle',
+    subtitleKey: 'messages.mockCollabSub',
+    timeLabelKey: 'messages.mockTime1023',
+    unread: false,
+    avatarLetter: 'A',
+    avatarColorIndex: 1,
+  },
+  {
     id: 'msg-3',
-    category: 'system',
+    category: 'announcement',
     sectionKey: 'yesterday',
     titleKey: 'messages.itemSubscriptionExpiring',
     subtitleKey: 'messages.itemSubscriptionExpiringSub',
@@ -61,7 +89,7 @@ export const MESSAGE_MOCK_ITEMS: MessageListItemDef[] = [
   },
   {
     id: 'msg-4',
-    category: 'system',
+    category: 'announcement',
     sectionKey: 'yesterday',
     titleKey: 'messages.itemRenewal',
     subtitleKey: 'messages.itemRenewalSub',
@@ -71,12 +99,22 @@ export const MESSAGE_MOCK_ITEMS: MessageListItemDef[] = [
   },
   {
     id: 'msg-5',
-    category: 'system',
+    category: 'announcement',
     sectionKey: 'yesterday',
     titleKey: 'messages.itemUpgrade',
     subtitleKey: 'messages.itemUpgradeSub',
     timeLabelKey: 'messages.weekdaySat',
     unread: false,
     leadSymbol: 'eds-arrow-up',
+  },
+  {
+    id: 'msg-aml-1',
+    category: 'amlAlert',
+    sectionKey: 'yesterday',
+    titleKey: 'messages.mockAmlTitle',
+    subtitleKey: 'messages.mockAmlSub',
+    timeLabelKey: 'messages.weekdayMon',
+    unread: true,
+    leadSymbol: 'eds-notice',
   },
 ];
