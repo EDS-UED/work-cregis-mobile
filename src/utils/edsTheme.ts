@@ -199,6 +199,15 @@ export function createEdsTypographyStyles(
       'weight-regular',
       'text-base-primary',
     ),
+    /** `typography-footnote-strong` · `text-base-secondary`（60%） */
+    footnoteStrong: edsTextStyle(
+      typography,
+      colors,
+      'size-footnote',
+      'line-height-footnote',
+      'weight-medium',
+      'text-base-secondary',
+    ),
     bodySmall: edsTextStyle(
       typography,
       colors,
@@ -230,6 +239,15 @@ export function createEdsTypographyStyles(
       'line-height-body-small',
       'weight-medium',
       'text-base-primary',
+    ),
+    /** `typography-body-small-strong` · `text-base-secondary`（60%） */
+    bodySmallStrong: edsTextStyle(
+      typography,
+      colors,
+      'size-body-small',
+      'line-height-body-small',
+      'weight-medium',
+      'text-base-secondary',
     ),
     bodySmallSemibold: edsTextStyle(
       typography,

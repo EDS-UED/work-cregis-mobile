@@ -86,7 +86,7 @@ export function HomeStackNavigator() {
         component={MessagesRoute}
         options={(props) => ({
           ...screenOptions(props),
-          ...messagesOptions,
+          ...messagesOptions(props),
         })}
       />
       <Stack.Screen

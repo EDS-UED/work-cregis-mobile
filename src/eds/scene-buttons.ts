@@ -1,1 +1,5 @@
-export { EgDecorButton, EgOptionButton } from '@/shims/eds-mobile-scene-buttons';
+export {
+  EgDangerButton,
+  EgDecorButton,
+  EgOptionButton,
+} from '@/shims/eds-mobile-scene-buttons';

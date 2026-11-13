@@ -31,6 +31,7 @@ import {
   type QuickServiceDef,
 } from "@/scenes/home/homeQuickServicesCatalog";
 import { QuickServiceHomeIcon } from "@/scenes/home/homeQuickServiceIcons";
+import { HomeTodoDetailSheet } from "@/scenes/home/HomeTodoDetailSheet";
 import { HomeTodoFilterBar } from "@/scenes/home/HomeTodoFilterBar";
 import { HomeTopBar, homeScrollTopReserve } from "@/scenes/home/HomeTopBar";
 import { EdsGlassScreenShell } from "@/scenes/shared/EdsGlassScreenShell";
@@ -376,6 +377,8 @@ export function HomeScene() {
   const setTodoFilter = useHomeStore((state) => state.setTodoFilter);
   const quickEntryIds = useHomeStore((state) => state.quickEntryIds);
   const [quickServicesVisible, setQuickServicesVisible] = useState(false);
+  const [todoSheetItem, setTodoSheetItem] = useState<HomeTodoItem | null>(null);
+  const [todoSheetVisible, setTodoSheetVisible] = useState(false);
 
   const quickEntryServices = useMemo(
     () => resolveQuickServices(quickEntryIds),
@@ -554,6 +557,15 @@ export function HomeScene() {
         onDismiss={() => setQuickServicesVisible(false)}
       />
 
+      <HomeTodoDetailSheet
+        visible={todoSheetVisible}
+        item={todoSheetItem}
+        onDismiss={() => {
+          setTodoSheetVisible(false);
+          setTodoSheetItem(null);
+        }}
+      />
+
       <View style={styles.quickActionsToTodoDivider}>
         <EgDivider variant="page" mode={mode} />
       </View>
@@ -576,7 +588,10 @@ export function HomeScene() {
                   item={item}
                   mode={mode}
                   spacing={spacing}
-                  onPress={() => undefined}
+                  onPress={() => {
+                    setTodoSheetItem(item);
+                    setTodoSheetVisible(true);
+                  }}
                 />
               ))
             )}

@@ -72,7 +72,7 @@ export function WalletAssetRow({
             gap: edsPx(spacing['spacing-2']),
           }}
         >
-          <SceneText variant="bodyMediumStrong">{item.symbol}</SceneText>
+          <SceneText variant="bodySemibold">{item.symbol}</SceneText>
           {item.multichain ? (
             <View
               style={{

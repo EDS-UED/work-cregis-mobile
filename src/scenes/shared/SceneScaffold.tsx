@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactElement } from 'react';
+import type { PropsWithChildren, ReactElement, ReactNode } from 'react';
 import { useLayoutEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -41,6 +41,8 @@ type SceneScaffoldProps = PropsWithChildren<{
   contentPaddingHorizontal?: number;
   /** 系统栏 / RN overlay 栏自定义标题（如团队头像 + 下拉）。 */
   customHeaderTitle?: () => ReactElement;
+  /** overlay 顶栏右侧槽（iOS 26+ 系统栏请走 Stack `screenOptions`）。 */
+  overlayNavTrailing?: ReactNode;
 }>;
 
 export function SceneScaffold({
@@ -50,6 +52,7 @@ export function SceneScaffold({
   pageBackground = 'default',
   contentPaddingHorizontal,
   customHeaderTitle,
+  overlayNavTrailing,
   children,
 }: SceneScaffoldProps) {
   const { colors, mode, spacing } = useEdsTheme();
@@ -120,6 +123,15 @@ export function SceneScaffold({
           paddingBottom: EG_NAV_BAR_PADDING_BOTTOM,
           paddingHorizontal: EG_NAV_BAR_PADDING_HORIZONTAL,
           flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'box-none',
+        },
+        overlayNavTrailing: {
+          position: 'absolute',
+          right: EG_NAV_BAR_PADDING_HORIZONTAL,
+          zIndex: 3,
+          elevation: 3,
           alignItems: 'center',
           justifyContent: 'center',
           pointerEvents: 'box-none',
@@ -200,6 +212,23 @@ export function SceneScaffold({
               pointerEvents="box-none"
             >
               {customHeaderTitle()}
+            </View>
+          ) : null}
+          {overlayNavTrailing ? (
+            <View
+              style={[
+                styles.overlayNavTrailing,
+                {
+                  top: insets.top,
+                  bottom: 0,
+                  paddingTop: EG_NAV_BAR_PADDING_TOP,
+                  paddingBottom: EG_NAV_BAR_PADDING_BOTTOM,
+                },
+              ]}
+              collapsable={false}
+              pointerEvents="box-none"
+            >
+              {overlayNavTrailing}
             </View>
           ) : null}
         </View>

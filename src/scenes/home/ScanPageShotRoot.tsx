@@ -1,12 +1,11 @@
-import type { EgEdsAnimaPageShotRootApi } from '@/eds/page-shot';
-
 import { ScanPageContent } from '@/scenes/home/ScanPageContent';
+import { ScanPageShell } from '@/scenes/scan/ScanPageShell';
 
-type ScanPageShotRootProps = {
-  api: EgEdsAnimaPageShotRootApi;
-};
-
-/** 扫码 page-shot 根页。 */
-export function ScanPageShotRoot({ api }: ScanPageShotRootProps) {
-  return <ScanPageContent contentStyle={{ paddingTop: api.scrollTopInset }} />;
+/** 扫码 page-shot 根页 · 相机全屏铺底，顶栏由 page-shot 提供。 */
+export function ScanPageShotRoot() {
+  return (
+    <ScanPageShell>
+      <ScanPageContent showTopBar={false} />
+    </ScanPageShell>
+  );
 }

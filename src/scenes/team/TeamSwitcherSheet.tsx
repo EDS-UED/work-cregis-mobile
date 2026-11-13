@@ -63,7 +63,7 @@ function TeamSwitcherRow({
           gap: edsPx(spacing['spacing-05']),
         }}
       >
-        <SceneText variant="bodyMediumStrong" numberOfLines={2}>
+        <SceneText variant="bodySemibold" numberOfLines={2}>
           {team.name}
         </SceneText>
         <SceneText
@@ -130,7 +130,7 @@ function TeamSwitcherCreateRow({ onPress }: { onPress: () => void }) {
         </View>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <SceneText variant="bodyMediumStrong" numberOfLines={1}>
+        <SceneText variant="bodySemibold" numberOfLines={1}>
           {t('team.switcherCreateTeam')}
         </SceneText>
       </View>

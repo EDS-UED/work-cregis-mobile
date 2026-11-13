@@ -26,11 +26,11 @@ export type DataListRowLayout = {
   padH: number;
   /** 行内上下 · `spacing-3`（12px） */
   padV: number;
-  /** 行外左右 · `spacing-1`（4px） */
+  /** 行壳（点按底）距屏幕左右 · `spacing-2`（8px）· 配合 DL-bleed */
   marginH: number;
   /** 行内主内容与尾标等 · `spacing-1`（4px） */
   contentGap: number;
-  /** 主文案距屏幕水平边缘 · `marginH + padH` === `sceneInset` */
+  /** 主文案距屏幕水平边缘 · `marginH + padH` */
   contentInsetFromScreen: number;
   /** 圆角 · `radius-md`（与 Showcase · list row 一致） */
   radius: number;
@@ -51,7 +51,7 @@ export function getDataListRowLayout(
   const sceneInset = edsSceneContentInset(spacing);
   const padH = edsPx(spacing['spacing-3']);
   const padV = edsPx(spacing['spacing-3']);
-  const marginH = edsPx(spacing['spacing-1']);
+  const marginH = edsPx(spacing['spacing-2']);
   const contentGap = edsPx(spacing['spacing-1']);
   const titleSubGap = edsPx(spacing['spacing-05']);
   return {
@@ -60,16 +60,37 @@ export function getDataListRowLayout(
     marginH,
     contentGap,
     radius: edsPx(spacing['radius-md']),
-    slack: dlPressScaleSlack(),
+    /** 列表 `gap` 已用 `dataListRowGap`（4px）· 不再叠加 scale 上下留白，避免行间视觉 ~8px。 */
+    slack: 0,
     sceneInset,
     contentInsetFromScreen: marginH + padH,
     titleSubGap,
   };
 }
 
+/** DL-row · 行壳（点按区域）距屏幕左右 · `marginH` · `spacing-2`（8px）。 */
+export function dataListRowShellInset(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return getDataListRowLayout(spacing).marginH;
+}
+
+/** DL-screen · 主文案距屏幕左右 · `marginH + padH`（默认 8+12=20px）。 */
+export function dataListScreenInset(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return getDataListRowLayout(spacing).contentInsetFromScreen;
+}
+
+/** DL 行与行 · `spacing-1`（4px）。 */
+export function dataListRowGap(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return edsPx(spacing['spacing-1']);
+}
+
 /**
- * **DL-bleed** · 抵消父级 `Scene` 水平 `spacing-5`，与首页 `todoList` 一致。
- * 行壳 `marginH`（4）+ `padH`（12）→ 文案距屏缘 **16px**（`spacing-4`）。
+ * **DL-bleed** · 抵消父级 Scene `spacing-5`；列表行间距 `dataListRowGap`。
  */
 export function dataListSectionStyle(
   spacing: typeof mobileTheme.spacing,
@@ -79,6 +100,6 @@ export function dataListSectionStyle(
     marginHorizontal: -sceneInset,
     alignSelf: 'stretch',
     overflow: 'visible',
-    gap: 0,
+    gap: dataListRowGap(spacing),
   };
 }

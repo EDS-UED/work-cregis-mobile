@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { edsPageBackground } from '@/utils/edsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
@@ -12,7 +11,7 @@ import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageSt
 export function useScanScreenOptions(): StackNavigationOptions {
   const { colors } = useEdsTheme();
   const { t } = useTranslation();
-  const pageBackground = edsPageBackground(colors);
+  const scanBackground = String(colors['material-same-black']);
 
   return useMemo(() => {
     const title = t('home.scan');
@@ -20,14 +19,14 @@ export function useScanScreenOptions(): StackNavigationOptions {
     if (shouldUseEgEdsAnimaNativePage()) {
       return {
         title,
-        contentStyle: { backgroundColor: pageBackground },
+        contentStyle: { backgroundColor: scanBackground },
       } as StackNavigationOptions;
     }
 
     return {
       title,
       ...edsPagePushedScreenOptions,
-      cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
+      cardStyle: { backgroundColor: scanBackground, overflow: 'visible' },
     };
-  }, [pageBackground, t]);
+  }, [scanBackground, t]);
 }

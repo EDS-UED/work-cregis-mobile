@@ -24,7 +24,8 @@
 | 1 | 段落标题、分段标题 | `typography-title` · `text-base-primary` | `SceneText variant="title"` |
 | 2 | 正文 | `typography-body-medium` · `text-base-primary` | `SceneText variant="body"` 或 `bodyMedium`（**weight-regular 400**） |
 | 3 | 副文本 | `typography-body-small` · `text-base-secondary` | `SceneText variant="bodySmallSecondary"` |
-| 4 | Item 主文案（列表行标题等） | `typography-body-medium-strong` · `text-base-primary` | `SceneText variant="bodyMediumStrong"` |
+| 4 | Item 主文案（非 DL 列表行标题等） | `typography-body-medium-strong` · `text-base-primary` | `SceneText variant="bodyMediumStrong"` |
+| 4b | **Data list 主文案（DL-title）** | `typography-body-medium-heavy` · `text-base-primary` | `SceneText variant="bodySemibold"` · §3 |
 | 5 | Item 与副文本间距 | `--spacing-1` | `edsPx(spacing['spacing-1'])` |
 | 5b | Item 左侧有图/头像/icon 时，与右侧文案 | `--spacing-3` | `edsPx(spacing['spacing-3'])` |
 | 6 | 页面边距 | 上 `spacing-4` · 左右 `spacing-5` · 下 `spacing-8` | 见 §2 |
@@ -68,6 +69,7 @@
 - **颜色**：`var(--text-base-primary)`
 - **实现**：`SceneText variant="bodyMediumStrong"`
 - **更重**：`typography-body-medium-heavy`（600）→ `bodySemibold`
+- **Data list 行主文案（DL-title）**：**【必须】** `typography-body-medium-heavy`（600）→ `bodySemibold`（§3.3）
 
 ### 1.5 禁止
 
@@ -108,21 +110,21 @@
 
 | 缩写 | Token / 行为 | RN |
 |------|----------------|-----|
-| **DL-padH** | 行内左右 `spacing-3`（**12px**） | `padH` |
-| **DL-padV** | 行内上下 `spacing-3`（**12px**） | `padV` |
-| **DL-bleed** | 列表容器 `marginHorizontal: −spacing-5` | `dataListSectionStyle()`（抵消 Scene 水平 padding） |
-| **DL-marginH** | 行外左右 `spacing-1`（**4px**） | `marginH` |
-| **DL-gap** | 行内槽位间距（主文块 ↔ 尾标等） | `spacing-1`（**4px**）· `contentGap` |
-| **DL-screen** | 文案距屏幕左右 | `spacing-4`（**16px** = `DL-marginH + DL-padH`） |
+| **DL-padH** | 行内左右 | `spacing-3`（**12px**） |
+| **DL-padV** | 行内上下 | `spacing-3`（**12px**） |
+| **DL-bleed** | 列表容器 `marginHorizontal: −spacing-5` | `dataListSectionStyle()` |
+| **DL-marginH** | **行壳**（点按底）距屏幕左右 | `spacing-2`（**8px**）· `dataListRowShellInset()` |
+| **DL-gap** | 行内槽位 / **行与行** | `spacing-1`（**4px**）· `contentGap` · `dataListRowGap()` |
+| **DL-screen** | **主文案**距屏幕左右 | `marginH + padH`（默认 **20px**）· `dataListScreenInset()` |
 | **DL-radius** | `radius-md`（**20px** · `scale-5`；与 Showcase `list row` / shallow card 一致） | `radius` |
 | **DL-bg** | 常态 `material-hide` · 按下 `event-tap` | `DataListRow` |
 | **DL-press** | semantic press · 档位 **xs** | `useEdsTapPressMotion('xs')` · `DL_PRESS_INTENSITY` |
-| **DL-slack** | scale 留白 | `dlPressScaleSlack()` |
-| **DL-title** | 主文案 · `typography-body-medium-strong` · **100%** | `SceneText variant="bodyMediumStrong"` · `text-base-primary` |
+| **DL-slack** | scale 留白 | **0**（行间由 `dataListRowGap` 控制，不叠 `dlPressScaleSlack`） |
+| **DL-title** | 主文案 · `typography-body-medium-heavy`（600）· **100%** | `SceneText variant="bodySemibold"` · `text-base-primary` |
 | **DL-sub** | 副文案 · `typography-body-small` · **60%** | `SceneText variant="bodySmallSecondary"` · `text-base-secondary` |
 | **DL-titleSub** | 主 ↔ 副纵向间距 | `spacing-05`（**2px**）· `getDataListRowLayout().titleSubGap` |
 
-父级须有 **`Scene` 水平 `spacing-5`**；列表外包一层 **DL-bleed**，再包 `DataListRow`。文案距屏缘恒 **`spacing-4`**（`DL-marginH + DL-padH` · 16px），勿在已 padding 的容器内直接挂行壳（否则会叠成双倍边距）。
+父级须有 **`Scene` 水平 `spacing-5`**；列表 **DL-bleed** 后再包 **`DataListRow`**。**行壳**距屏左右 **`spacing-2`（8px）**（`marginH`）；行内 `padH`/`padV` **`spacing-3`（12px）**；行与行 **`spacing-1`（4px）**。勿在已 padding 的容器内再挂行壳（会叠边距）。
 
 ### 3.2 用法
 
@@ -148,13 +150,11 @@ Data list 行内「主 + 副」双行（如团队中心设置项）默认：
 
 | 层级 | 字阶（Figma / CSS） | 颜色变量 | RN |
 |------|---------------------|----------|-----|
-| **主文本** | `typography-body-medium-strong`（17 · 500） | `var(--text-base-primary)` **100%** | `bodyMediumStrong` |
+| **主文本** | `typography-body-medium-heavy`（17 · **600**） | `var(--text-base-primary)` **100%** | `bodySemibold` |
 | **副文本** | `typography-body-small` | `var(--text-base-secondary)` **60%**（spec α） | `bodySmallSecondary` |
 
 - 主副纵向间距：**`DL-titleSub`** · `--spacing-05`（**2px**）；实现 `gap: layout.titleSubGap`。
-- **禁止**主行用 `bodySemibold`（600 · heavy）顶替 strong，除非稿面标注 heavy。
-
-首页待办等为**多段/金额**布局，字阶可例外；**双行标题型 DL** 须遵守上表。
+- 首页待办、协作待办、通知交易等**金额 + 币种**主行亦用 **`bodySemibold`**（与 DL-title 一致）；副行/说明仍用 `bodySmallSecondary` 等。
 
 **禁止**在单页另写一套 row margin / `event-tap` / 手写 scale；与 DL 不一致时须有稿面依据。
 
@@ -174,8 +174,8 @@ Agent **不得**因单页改版而批量把其它页的 DL 改成同一例外，
 
 | 场景 | 行首媒体 ↔ 文案 | 行内左右 `padH` | 实现 |
 |------|------------------|-----------------|------|
-| **团队中心** 设置列表 | `spacing-3`（**12px**） | 通用 DL · `spacing-3`（12px） | `teamCenterDataListMediaGap` · `TeamCenterMenuRow` |
-| **团队切换** EgSheets | `spacing-3`（**12px**） | `spacing-4`（**16px**） | `teamSwitcherDataListMediaGap` · `getTeamSwitcherDataListRowLayout` |
+| **团队中心** 设置列表 | `spacing-3`（**12px**） | 全站 DL · 行壳距屏 8px | `teamCenterDataListMediaGap` · `TeamCenterMenuRow` |
+| **团队切换** EgSheets | `spacing-3`（**12px**） | 全站 DL · `spacing-3`（12px） | `teamSwitcherDataListMediaGap` |
 
 ---
 
@@ -214,7 +214,10 @@ Agent **不得**因单页改版而批量把其它页的 DL 改成同一例外，
 | 2026-11-12 | DL-titleSub · spacing-05（2px） |
 | 2026-11-12 | DL padH 16 / padV 12 · marginH & gap 4（spacing-1） |
 | 2026-11-12 | DL padH · spacing-3（12px）· DL-screen 16px |
+| 2026-11-13 | 全站 DL：`marginH` 0 · `DL-screen` **12px**（`padH`/`padV` `spacing-3`） |
+| 2026-11-13 | 全站 DL：**行壳**距屏 **8px**（`marginH` `spacing-2`）· 行间距 **4px** · 文案距屏 20px（`padH` 12） |
 | 2026-11-12 | §3.4 团队中心 / 团队切换 DL 媒体 12px · 切换行内左右 16px |
 | 2026-11-12 | §3.4 通用 DL vs 单页例外（不改共享默认） |
+| 2026-11-13 | **DL-title** 全站 · `typography-body-medium-heavy`（600）→ `bodySemibold` |
 
 _（以下随产品补充条目，保持 §0 速查表同步更新。）_

@@ -1,33 +1,46 @@
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import type { StackNavigationOptions } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 
+import { egNavBarNativeStackScreenOptions } from '@/eds/nav-bar';
 import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { useMessagesIosNativeHeaderItems } from '@/scenes/messages/useMessagesIosNativeHeaderItems';
 import { edsPageBackground } from '@/utils/edsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-/** 通知 — EDS page + `box-page`。 */
-export function useMessagesScreenOptions(): StackNavigationOptions {
-  const { colors } = useEdsTheme();
+type MessagesNav = { goBack: () => void };
+
+/** 通知 — EDS page + `box-page`；右栏 `eds-clear` + 未读红点。 */
+export function useMessagesScreenOptions() {
+  const { colors, mode } = useEdsTheme();
   const { t } = useTranslation();
   const pageBackground = edsPageBackground(colors);
+  const iosRight = useMessagesIosNativeHeaderItems();
 
-  return useMemo(() => {
-    const title = t('messages.title');
+  return useCallback(
+    ({ navigation }: { navigation: MessagesNav }): StackNavigationOptions => {
+      const title = t('messages.title');
 
-    if (shouldUseEgEdsAnimaNativePage()) {
+      if (shouldUseEgEdsAnimaNativePage()) {
+        return {
+          ...egNavBarNativeStackScreenOptions({
+            onBack: () => navigation.goBack(),
+            mode,
+          }),
+          title,
+          ...iosRight,
+          contentStyle: { backgroundColor: pageBackground },
+        } as StackNavigationOptions;
+      }
+
       return {
         title,
-        contentStyle: { backgroundColor: pageBackground },
-      } as StackNavigationOptions;
-    }
-
-    return {
-      title,
-      ...edsPagePushedScreenOptions,
-      cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
-    };
-  }, [pageBackground, t]);
+        ...edsPagePushedScreenOptions,
+        cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
+      };
+    },
+    [iosRight, mode, pageBackground, t],
+  );
 }

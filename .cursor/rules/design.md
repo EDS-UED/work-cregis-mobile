@@ -19,4 +19,4 @@ alwaysApply: false
 - **Data list**：§3 / `getDataListRowLayout()` 为**通用默认**；单页 DL 例外只改该 Scene 局部，**禁止**为单页改动 `dataListLayout.ts` 默认值或 §3 缩写（除非用户确认升级全站默认）。
 - 在无关任务（修 bug、接接口等）中顺手「按 design.md 整页改版」。
 
-要点速览见 `docs/design.md`；与 `work.md` §5.0 一致。**DL**：`DataListRow` · §3；**DL-title** `bodyMediumStrong` + primary 100% · **DL-sub** `bodySmallSecondary` + secondary 60%。
+要点速览见 `docs/design.md`；与 `work.md` §5.0 一致。**DL**：**行壳**距屏 **8px**（`marginH`）· 行间 **4px**；**DL-title** · `typography-body-medium-heavy`（600）→ `bodySemibold`；**DL-sub** 见 §3.3。

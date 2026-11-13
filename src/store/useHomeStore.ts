@@ -19,6 +19,18 @@ export type TeamSwitcherItem = {
 
 export type HomeTodoFilter = 'approval' | 'sign' | 'errorCallback';
 
+export type HomeTodoSheetBusinessType = 'paymentRequest' | 'withdrawal';
+
+export type HomeTodoSheetDetail = {
+  initiatorName: string;
+  initiatorEmail: string;
+  initiatorColorIndex: number;
+  recipientAddress: string;
+  businessType: HomeTodoSheetBusinessType;
+  occurredAt: string;
+  remark: string | null;
+};
+
 export type HomeTodoItem = {
   id: string;
   category: HomeTodoFilter;
@@ -29,6 +41,7 @@ export type HomeTodoItem = {
   /** 副文本常规后缀（含 leading space，如 " Request for withdrawal"） */
   descriptionRest: string;
   timestamp: string;
+  detail: HomeTodoSheetDetail;
 };
 
 /** 与首页顶栏 `companyName` 一致 · 切换列表默认第 2 项。 */
@@ -87,24 +100,54 @@ export const HOME_TODO_MOCK_CURRENCIES_FIRST_10 = [
   'AVAX',
 ] as const;
 
-const todoTemplates: Omit<HomeTodoItem, 'id' | 'category' | 'currency'>[] = [
+const todoDetailTemplates: HomeTodoSheetDetail[] = [
   {
-    amount: '100.00035',
-    descriptionHighlight: 'Project Name',
-    descriptionRest: ' Request for withdrawal',
-    timestamp: 'Jun 08, 16:07',
+    initiatorName: 'Campos',
+    initiatorEmail: 'bosscao@gmail.com',
+    initiatorColorIndex: 0,
+    recipientAddress: '0x3328309c493309c49ab12cd8e',
+    businessType: 'paymentRequest',
+    occurredAt: '2027-11-28 13:23:45',
+    remark: null,
+  },
+  {
+    initiatorName: 'Alex Mah.',
+    initiatorEmail: 'alex.mah@quant.inc',
+    initiatorColorIndex: 0,
+    recipientAddress: '0x91f2b8e44a0c12df9e8b01',
+    businessType: 'paymentRequest',
+    occurredAt: '2027-06-08 16:07:00',
+    remark: null,
+  },
+  {
+    initiatorName: 'Project Name',
+    initiatorEmail: 'ops@quant.inc',
+    initiatorColorIndex: 0,
+    recipientAddress: '0xac1200ff3311bb2200ee99',
+    businessType: 'withdrawal',
+    occurredAt: '2027-06-08 16:07:00',
+    remark: '月末结算',
+  },
+];
+
+const todoTemplates: Omit<HomeTodoItem, 'id' | 'category' | 'currency' | 'detail'>[] = [
+  {
+    amount: '1.0035',
+    descriptionHighlight: 'Campos',
+    descriptionRest: ' 发起付款申请',
+    timestamp: '11-28 13:23',
   },
   {
     amount: '2.000000078',
     descriptionHighlight: 'Alex Mah.',
-    descriptionRest: ' Initiated a payment request',
-    timestamp: 'Jun 08, 16:07',
+    descriptionRest: ' 发起付款申请',
+    timestamp: '06-08 16:07',
   },
   {
     amount: '5,087.005',
     descriptionHighlight: 'Name',
-    descriptionRest: ' withdrawal via',
-    timestamp: 'Jun 08, 16:07',
+    descriptionRest: ' 发起提现',
+    timestamp: '06-08 16:07',
   },
 ];
 
@@ -125,9 +168,11 @@ function buildInitialTodoItems(): HomeTodoItem[] {
     const total = counts[category];
     for (let i = 0; i < total; i += 1) {
       const template = todoTemplates[(seq - 1) % todoTemplates.length]!;
+      const templateIndex = (seq - 1) % todoTemplates.length;
       items.push({
         ...template,
         currency: mockTodoCurrencyForSeq(seq),
+        detail: todoDetailTemplates[templateIndex]!,
         id: `todo-${seq}`,
         category,
       });

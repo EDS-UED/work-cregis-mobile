@@ -15,10 +15,7 @@ export function HomePageShotHost({ children }: PropsWithChildren) {
   const { t } = useTranslation();
   const { mode } = useEdsTheme();
 
-  const renderRoot = useCallback(
-    (api: EgEdsAnimaPageShotRootApi) => <ScanPageShotRoot api={api} />,
-    [],
-  );
+  const renderRoot = useCallback((_api: EgEdsAnimaPageShotRootApi) => <ScanPageShotRoot />, []);
 
   const title = useCallback(
     (source: EgEdsAnimaPageShotSource, pageKey: string | null) =>

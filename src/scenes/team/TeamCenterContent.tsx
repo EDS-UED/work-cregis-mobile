@@ -9,8 +9,8 @@ import { TeamCenterPageShotHost } from '@/scenes/team/TeamCenterPageShotHost';
 import { TeamCenterPlanCard } from '@/scenes/team/TeamCenterPlanCard';
 import {
   teamCenterDataListGroupStyle,
-  teamCenterDataListSectionStyle,
 } from '@/scenes/team/teamCenterDataListLayout';
+import { dataListSectionStyle } from '@/scenes/shared/dataListLayout';
 import { edsPx } from '@/utils/edsTheme';
 
 /** 团队中心正文 · 套餐卡 + 三组 DataList（块间分割线 · 块内无分割）。 */
@@ -24,7 +24,7 @@ export function TeamCenterContent() {
         root: {
           gap: edsPx(spacing['spacing-6']),
         },
-        dataList: teamCenterDataListSectionStyle(spacing),
+        dataList: dataListSectionStyle(spacing),
         group: teamCenterDataListGroupStyle(spacing),
       }),
     [spacing],

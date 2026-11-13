@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -23,6 +23,8 @@ type DataListRowProps = {
   contentStyle?: StyleProp<ViewStyle>;
   /** 单页 DL 例外 · 不传则用 `getDataListRowLayout` */
   layout?: DataListRowLayout;
+  /** `false` · 无点按底 / 缩放 · 透明行壳（详情只读行）。默认随 `onPress` 推断。 */
+  interactive?: boolean;
 };
 
 /**
@@ -38,15 +40,46 @@ export function DataListRow({
   gap,
   contentStyle,
   layout: layoutOverride,
+  interactive: interactiveProp,
 }: DataListRowProps) {
   const { colors, spacing } = useEdsTheme();
   const layout = layoutOverride ?? getDataListRowLayout(spacing);
+  const interactive = interactiveProp ?? onPress != null;
   const { animatedStyle, onPressIn, onPressOut, pressing } =
     useEdsTapPressMotion(DL_PRESS_INTENSITY);
 
-  const rowBackground = String(
-    colors[pressing ? 'event-tap' : 'material-hide'],
-  );
+  const rowBackground = interactive
+    ? String(colors[pressing ? 'event-tap' : 'material-hide'])
+  : 'transparent';
+
+  const rowShell = {
+    flexDirection: axis,
+    alignItems: axis === 'row' ? ('center' as const) : ('stretch' as const),
+    alignSelf: 'stretch' as const,
+    gap,
+    paddingVertical: layout.padV,
+    paddingHorizontal: layout.padH,
+    borderRadius: layout.radius,
+    backgroundColor: rowBackground,
+    overflow: 'visible' as const,
+  };
+
+  if (!interactive) {
+    return (
+      <View
+        style={{
+          marginHorizontal: layout.marginH,
+          alignSelf: 'stretch',
+          overflow: 'visible',
+          paddingVertical: layout.slack,
+        }}
+      >
+        <View style={[rowShell, contentStyle]} accessibilityLabel={accessibilityLabel}>
+          {children}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <Animated.View
@@ -66,21 +99,7 @@ export function DataListRow({
         disabled={!onPress}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        style={[
-          {
-            flexDirection: axis,
-            alignItems: axis === 'row' ? 'center' : 'stretch',
-            alignSelf: 'stretch',
-            gap,
-            paddingVertical: layout.padV,
-            paddingHorizontal: layout.padH,
-            borderRadius: layout.radius,
-            backgroundColor: rowBackground,
-            overflow: 'visible',
-          },
-          contentStyle,
-          animatedStyle,
-        ]}
+        style={[rowShell, contentStyle, animatedStyle]}
       >
         {children}
       </AnimatedPressable>

@@ -12,18 +12,9 @@ export function teamSwitcherDataListMediaGap(
   return edsPx(spacing['spacing-3']);
 }
 
-/**
- * 团队切换 · EgSheets 内 DL 例外（`docs/design.md` §3.4）
- * 行内左右 `spacing-4`（16px）· 媒体间距见 `teamSwitcherDataListMediaGap`。
- */
+/** 团队切换 · 行内左右与全站 DL 一致 · `spacing-3`（12px）。 */
 export function getTeamSwitcherDataListRowLayout(
   spacing: typeof mobileTheme.spacing,
 ): DataListRowLayout {
-  const base = getDataListRowLayout(spacing);
-  const padH = edsPx(spacing['spacing-4']);
-  return {
-    ...base,
-    padH,
-    contentInsetFromScreen: base.marginH + padH,
-  };
+  return getDataListRowLayout(spacing);
 }

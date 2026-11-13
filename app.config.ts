@@ -47,6 +47,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       NSFaceIDUsageDescription:
         'Cregis uses Face ID to secure your account and authorize transactions.',
+      NSCameraUsageDescription:
+        'Cregis needs camera access to scan QR codes for transfers.',
     },
   },
   android: {
@@ -65,5 +67,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-status-bar',
     'expo-secure-store',
     'expo-local-authentication',
+    [
+      'expo-camera',
+      {
+        cameraPermission:
+          'Cregis needs camera access to scan QR codes for transfers.',
+        recordAudioAndroid: false,
+      },
+    ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'Cregis needs access to your photo library to scan QR codes from images.',
+      },
+    ],
   ],
 });

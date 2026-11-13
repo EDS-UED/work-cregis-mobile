@@ -1,74 +1,93 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
-import { EgSymbol } from '@/eds/home-ui';
+import { GlassBlurBackdrop } from '@/eds/glass';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
-import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { ScanQrViewfinder } from '@/scenes/home/ScanQrViewfinder';
-import { SceneText } from '@/scenes/shared/SceneText';
-import { edsPx } from '@/utils/edsTheme';
+import { ScanFullScreenCamera } from '@/scenes/home/ScanFullScreenCamera';
+import {
+  SCAN_VIEWFINDER_CORNER_RADIUS,
+  SCAN_VIEWFINDER_STROKE,
+  ScanQrViewfinderOverlay,
+} from '@/scenes/home/ScanQrViewfinderOverlay';
+import { ScanQrFrostedMask } from '@/scenes/scan/ScanQrFrostedMask';
+import { ScanTopBar } from '@/scenes/scan/ScanTopBar';
+import { useScanTorchAssistant } from '@/scenes/scan/useScanTorchAssistant';
+
+const VIEWFINDER_WIDTH_RATIO = 0.72;
+/** 取景框相对屏幕垂直居中再上移。 */
+const VIEWFINDER_RAISE = 60;
 
 type ScanPageContentProps = {
   contentStyle?: ViewStyle;
+  /** page-shot 自带 EDS 顶栏（标题 + 关闭）时传 `false`，避免双栏。 */
+  showTopBar?: boolean;
 };
 
-/** 扫码页正文 · page-shot 与 Stack 页共用。 */
-export function ScanPageContent({ contentStyle }: ScanPageContentProps) {
-  const { t } = useTranslation();
+/** 扫码页 · 全屏相机 + 取景磨砂暗角 + 浮层顶栏。 */
+export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageContentProps) {
   const colors = useThemeColors();
-  const { mode, spacing } = useEdsTheme();
-  const { width: windowWidth } = useWindowDimensions();
-  const [torchOn, setTorchOn] = useState(false);
-  const viewfinderSize = Math.min(windowWidth - edsPx(spacing['spacing-8']) * 2, 320);
+  const isFocused = useIsFocused();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const [cameraReady, setCameraReady] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+
+  const viewfinderSize = Math.round(windowWidth * VIEWFINDER_WIDTH_RATIO);
+  const frameLeft = (windowWidth - viewfinderSize) / 2;
+  const frameTop = Math.round((windowHeight - viewfinderSize) / 2) - VIEWFINDER_RAISE;
+
+  const { torchOn, toggleTorch } = useScanTorchAssistant({ cameraReady, permissionGranted });
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         page: {
-          flexGrow: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: edsPx(spacing['spacing-8']),
+          flex: 1,
+          minHeight: windowHeight,
+          backgroundColor: String(colors['material-same-black']),
         },
-        caption: {
-          textAlign: 'center',
-          paddingHorizontal: edsPx(spacing['spacing-4']),
+        frameHost: {
+          position: 'absolute',
+          left: frameLeft,
+          top: frameTop,
+          width: viewfinderSize,
+          height: viewfinderSize,
         },
-        torch: {
-          width: edsPx(spacing['capsule-lg']),
-          height: edsPx(spacing['capsule-lg']),
-          borderRadius: edsPx(spacing['radius-full']),
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: String(colors['material-card-deep']),
-        },
-        torchPressed: { opacity: 0.88 },
       }),
-    [colors, spacing],
+    [colors, frameLeft, frameTop, viewfinderSize, windowHeight],
+  );
+
+  const frame = useMemo(
+    () => ({ left: frameLeft, top: frameTop, width: viewfinderSize, height: viewfinderSize }),
+    [frameLeft, frameTop, viewfinderSize],
   );
 
   return (
     <View style={[styles.page, contentStyle]}>
-      <ScanQrViewfinder size={viewfinderSize} />
-      <SceneText variant="bodyMediumStrong" style={styles.caption}>
-        {t('home.scanTransferHint')}
-      </SceneText>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('home.scanTorch')}
-        accessibilityState={{ selected: torchOn }}
-        onPress={() => setTorchOn((prev) => !prev)}
-        style={({ pressed }) => [styles.torch, pressed ? styles.torchPressed : null]}
-      >
-        <EgSymbol
-          name="eds-light"
-          mode={mode}
-          size="md"
-          strokeColorToken={torchOn ? 'text-base-primary' : 'text-base-secondary'}
-          accessibilityLabel=""
+      <GlassBlurBackdrop style={StyleSheet.absoluteFill} active={isFocused}>
+        <ScanFullScreenCamera
+          torchEnabled={torchOn}
+          onCameraReady={() => setCameraReady(true)}
+          onPermissionChange={setPermissionGranted}
         />
-      </Pressable>
+      </GlassBlurBackdrop>
+
+      {permissionGranted ? (
+        <>
+          <ScanQrFrostedMask
+            windowWidth={windowWidth}
+            windowHeight={windowHeight}
+            frame={frame}
+            stroke={SCAN_VIEWFINDER_STROKE}
+            cornerRadius={SCAN_VIEWFINDER_CORNER_RADIUS}
+          />
+          <View style={styles.frameHost} pointerEvents="none">
+            <ScanQrViewfinderOverlay size={viewfinderSize} />
+          </View>
+        </>
+      ) : null}
+
+      {showTopBar ? <ScanTopBar torchOn={torchOn} onToggleTorch={toggleTorch} /> : null}
     </View>
   );
 }

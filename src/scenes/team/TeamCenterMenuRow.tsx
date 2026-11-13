@@ -53,7 +53,7 @@ export function TeamCenterMenuRow({
             gap: edsPx(spacing['spacing-05']),
           }}
         >
-          <SceneText variant="bodyMediumStrong">{label}</SceneText>
+          <SceneText variant="bodySemibold">{label}</SceneText>
           <SceneText variant="bodySmallSecondary">{subtitle}</SceneText>
         </View>
         <EgSymbol
