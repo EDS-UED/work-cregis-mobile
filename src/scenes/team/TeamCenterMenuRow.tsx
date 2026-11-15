@@ -2,7 +2,7 @@ import { View } from 'react-native';
 
 import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { DataListRow } from '@/scenes/shared/DataListRow';
+import { EgDataListRow } from '@/eds/data-list';
 import { TeamCenterMenuLeadIcon } from '@/scenes/team/TeamCenterMenuLeadIcon';
 import {
   getTeamCenterDataListRowLayout,
@@ -29,7 +29,8 @@ export function TeamCenterMenuRow({
   const mediaGap = teamCenterDataListMediaGap(spacing);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
       testID={testID}
       accessibilityLabel={label}
       onPress={onPress}
@@ -64,6 +65,6 @@ export function TeamCenterMenuRow({
           accessibilityLabel=""
         />
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }

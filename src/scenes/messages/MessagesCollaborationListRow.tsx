@@ -5,7 +5,7 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useEdsTypography } from '@/hooks/useEdsTypography';
 import type { MessageCollaborationMock } from '@/scenes/messages/messagesCollaborationMock';
 import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
-import { DataListRow } from '@/scenes/shared/DataListRow';
+import { EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
@@ -26,14 +26,15 @@ export function MessagesCollaborationListRow({
 }: MessagesCollaborationListRowProps) {
   const { t } = useTranslation();
   const text = useEdsTypography();
-  const { spacing, colors } = useEdsTheme();
+  const { mode, spacing, colors } = useEdsTheme();
   const layout = getDataListRowLayout(spacing);
   const mediaGap = edsPx(spacing['spacing-3']);
   const secondaryColor = String(colors['text-base-secondary']);
   const amountA11y = `${collab.amount} ${collab.currency}`;
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
       accessibilityLabel={amountA11y}
       onPress={onPress}
       layout={layout}
@@ -73,6 +74,6 @@ export function MessagesCollaborationListRow({
           {` ${t('messages.collabPaymentRequest')}`}
         </Text>
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }

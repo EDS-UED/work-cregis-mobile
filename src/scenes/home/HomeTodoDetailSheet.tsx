@@ -9,15 +9,12 @@ import { EgSheets } from '@/eds/sheets';
 import { EgDecorButton, EgOptionButton } from '@/eds/scene-buttons';
 import { EgLink } from '@/eds/link-button';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { DataListRow } from '@/scenes/shared/DataListRow';
-import {
-  dataListSectionStyle,
-  getDataListRowLayout,
-} from '@/scenes/shared/dataListLayout';
+import { EgDataList, EgDataListRow } from '@/eds/data-list';
+import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import type { HomeTodoItem } from '@/store';
 import { edsCryptoSymbolForCurrency } from '@/utils/edsCryptoSymbol';
-import { edsPx } from '@/utils/edsTheme';
+import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 type HomeTodoDetailSheetProps = {
   visible: boolean;
@@ -53,12 +50,13 @@ function DetailFieldRow({
   children: ReactNode;
   onPress?: () => void;
 }) {
-  const { spacing } = useEdsTheme();
+  const { mode, spacing } = useEdsTheme();
   const layout = getDataListRowLayout(spacing);
   const rowGap = edsPx(spacing['spacing-3']);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
       layout={layout}
       axis="row"
       gap={rowGap}
@@ -70,7 +68,7 @@ function DetailFieldRow({
         {label}
       </SceneText>
       <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-end' }}>{children}</View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }
 
@@ -126,10 +124,6 @@ export function HomeTodoDetailSheet({ visible, item, onDismiss }: HomeTodoDetail
         marginTop: edsPx(spacing['spacing-7']),
         marginBottom: edsPx(spacing['spacing-4']),
         alignSelf: 'stretch',
-      },
-      fields: {
-        ...dataListSectionStyle(spacing),
-        gap: edsPx(spacing['spacing-0']),
       },
       initiatorValue: {
         alignItems: 'flex-end',
@@ -193,7 +187,10 @@ export function HomeTodoDetailSheet({ visible, item, onDismiss }: HomeTodoDetail
           <EgDivider variant="module" mode={mode} />
         </View>
 
-        <View style={styles.fields}>
+        <EgDataList
+          sceneContentInset={edsSceneContentInset(spacing)}
+          rowGap={edsPx(spacing['spacing-0'])}
+        >
           <DetailFieldRow label={t('home.todoSheetInitiator')}>
             <View style={styles.initiatorValue}>
               <View style={styles.initiatorTop}>
@@ -237,7 +234,7 @@ export function HomeTodoDetailSheet({ visible, item, onDismiss }: HomeTodoDetail
             </SceneText>
           </DetailFieldRow>
 
-        </View>
+        </EgDataList>
 
         <View style={styles.viewDetails}>
           <View style={styles.viewDetailsLink}>

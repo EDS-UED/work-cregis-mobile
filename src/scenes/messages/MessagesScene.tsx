@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { EgDataList, egDataListRowGap } from '@/eds/data-list';
 import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
 import { HomeTodoEmptyState } from '@/scenes/home/HomeTodoEmptyState';
 import { HomeTodoFilterBar } from '@/scenes/home/HomeTodoFilterBar';
@@ -19,9 +20,8 @@ import {
   groupMessageItemsByDateSection,
   messageCategoryUnreadCounts,
 } from '@/scenes/messages/messagesMock';
-import { dataListRowGap, dataListSectionStyle } from '@/scenes/shared/dataListLayout';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
-import { edsPx } from '@/utils/edsTheme';
+import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 const MESSAGE_CATEGORY_ORDER: MessageCategory[] = [
   'transaction',
@@ -37,25 +37,23 @@ export function MessagesScene() {
   const { spacing } = useEdsTheme();
   const [category, setCategory] = useState<MessageCategory>('transaction');
   const nativeNavBar = shouldUseEgNavBarNativeStack();
+  const sceneInset = edsSceneContentInset(spacing);
+
+  const tabBlockBodyGap = edsPx(spacing['spacing-5']);
+  const tabToCalendarGap = edsPx(spacing['spacing-8']);
+  const sectionGroupGap = edsPx(spacing['spacing-7']);
 
   const styles = useMemo(() => {
-    const tabBlockBodyGap = edsPx(spacing['spacing-5']);
-    const tabToCalendarGap = edsPx(spacing['spacing-8']);
-    const sectionGroupGap = edsPx(spacing['spacing-7']);
     return StyleSheet.create({
       root: { flexGrow: 1 },
-      content: {
-        ...dataListSectionStyle(spacing),
+      contentBleedExtra: {
         /** ① Tab ↔ 首行日历标题 · 合计 `spacing-8`（32px）= TabBlock 默认 20 + 补足。 */
         paddingTop: tabToCalendarGap - tabBlockBodyGap,
-        /** ③ 组 ↔ 组 · `spacing-7`（28px）。 */
-        gap: sectionGroupGap,
       },
       /** ② 日历标题 ↔ 列表 · `spacing-1-5`（6px）。 */
       section: { gap: edsPx(spacing['spacing-1-5']) },
-      sectionRows: { gap: dataListRowGap(spacing) },
     });
-  }, [spacing]);
+  }, [spacing, tabBlockBodyGap, tabToCalendarGap]);
 
   const categoryLabelKey: Record<MessageCategory, `messages.${string}`> = {
     transaction: 'messages.categoryTransaction',
@@ -103,7 +101,11 @@ export function MessagesScene() {
           onSelect={setCategory}
           contentKey={category}
         >
-          <View style={styles.content}>
+          <EgDataList
+            style={styles.contentBleedExtra}
+            sceneContentInset={sceneInset}
+            rowGap={sectionGroupGap}
+          >
             {!hasListRows ? (
               <HomeTodoEmptyState />
             ) : (
@@ -117,7 +119,7 @@ export function MessagesScene() {
                 return (
                   <View key={`section-${sectionDayOffset}`} style={styles.section}>
                     <MessagesListSectionHeader label={sectionLabel} />
-                    <View style={styles.sectionRows}>
+                    <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
                       {rows.map((item) =>
                         item.teamActivity ? (
                           <MessagesTeamActivityListRow
@@ -158,12 +160,12 @@ export function MessagesScene() {
                           />
                         ),
                       )}
-                    </View>
+                    </EgDataList>
                   </View>
                 );
               })
             )}
-          </View>
+          </EgDataList>
         </HomeTodoFilterBar>
       </View>
     </SceneScaffold>

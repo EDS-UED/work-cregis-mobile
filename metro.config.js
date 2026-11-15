@@ -79,6 +79,11 @@ const expoRouterUnstableNativeTabsShim = path.join(
   projectRoot,
   'src/shims/expo-router-unstable-native-tabs.tsx',
 );
+/** 须在 projectRoot 内 · 避免 Metro SHA-1 无法哈希 eds-mobile/node_modules。 */
+const expoRouterNativeTabsAppearanceIosShim = path.join(
+  projectRoot,
+  'src/shims/expo-router/build/native-tabs/appearance.ios.js',
+);
 const expoGlassEffectShim = path.join(projectRoot, 'src/shims/expo-glass-effect.js');
 /** RNGH 3 丢弃 stack 旧版 Pan 属性名 → 卡片手势无方向约束、抢纵向滚动。 */
 const stackGestureActivationCriteriaShim = path.join(
@@ -330,6 +335,10 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 
   if (moduleName === 'expo-router/unstable-native-tabs') {
     return { type: 'sourceFile', filePath: expoRouterUnstableNativeTabsShim };
+  }
+
+  if (moduleName === 'expo-router/build/native-tabs/appearance.ios.js') {
+    return { type: 'sourceFile', filePath: expoRouterNativeTabsAppearanceIosShim };
   }
 
   if (

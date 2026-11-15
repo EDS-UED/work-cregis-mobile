@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { EgItemGroup } from '@/eds/item';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { SceneText } from '@/scenes/shared/SceneText';
@@ -17,7 +18,7 @@ export function PersonalCenterSettingsGroup({
   children,
 }: PersonalCenterSettingsGroupProps) {
   const colors = useThemeColors();
-  const { spacing } = useEdsTheme();
+  const { mode, spacing } = useEdsTheme();
 
   const styles = useMemo(
     () =>
@@ -29,14 +30,8 @@ export function PersonalCenterSettingsGroup({
         sectionTitle: {
           marginLeft: edsPx(spacing['spacing-5']),
         },
-        card: {
-          backgroundColor: colors['material-card-same-white'],
-          borderRadius: edsPx(spacing['radius-lg']),
-          padding: edsPx(spacing['spacing-1']),
-          overflow: 'hidden',
-        },
       }),
-    [colors, spacing],
+    [spacing],
   );
 
   return (
@@ -47,7 +42,7 @@ export function PersonalCenterSettingsGroup({
       >
         {sectionTitle}
       </SceneText>
-      <View style={styles.card}>{children}</View>
+      <EgItemGroup mode={mode}>{children}</EgItemGroup>
     </View>
   );
 }

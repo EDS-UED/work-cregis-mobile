@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { EgAvatar } from '@/eds/button-glass';
 import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { DataListRow } from '@/scenes/shared/DataListRow';
+import { EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import type { CollaborationItem, CollaborationSignKind } from '@/store/useCollaborationStore';
@@ -40,7 +40,8 @@ export function CollaborationTodoRow({
   const badgeSize = edsPx(spacing['spacing-4']);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
       accessibilityLabel={`${item.amount} ${item.currency}`}
       onPress={onPress}
       layout={layout}
@@ -104,6 +105,6 @@ export function CollaborationTodoRow({
       >
         <SceneText variant="footnotePrimary">{signKindLabel}</SceneText>
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }

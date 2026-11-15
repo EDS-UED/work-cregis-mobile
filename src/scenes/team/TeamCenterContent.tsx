@@ -2,21 +2,19 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { EgDataList, egDataListRowGap } from '@/eds/data-list';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { TeamCenterMenuBlockDivider } from '@/scenes/team/TeamCenterMenuBlockDivider';
 import { TeamCenterMenuRow } from '@/scenes/team/TeamCenterMenuRow';
 import { TeamCenterPageShotHost } from '@/scenes/team/TeamCenterPageShotHost';
 import { TeamCenterPlanCard } from '@/scenes/team/TeamCenterPlanCard';
-import {
-  teamCenterDataListGroupStyle,
-} from '@/scenes/team/teamCenterDataListLayout';
-import { dataListSectionStyle } from '@/scenes/shared/dataListLayout';
-import { edsPx } from '@/utils/edsTheme';
+import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 /** 团队中心正文 · 套餐卡 + 三组 DataList（块间分割线 · 块内无分割）。 */
 export function TeamCenterContent() {
   const { t } = useTranslation();
   const { spacing } = useEdsTheme();
+  const sceneInset = edsSceneContentInset(spacing);
 
   const styles = useMemo(
     () =>
@@ -24,8 +22,6 @@ export function TeamCenterContent() {
         root: {
           gap: edsPx(spacing['spacing-6']),
         },
-        dataList: dataListSectionStyle(spacing),
-        group: teamCenterDataListGroupStyle(spacing),
       }),
     [spacing],
   );
@@ -35,19 +31,19 @@ export function TeamCenterContent() {
       <View style={styles.root}>
         <TeamCenterPlanCard />
 
-        <View style={styles.dataList}>
-          <View style={styles.group}>
+        <EgDataList sceneContentInset={sceneInset} rowGap={egDataListRowGap()}>
+          <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
             <TeamCenterMenuRow
               testID="team-row-team-security"
               label={t('team.teamSecurity')}
               subtitle={t('team.teamSecuritySubtitle')}
               onPress={() => undefined}
             />
-          </View>
+          </EgDataList>
 
           <TeamCenterMenuBlockDivider />
 
-          <View style={styles.group}>
+          <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
             <TeamCenterMenuRow
               testID="team-row-member-management"
               label={t('team.memberManagement')}
@@ -72,11 +68,11 @@ export function TeamCenterContent() {
               subtitle={t('team.webhookSubtitle')}
               onPress={() => undefined}
             />
-          </View>
+          </EgDataList>
 
           <TeamCenterMenuBlockDivider />
 
-          <View style={styles.group}>
+          <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
             <TeamCenterMenuRow
               testID="team-row-team-account"
               label={t('team.teamAccount')}
@@ -101,8 +97,8 @@ export function TeamCenterContent() {
               subtitle={t('team.orderManagementSubtitle')}
               onPress={() => undefined}
             />
-          </View>
-        </View>
+          </EgDataList>
+        </EgDataList>
       </View>
     </TeamCenterPageShotHost>
   );

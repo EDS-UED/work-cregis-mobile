@@ -2,7 +2,8 @@ import { View } from 'react-native';
 
 import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { DataListRow } from '@/scenes/shared/DataListRow';
+import { EgDataListRow } from '@/eds/data-list';
+import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import type { AssetItem } from '@/store/useAssetsStore';
 import { edsCryptoSymbolForCurrency } from '@/utils/edsCryptoSymbol';
@@ -22,12 +23,15 @@ export function WalletAssetRow({
   onPress,
 }: WalletAssetRowProps) {
   const { mode, spacing, colors } = useEdsTheme();
+  const layout = getDataListRowLayout(spacing);
   const mediaGap = edsPx(spacing['spacing-3']);
   const avatarSize = edsPx(spacing['avatar-lg']);
   const cryptoSymbol = edsCryptoSymbolForCurrency(item.symbol);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
+      layout={layout}
       axis="row"
       gap={mediaGap}
       onPress={onPress}
@@ -93,6 +97,6 @@ export function WalletAssetRow({
           {balanceVisible ? item.balance : '****'}
         </SceneText>
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }

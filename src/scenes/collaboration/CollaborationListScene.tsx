@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { CollaborationTodoRow } from '@/scenes/collaboration/CollaborationTodoRow';
 import { SceneText } from '@/scenes/shared/SceneText';
-import { dataListSectionStyle } from '@/scenes/shared/dataListLayout';
+import { EgDataList } from '@/eds/data-list';
 import type { CollaborationStackParamList } from '@/navigation/types';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useCollaborationStore, type CollaborationItem } from '@/store';
@@ -94,7 +94,6 @@ export function CollaborationListScene({ navigation }: Props) {
           alignItems: 'center',
           gap: edsPx(spacing['spacing-2-5']),
         },
-        list: dataListSectionStyle(spacing),
       }),
     [colors, spacing],
   );
@@ -149,7 +148,7 @@ export function CollaborationListScene({ navigation }: Props) {
             {t('scenes.collaborationPendingSummary', { count: totalPendingCount })}
           </SceneText>
 
-          <View style={styles.list}>
+          <EgDataList sceneContentInset={edsSceneContentInset(spacing)}>
             {items.map((item) => (
               <CollaborationTodoRow
                 key={item.id}
@@ -164,7 +163,7 @@ export function CollaborationListScene({ navigation }: Props) {
                 }
               />
             ))}
-          </View>
+          </EgDataList>
         </ScrollView>
       </View>
     </View>

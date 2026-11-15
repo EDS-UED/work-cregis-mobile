@@ -38,8 +38,8 @@ import { EdsGlassScreenShell } from "@/scenes/shared/EdsGlassScreenShell";
 import { SceneText } from "@/scenes/shared/SceneText";
 import { useHomeStore, type HomeTodoFilter, type HomeTodoItem } from "@/store";
 import { nativeNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
-import { DataListRow } from "@/scenes/shared/DataListRow";
-import { dataListSectionStyle } from "@/scenes/shared/dataListLayout";
+import { EgDataList, EgDataListRow } from "@/eds/data-list";
+import { getDataListRowLayout } from "@/scenes/shared/dataListLayout";
 import {
   edsNavContentGap,
   edsPageBackground,
@@ -292,9 +292,12 @@ function HomeTodoRow({
   const avatarSize = edsPx(spacing["avatar-xl"]);
   const amountToCurrencyGap = edsPx(spacing["spacing-2"]);
   const textStackGap = edsPx(spacing["spacing-05"]);
+  const layout = getDataListRowLayout(spacing);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
+      layout={layout}
       axis="row"
       gap={mediaGap}
       onPress={onPress}
@@ -351,7 +354,7 @@ function HomeTodoRow({
           {item.timestamp}
         </SceneText>
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }
 
@@ -459,7 +462,6 @@ export function HomeScene() {
           gap: edsPx(spacing["spacing-3"]),
           alignSelf: "stretch",
         },
-        todoList: dataListSectionStyle(spacing),
       }),
     [
       balanceToQuickActionsGap,
@@ -578,7 +580,7 @@ export function HomeScene() {
           onSelect={setTodoFilter}
           contentKey={todoFilter}
         >
-          <View style={styles.todoList}>
+          <EgDataList sceneContentInset={sceneContentInset}>
             {visibleTodoItems.length === 0 ? (
               <HomeTodoEmptyState />
             ) : (
@@ -595,7 +597,7 @@ export function HomeScene() {
                 />
               ))
             )}
-          </View>
+          </EgDataList>
         </HomeTodoFilterBar>
       </View>
     </>

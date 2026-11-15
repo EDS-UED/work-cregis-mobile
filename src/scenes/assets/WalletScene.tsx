@@ -16,7 +16,7 @@ import { homeScrollTopReserve } from '@/scenes/home/HomeTopBar';
 import { WalletAssetRow } from '@/scenes/assets/WalletAssetRow';
 import { EdsGlassScreenShell } from '@/scenes/shared/EdsGlassScreenShell';
 import { SceneText } from '@/scenes/shared/SceneText';
-import { dataListSectionStyle } from '@/scenes/shared/dataListLayout';
+import { EgDataList } from '@/eds/data-list';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useAssetsStore } from '@/store';
 import {
@@ -88,7 +88,6 @@ export function WalletScene() {
           alignItems: 'center',
           justifyContent: 'space-between',
         },
-        assetList: dataListSectionStyle(spacing),
       }),
     [colors, sceneContentInset, spacing],
   );
@@ -130,7 +129,7 @@ export function WalletScene() {
             testID="wallet-crypto-filter"
           />
         </View>
-        <View style={styles.assetList}>
+        <EgDataList sceneContentInset={sceneContentInset}>
           {assets.map((asset) => (
             <WalletAssetRow
               key={asset.symbol}
@@ -139,7 +138,7 @@ export function WalletScene() {
               multichainLabel={t('scenes.walletMultichain')}
             />
           ))}
-        </View>
+        </EgDataList>
       </View>
     </>
   );

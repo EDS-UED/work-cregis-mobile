@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 import { EgSymbol } from '@/eds/profile-icons';
 import type { EgMenuItem } from '@/eds/menu';
+import { EgItem } from '@/eds/item';
 import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useAppStore } from '@/store';
 import type { LocaleCode, ThemePreference } from '@/types/app';
 import { PersonalCenterAccountProfileRow } from '@/scenes/profile/PersonalCenterAccountProfileRow';
-import { PersonalCenterMenuPickRow } from '@/scenes/profile/PersonalCenterMenuPickRow';
 import { PersonalCenterSettingsGroup } from '@/scenes/profile/PersonalCenterSettingsGroup';
-import { PersonalCenterSettingsRow } from '@/scenes/profile/PersonalCenterSettingsRow';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
 
 const LOCALE_LABEL_KEY: Record<LocaleCode, `profile.${string}`> = {
@@ -64,121 +63,181 @@ export function PersonalCenterScene() {
     <SceneScaffold title={t('profile.title')} showNavBack pageBackground="card">
       <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionAccount')}>
         <PersonalCenterAccountProfileRow />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-change-nickname"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.changeNickname')}
+          showChevron
           onPress={() => undefined}
-          isLast
+          showDivider={false}
+          accessibilityLabel={t('profile.changeNickname')}
         />
       </PersonalCenterSettingsGroup>
 
       <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionPreferences')}>
-        <PersonalCenterMenuPickRow
+        <EgItem
           testID="profile-row-appearance"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.appearance')}
           value={t(THEME_LABEL_KEY[themePreference])}
-          items={appearanceMenuItems}
-          selectedId={themePreference}
-          onSelect={(id) => setThemePreference(id as ThemePreference)}
+          trailingDisplay="menu"
+          menuItems={appearanceMenuItems}
+          selectedMenuId={themePreference}
+          onMenuSelect={(id) => setThemePreference(id as ThemePreference)}
+          showDivider
+          accessibilityLabel={t('profile.appearance')}
         />
-        <PersonalCenterMenuPickRow
+        <EgItem
           testID="profile-row-language"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.language')}
           value={t(LOCALE_LABEL_KEY[locale])}
-          items={languageMenuItems}
-          selectedId={locale}
-          onSelect={(id) => setLocale(id as LocaleCode)}
+          trailingDisplay="menu"
+          menuItems={languageMenuItems}
+          selectedMenuId={locale}
+          onMenuSelect={(id) => setLocale(id as LocaleCode)}
+          showDivider
+          accessibilityLabel={t('profile.language')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-font-size"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.fontSize')}
           value={t('profile.fontSizeDefault')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.fontSize')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-currency-unit"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.currencyUnit')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.currencyUnit')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-timezone"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.timezone')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.timezone')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-mpc-network"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.mpcNetworkSettings')}
+          showChevron
           onPress={() => undefined}
-          isLast
+          showDivider={false}
+          accessibilityLabel={t('profile.mpcNetworkSettings')}
         />
       </PersonalCenterSettingsGroup>
 
       <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionSecurity')}>
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-identity"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.identityVerification')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.identityVerification')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-pin"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.pinCode')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.pinCode')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-email"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.email')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.email')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-google-auth"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.googleAuthenticator')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.googleAuthenticator')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-transaction-password"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.transactionPassword')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.transactionPassword')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-device"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.device')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.device')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-biometric"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.biometric')}
+          showChevron
           onPress={() => undefined}
-          isLast
+          showDivider={false}
+          accessibilityLabel={t('profile.biometric')}
         />
       </PersonalCenterSettingsGroup>
 
       <PersonalCenterSettingsGroup sectionTitle={t('profile.sectionCregis')}>
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-customer-support"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.customerSupport')}
+          showChevron
           onPress={() => undefined}
+          showDivider
+          accessibilityLabel={t('profile.customerSupport')}
         />
-        <PersonalCenterSettingsRow
+        <EgItem
           testID="profile-row-about"
+          mode={mode}
           icon={rowIcon}
           label={t('profile.about')}
+          showChevron
           onPress={() => undefined}
-          isLast
+          showDivider={false}
+          accessibilityLabel={t('profile.about')}
         />
       </PersonalCenterSettingsGroup>
     </SceneScaffold>

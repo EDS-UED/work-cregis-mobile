@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
-import { DataListRow } from '@/scenes/shared/DataListRow';
+import { EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
@@ -38,12 +38,13 @@ export function MessagesListRow({
   leadDangerRefuse,
   onPress,
 }: MessagesListRowProps) {
-  const { spacing } = useEdsTheme();
+  const { mode, spacing } = useEdsTheme();
   const layout = getDataListRowLayout(spacing);
   const mediaGap = edsPx(spacing['spacing-3']);
 
   return (
-    <DataListRow
+    <EgDataListRow
+      mode={mode}
       accessibilityLabel={title}
       onPress={onPress}
       layout={layout}
@@ -77,6 +78,6 @@ export function MessagesListRow({
           {subtitle}
         </SceneText>
       </View>
-    </DataListRow>
+    </EgDataListRow>
   );
 }

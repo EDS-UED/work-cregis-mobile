@@ -329,7 +329,7 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 
 ### 3.1.1 EDS 联调 · 业务反馈清单（Cregis → eds-mobile）
 
-**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 同步 2026-11-13 · eds-mobile `22080d1`）**
+**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 同步 2026-11-16 · eds-mobile `0c05ddc`）**
 
 | EDS 约定 | 业务用法 |
 |----------|----------|
@@ -341,8 +341,10 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 | `EgButtonGlass` `host="navigationBar"` | Home 栏按钮 → **系统栏内容组件**（非 Nav 槽内 `GlassView`） |
 | `EgButtonGlass` 默认 canvas | `HomeTopBar` overlay（仅非 iOS 26+） |
 | `readEgButtonGlassStackDiagnostics` | Nav 槽按钮走 NavigationBar 路径；**canvas** 仍看 `stack: native \| rn` |
-| Semantic **`radius-md` / `radius-lg`** | **列表行点按底** · DL · 设置行 → **`radius-md`**（20px · `scale-5`）；**分组白卡** → **`radius-lg`**（24px · `scale-6`）。与 Showcase `list row` / shallow card 语义一致 · `docs/design.md` §3 |
-| **`EgTabBlock`** | 首页待办 / 通知胶囊分段 · `@/eds/tab-block`；`children` + `contentKey` 自带 layout-content 正文动效与左右滑切（对齐 `EgTab`）。独立正文区仍可用 **`useEgHorizontalSegmentSwipe`**。下划线样式用 **`EgTab`**。 |
+| **`EgDataList` / `EgDataListRow`** | 可点数据列表 · `@/eds/data-list`；Scene 行布局 `getDataListRowLayout(spacing)`（`dataListLayout.ts` 委托 DS metrics） |
+| **`EgItem` / `EgItemGroup`** | 设置列表行 · `@/eds/item`（如个人中心） |
+| **`EgTab` / `EgTabBlock`** | 下划线分段 · `@/eds/tab`；胶囊 + 正文 layout-content · `@/eds/tab-block`（首页/通知 `HomeTodoFilterBar` 薄封装）· `useEgHorizontalSegmentSwipe` |
+| Semantic **`radius-md` / `radius-lg`** | **`EgDataListRow` 点按底** / **`EgItem` 点按底** → **`radius-md`**；**`EgItemGroup` 分组卡** → **`radius-lg`**（与 Showcase 一致） |
 
 **业务仓必保依赖**：`expo-glass-effect ~58` · Metro iOS **`expo-glass-effect` shim** · `@expo/ui ~58`（iOS 26+ `EgMenu` 走系统菜单，与 Showcase 一致；缺失则回退 RN 浮层）。要对齐 eds-mobile **最新** dist → 仅用户 **「同步」** §3.1.2。
 
@@ -536,12 +538,11 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 | 分段标题 | `typography-title` · `text-base-primary` → `SceneText variant="title"` |
 | 正文 | `typography-body-medium` · primary → `bodyMedium` |
 | 副文本 | `typography-body-small` · secondary → `bodySmallSecondary` |
-| Item 主文案（非 DL） | `typography-body-medium-strong` · primary → `bodyMediumStrong` |
-| **Data list 主文案（DL-title）** | `typography-body-medium-heavy`（600）· primary → **`bodySemibold`**（`docs/design.md` §3.3） |
+| Item 主文案（设置行等） | `typography-body-medium-strong` · primary → `bodyMediumStrong` |
+| 更重主文案（如待办金额行） | `typography-body-medium-heavy`（600）→ `bodySemibold` |
 | 页边距 | 上 `spacing-4`（`EDS_NAV_CONTENT_GAP`）· 左右 `spacing-5`（`EDS_SCENE_CONTENT_INSET`）· 下 `spacing-8` |
 | 块/卡片间距 | `spacing-7` |
 | Item 内间距 | 标题–副文本 `spacing-1`；左图/头像/icon–文案 `spacing-3` |
-| **Data list 行** | **行壳**距屏 **`spacing-2`（8px）** · 行内 **`spacing-3`（12px）** · 行间 **`spacing-1`（4px）** · `getDataListRowLayout()` + `dataListSectionStyle()`（§3） |
 | 尺寸 | 头像/币种默认 `avatar-lg`（首页待办币种图 `avatar-xl`）；icon `symbol-md` |
 
 ### 5.0.1 稿面数值 → EDS 字阶 / 色（Agent 解码）
@@ -563,7 +564,6 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 
 - 业务：`useEdsTheme()` + `edsPx()` + `src/utils/edsTheme.ts` 命名 helper（`edsPageBackground` · `edsSceneContentInset` · `createEdsTypographyStyles` / `SceneText` variant）
 - **【必须】** Scene 水平内边距统一 `edsSceneContentInset(spacing)`（`EDS_SCENE_CONTENT_INSET` = **`spacing-5` / 20px**），禁止单页另写 `spacing-*` 当「全局边距」
-- **【必须】** **Data list**：**行壳**（`DataListRow` 点按底）距屏幕左右 **`spacing-2`（8px）** = **`marginH`**（配 DL-bleed）；**不是**用 `padH` 顶到屏缘。行内 `padH`/`padV` **`spacing-3`（12px）**；行间 **`spacing-1`（4px）**。主文案距屏 = `marginH + padH`（`dataListScreenInset()`）。**DL-title** 字阶 **`typography-body-medium-heavy`（600）** → `SceneText variant="bodySemibold"`。单页例外 §3.4
 - **【必须】** 导航底到首屏内容间距统一 `edsNavContentGap(spacing)`（`EDS_NAV_CONTENT_GAP` = **`spacing-4` / 16px**）；`SceneScaffold` · 首页 `HomeScene` 已接，新页勿另算
 - 新页若采用 `docs/design.md`：下边距 `spacing-8`、块间距 `spacing-7`；水平边距仍以 `EDS_SCENE_CONTENT_INSET` 为全局左右标准（**不**因此对已有页做追溯替换）
 - **【必须】** 语义色/字档走 `SceneText` variant 或 Eg* 的 color token prop（如 `text-base-secondary`），禁止 Scene 内 `color: '#…'` 或 `colors[...]` 拼一行覆盖（除非 variant 尚未收录 → 先补 `edsTheme`）
@@ -727,7 +727,7 @@ npm run typecheck
 | Sheet 内列表行改用 RNGH `Pressable` | RNGH 原生按钮 `disallowInterruption = YES` → 手指按在行上时 Sheet 的 Pan 被取消，**中档拖不到大档** |
 | `EgSheets` `contentPan` 恒用长按（`buildPan(true)`） | 中档无法直接拖拽换档 |
 
-**【必须】** Sheet 内行保持 RN `Pressable`（`DataListRow`）；`contentPan = buildPan(contentScrollable)`（仅最高档且内容溢出时长按拖）。
+**【必须】** Sheet 内行保持 DS **`EgDataListRow`**（RN `Pressable`）；`contentPan = buildPan(contentScrollable)`（仅最高档且内容溢出时长按拖）。
 
 ### 12.4 RNGH 3 × `@react-navigation/stack` 7.12
 
@@ -784,9 +784,9 @@ npm run typecheck
 
 | 现象 | 根因 | 正解（DS） |
 |------|------|-----------|
-| 首页待办 / 通知等含 `EgTabBlock` `children` 的列表 **`Pressable` 点不动**，左右滑切仍可用 | 正文外包 `Gesture.Pan()`（默认在 `BEGAN` 即占触摸）；iOS 26 原生 Nav/Tab 栈下 RN 点按不走 RNGH，Pan 占满 → 点击被吃掉 | `useEgHorizontalSegmentSwipe` · `manualActivation(true)` + `cancelsTouchesInView(false)`，横向超过阈值才 `activate`；轻点才交给子级 |
+| 首页待办 / 通知等含 `EgTabBlock` `children` 的列表 **`Pressable` 点不动**，左右滑切仍可用 | 正文区 Pan 在 iOS 26 原生 Nav/Tab 栈下抢过 RN 点按 | DS `useEgHorizontalSegmentSwipe`：`activeOffsetX` + `failOffsetY` + `cancelsTouchesInView(false)`（见 dist `egHorizontalSegmentSwipeCommit.js`） |
 
-| 手指落在列表上**上下滚不动** | `manualActivation(true)` 的 Pan 落指即 BEGAN，UIKit 判它赢过外层 ScrollView 的 pan | DS：改 `activeOffsetX ±20` + `failOffsetY ±12`（纵向先失败）+ `cancelsTouchesInView(false)`；**禁止**再用 `manualActivation` |
+| 手指落在列表上**上下滚不动** | 横向 Pan 未设纵向 fail 阈值，与外层 ScrollView 抢手势 | 同上 · 以当前 dist 常量为准；业务勿再包一层 `Gesture.Pan` |
 | 列表下方空白处**左右滑不切** | 手势宿主只有正文内容高 | DS：`EgTabBlock` 正文 `flexGrow: 1` 撑满；业务**从滚动容器到 `EgTabBlock` 每一层**都要 `flexGrow: 1`（`SceneScaffold` content · 首页 `content` + `todoSection`）。验证：临时给 dist 里 `bodyGestureHost` 加半透明底色看是否铺到底 |
 | 正文右滑与整页返回抢手势 | `EgEdsAnimaPage` 整页任意位置拖拽返回 | DS：仅屏幕左缘侧滑返回（iOS 26+ `fullScreenGestureEnabled: false`） |
 | Android · iOS ≤25 右滑后**页面右缘往左走一段**（越过原位露底再弹回） | 侧滑未达阈值松手 → open spring 继承手势速度弹回原位而越位；拖动中回拉过起点同理 | DS：`EgEdsAnimaPage` 每路由 `gestureSettle`（`gestureStart` 置 1 → `transitionEnd` 复 0），期间上层页位移夹取在 [原位, 离场位]。**【必须】** 推入 / 返回的 spring 轻回弹保留（`page-push` · `page-pop` 不改临界阻尼、不 `overshootClamping`）— 回弹是 page 动效本体 |
