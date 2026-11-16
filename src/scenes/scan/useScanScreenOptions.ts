@@ -7,7 +7,7 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-/** 扫码 Stack 页 · EDS page + `box-page`（系统栏无法挂 page-shot trigger 时的回退）。 */
+/** 扫码 Stack 页 · 全屏相机 + 浮层 `ScanTopBar`（不经 EDS 栈头）。 */
 export function useScanScreenOptions(): StackNavigationOptions {
   const { colors } = useEdsTheme();
   const { t } = useTranslation();
@@ -15,16 +15,20 @@ export function useScanScreenOptions(): StackNavigationOptions {
 
   return useMemo(() => {
     const title = t('home.scan');
+    const chromeless = {
+      title,
+      headerShown: false,
+    } as const;
 
     if (shouldUseEgEdsAnimaNativePage()) {
       return {
-        title,
+        ...chromeless,
         contentStyle: { backgroundColor: scanBackground },
       } as StackNavigationOptions;
     }
 
     return {
-      title,
+      ...chromeless,
       ...edsPagePushedScreenOptions,
       cardStyle: { backgroundColor: scanBackground, overflow: 'visible' },
     };

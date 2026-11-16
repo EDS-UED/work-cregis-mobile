@@ -6,7 +6,7 @@ import { useEdsTypography } from '@/hooks/useEdsTypography';
 import { formatMessageAddressShort } from '@/scenes/messages/messagesFormat';
 import type { MessageTransactionMock } from '@/scenes/messages/messagesMock';
 import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
-import { EgDataListRow } from '@/eds/data-list';
+import { EgDataListReddot, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
@@ -97,7 +97,19 @@ export function MessagesTransactionListRow({
           </View>
           <SceneText variant="bodySmallTertiary">{timeLabel}</SceneText>
         </View>
-        {subtitle}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: edsPx(spacing['spacing-2']),
+            alignSelf: 'stretch',
+          }}
+        >
+          <View style={{ flex: 1, minWidth: 0 }}>{subtitle}</View>
+          {unread ? (
+            <EgDataListReddot mode={mode} accessibilityLabel={t('messages.unreadBadge')} />
+          ) : null}
+        </View>
       </View>
     </EgDataListRow>
   );

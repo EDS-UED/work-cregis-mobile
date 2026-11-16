@@ -5,7 +5,7 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useEdsTypography } from '@/hooks/useEdsTypography';
 import type { MessageCollaborationMock } from '@/scenes/messages/messagesCollaborationMock';
 import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
-import { EgDataListRow } from '@/eds/data-list';
+import { EgDataListReddot, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
@@ -65,14 +65,26 @@ export function MessagesCollaborationListRow({
           </View>
           <SceneText variant="bodySmallTertiary">{timeLabel}</SceneText>
         </View>
-        <Text
-          style={[text.bodySmallSecondary, { color: secondaryColor }]}
-          numberOfLines={2}
-          ellipsizeMode="tail"
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: edsPx(spacing['spacing-2']),
+            alignSelf: 'stretch',
+          }}
         >
-          <Text style={text.bodySmallStrong}>{collab.memberName}</Text>
-          {` ${t('messages.collabPaymentRequest')}`}
-        </Text>
+          <Text
+            style={[text.bodySmallSecondary, { color: secondaryColor, flex: 1, minWidth: 0 }]}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            <Text style={text.bodySmallStrong}>{collab.memberName}</Text>
+            {` ${t('messages.collabPaymentRequest')}`}
+          </Text>
+          {unread ? (
+            <EgDataListReddot mode={mode} accessibilityLabel={t('messages.unreadBadge')} />
+          ) : null}
+        </View>
       </View>
     </EgDataListRow>
   );

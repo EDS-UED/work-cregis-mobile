@@ -265,6 +265,17 @@ export const zhCN = {
     homePendingTasks: '待办 {{count}} 项',
     detailMock: 'Mock 详情内容',
   },
+  compare: {
+    hubSubtitle: 'Scroll edge 对比入口（临时 · 改 compare 目录不影响正式页）',
+    teamCenterCardTraditionalEntry: '团队中心 · 卡片（传统）',
+    teamCenterCardGrayEntry: '团队中心 · 卡片（灰色背景）',
+    homeTodoCardEntry: '主页 · 待办卡片',
+    homeTodoDividerEntry: '主页 · 待办 · 分割线',
+    teamCenterCardTraditionalTitle: '对比 · 团队中心-卡片（传统）',
+    teamCenterCardGrayTitle: '对比 · 团队中心-卡片（灰色背景）',
+    homeTodoCardTitle: '对比 · 主页-待办卡片',
+    homeTodoDividerTitle: '对比 · 主页-待办-分割线',
+  },
 } as const;
 
 export type ZhCNMessages = typeof zhCN;

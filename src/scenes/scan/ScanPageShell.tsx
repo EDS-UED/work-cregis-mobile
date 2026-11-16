@@ -18,9 +18,11 @@ export function ScanPageShell({ children, style, contentStyle }: ScanPageShellPr
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'visible',
     backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
+    overflow: 'visible',
   },
 });

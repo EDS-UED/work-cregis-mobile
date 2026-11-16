@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { View } from 'react-native';
 
 import { EgSymbol } from '@/eds/home-ui';
@@ -16,6 +17,8 @@ type TeamCenterMenuRowProps = {
   subtitle: string;
   onPress?: () => void;
   testID?: string;
+  /** 圆角分组卡内行 — 卡壳已留 `spacing-2`，行 `marginH` 归零。 */
+  inCardShell?: boolean;
 };
 
 export function TeamCenterMenuRow({
@@ -23,9 +26,13 @@ export function TeamCenterMenuRow({
   subtitle,
   onPress,
   testID,
+  inCardShell = false,
 }: TeamCenterMenuRowProps) {
   const { mode, spacing } = useEdsTheme();
-  const layout = getTeamCenterDataListRowLayout(spacing);
+  const layout = useMemo(() => {
+    const base = getTeamCenterDataListRowLayout(spacing);
+    return inCardShell ? { ...base, marginH: 0 } : base;
+  }, [inCardShell, spacing]);
   const mediaGap = teamCenterDataListMediaGap(spacing);
 
   return (

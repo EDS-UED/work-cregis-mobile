@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { BarcodeScanningResult, CameraView, useCameraPermissions } from 'expo-camera';
+import {
+  BarcodeScanningResult,
+  CameraView,
+  type PermissionResponse,
+} from 'expo-camera';
 
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -9,26 +13,23 @@ import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
 
 type ScanFullScreenCameraProps = {
+  permission: PermissionResponse | null;
+  requestPermission: () => Promise<PermissionResponse>;
   torchEnabled: boolean;
   onCameraReady?: () => void;
-  onPermissionChange?: (granted: boolean) => void;
 };
 
-/** 全屏相机层 · 铺满扫码页，供 QR 识别。 */
+/** 全屏相机层 · 铺满扫码页，供 QR 识别（权限态由 `ScanPageContent` 单点持有）。 */
 export function ScanFullScreenCamera({
+  permission,
+  requestPermission,
   torchEnabled,
   onCameraReady,
-  onPermissionChange,
 }: ScanFullScreenCameraProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const { spacing } = useEdsTheme();
-  const [permission, requestPermission] = useCameraPermissions();
   const scanLockRef = useRef(false);
-
-  useEffect(() => {
-    onPermissionChange?.(permission?.granted === true);
-  }, [onPermissionChange, permission?.granted]);
 
   const onBarcodeScanned = useCallback(
     (result: BarcodeScanningResult) => {

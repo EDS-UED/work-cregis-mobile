@@ -272,4 +272,15 @@ export const enUS: {
     homePendingTasks: '{{count}} pending tasks',
     detailMock: 'Mock detail content',
   },
+  compare: {
+    hubSubtitle: 'Scroll edge compare (temp · edits stay under compare/)',
+    teamCenterCardTraditionalEntry: 'Team center · card (traditional)',
+    teamCenterCardGrayEntry: 'Team center · card (gray background)',
+    homeTodoCardEntry: 'Home · todo card',
+    homeTodoDividerEntry: 'Home · todo · divider',
+    teamCenterCardTraditionalTitle: 'Compare · team center card (traditional)',
+    teamCenterCardGrayTitle: 'Compare · team center card (gray background)',
+    homeTodoCardTitle: 'Compare · home todo card',
+    homeTodoDividerTitle: 'Compare · home todo divider',
+  },
 };

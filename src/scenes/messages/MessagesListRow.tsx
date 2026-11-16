@@ -1,9 +1,11 @@
 import type { ImageSourcePropType } from 'react-native';
 import { View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
-import { EgDataListRow } from '@/eds/data-list';
+import { EgDataListReddot, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
@@ -38,6 +40,7 @@ export function MessagesListRow({
   leadDangerRefuse,
   onPress,
 }: MessagesListRowProps) {
+  const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();
   const layout = getDataListRowLayout(spacing);
   const mediaGap = edsPx(spacing['spacing-3']);
@@ -74,9 +77,26 @@ export function MessagesListRow({
           </SceneText>
           <SceneText variant="bodySmallTertiary">{timeLabel}</SceneText>
         </View>
-        <SceneText variant="bodySmallSecondary" numberOfLines={2} ellipsizeMode="tail">
-          {subtitle}
-        </SceneText>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: edsPx(spacing['spacing-2']),
+            alignSelf: 'stretch',
+          }}
+        >
+          <SceneText
+            variant="bodySmallSecondary"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            style={{ flex: 1, minWidth: 0 }}
+          >
+            {subtitle}
+          </SceneText>
+          {unread ? (
+            <EgDataListReddot mode={mode} accessibilityLabel={t('messages.unreadBadge')} />
+          ) : null}
+        </View>
       </View>
     </EgDataListRow>
   );

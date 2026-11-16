@@ -1,6 +1,9 @@
 export {
   EgDataList,
+  EgDataListPrimaryText,
+  EgDataListReddot,
   EgDataListRow,
+  EgDataListSubText,
   EG_DATA_LIST_GRAPHIC_TEXT_GAP,
   EG_DATA_LIST_PRESS_INTENSITY,
   EG_DATA_LIST_ROW_GAP,
@@ -10,13 +13,20 @@ export {
   EG_DATA_LIST_ROW_RADIUS,
   EG_DATA_LIST_SCENE_CONTENT_INSET,
   EG_DATA_LIST_SUB_TEXT_MAX_LINES,
+  egDataListPrimaryTextStyle,
   egDataListRowGap,
   egDataListSectionStyle,
+  egDataListSubTextSegmentAStyle,
+  egDataListSubTextStyle,
   getEgDataListRowLayout,
 } from '@/shims/eds-mobile-data-list';
 
 export type {
+  EgDataListPrimaryTextProps,
+  EgDataListPrimaryWeight,
   EgDataListProps,
+  EgDataListReddotProps,
   EgDataListRowLayout,
   EgDataListRowProps,
+  EgDataListSubTextProps,
 } from '@/shims/eds-mobile-data-list';

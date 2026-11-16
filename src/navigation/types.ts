@@ -26,6 +26,10 @@ export type AssetsStackParamList = {
 
 export type TransactionRecordsStackParamList = {
   TransactionRecordsMain: undefined;
+  CompareTeamCenterCardTraditional: undefined;
+  CompareTeamCenterCardGray: undefined;
+  CompareHomeTodoCard: undefined;
+  CompareHomeTodoDivider: undefined;
 };
 
 export const tabRouteNames: TabRouteName[] = ['Home', 'Wallet', 'Collaboration', 'TransactionRecords'];

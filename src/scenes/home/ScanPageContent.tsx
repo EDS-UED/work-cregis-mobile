@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
+import { useCameraPermissions } from 'expo-camera';
 
 import { GlassBlurBackdrop } from '@/eds/glass';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
@@ -12,6 +12,12 @@ import {
 } from '@/scenes/home/ScanQrViewfinderOverlay';
 import { ScanQrFrostedMask } from '@/scenes/scan/ScanQrFrostedMask';
 import { ScanTopBar } from '@/scenes/scan/ScanTopBar';
+import {
+  SCAN_LAYER_CAMERA,
+  SCAN_LAYER_CHROME,
+  SCAN_LAYER_TOP_BAR,
+  scanLayerSurface,
+} from '@/scenes/scan/scanLayers';
 import { useScanTorchAssistant } from '@/scenes/scan/useScanTorchAssistant';
 
 const VIEWFINDER_WIDTH_RATIO = 0.72;
@@ -27,10 +33,17 @@ type ScanPageContentProps = {
 /** 扫码页 · 全屏相机 + 取景磨砂暗角 + 浮层顶栏。 */
 export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageContentProps) {
   const colors = useThemeColors();
-  const isFocused = useIsFocused();
+  const [permission, requestPermission] = useCameraPermissions();
+  const permissionGranted = permission?.granted === true;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [cameraReady, setCameraReady] = useState(false);
-  const [permissionGranted, setPermissionGranted] = useState(false);
+
+  useEffect(() => {
+    if (!permission || permission.granted || permission.canAskAgain === false) {
+      return;
+    }
+    void requestPermission();
+  }, [permission, requestPermission]);
 
   const viewfinderSize = Math.round(windowWidth * VIEWFINDER_WIDTH_RATIO);
   const frameLeft = (windowWidth - viewfinderSize) / 2;
@@ -44,7 +57,20 @@ export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageCon
         page: {
           flex: 1,
           minHeight: windowHeight,
+          overflow: 'visible',
           backgroundColor: String(colors['material-same-black']),
+        },
+        cameraHost: {
+          ...StyleSheet.absoluteFill,
+          ...scanLayerSurface(SCAN_LAYER_CAMERA),
+        },
+        chromeHost: {
+          ...StyleSheet.absoluteFill,
+          ...scanLayerSurface(SCAN_LAYER_CHROME),
+        },
+        topBarHost: {
+          ...StyleSheet.absoluteFill,
+          ...scanLayerSurface(SCAN_LAYER_TOP_BAR),
         },
         frameHost: {
           position: 'absolute',
@@ -63,17 +89,20 @@ export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageCon
   );
 
   return (
-    <View style={[styles.page, contentStyle]}>
-      <GlassBlurBackdrop style={StyleSheet.absoluteFill} active={isFocused}>
-        <ScanFullScreenCamera
-          torchEnabled={torchOn}
-          onCameraReady={() => setCameraReady(true)}
-          onPermissionChange={setPermissionGranted}
-        />
-      </GlassBlurBackdrop>
+    <View style={[styles.page, contentStyle]} collapsable={false}>
+      <View style={styles.cameraHost} collapsable={false} pointerEvents="box-none">
+        <GlassBlurBackdrop style={StyleSheet.absoluteFill} active>
+          <ScanFullScreenCamera
+            permission={permission}
+            requestPermission={requestPermission}
+            torchEnabled={torchOn}
+            onCameraReady={() => setCameraReady(true)}
+          />
+        </GlassBlurBackdrop>
+      </View>
 
       {permissionGranted ? (
-        <>
+        <View style={styles.chromeHost} collapsable={false} pointerEvents="box-none">
           <ScanQrFrostedMask
             windowWidth={windowWidth}
             windowHeight={windowHeight}
@@ -84,10 +113,14 @@ export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageCon
           <View style={styles.frameHost} pointerEvents="none">
             <ScanQrViewfinderOverlay size={viewfinderSize} />
           </View>
-        </>
+        </View>
       ) : null}
 
-      {showTopBar ? <ScanTopBar torchOn={torchOn} onToggleTorch={toggleTorch} /> : null}
+      {showTopBar ? (
+        <View style={styles.topBarHost} collapsable={false} pointerEvents="box-none">
+          <ScanTopBar torchOn={torchOn} onToggleTorch={toggleTorch} />
+        </View>
+      ) : null}
     </View>
   );
 }

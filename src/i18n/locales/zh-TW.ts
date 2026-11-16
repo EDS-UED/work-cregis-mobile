@@ -271,4 +271,15 @@ export const zhTW: {
     homePendingTasks: '待辦 {{count}} 項',
     detailMock: 'Mock 詳情內容',
   },
+  compare: {
+    hubSubtitle: 'Scroll edge 對比入口（臨時 · 改 compare 目錄不影響正式頁）',
+    teamCenterCardTraditionalEntry: '團隊中心 · 卡片（傳統）',
+    teamCenterCardGrayEntry: '團隊中心 · 卡片（灰色背景）',
+    homeTodoCardEntry: '主頁 · 待辦卡片',
+    homeTodoDividerEntry: '主頁 · 待辦 · 分割線',
+    teamCenterCardTraditionalTitle: '對比 · 團隊中心-卡片（傳統）',
+    teamCenterCardGrayTitle: '對比 · 團隊中心-卡片（灰色背景）',
+    homeTodoCardTitle: '對比 · 主頁-待辦卡片',
+    homeTodoDividerTitle: '對比 · 主頁-待辦-分割線',
+  },
 };
