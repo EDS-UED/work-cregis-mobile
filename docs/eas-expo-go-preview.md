@@ -18,8 +18,8 @@ push → EAS Workflow (eas update) → Expo CDN
 ### 1. EAS 项目（已创建）
 
 - **Expo 显示名**：**Cregis UED**（业务项目；Expo Go 里看到的名称）
-- **Dashboard slug**：`eds-ued`（URL 不变） — https://expo.dev/accounts/theyangsongs-team/projects/eds-ued  
-- **Project ID**：已写入 `app.config.ts`（`6ac19714-fbe5-4de6-ab92-ea1bb47a0ff5`）
+- **Dashboard slug**：`cregis` — https://expo.dev/accounts/theyangsongs-team/projects/cregis  
+- **Project ID**：已写入 `app.config.ts`（`00ddabfa-c1cb-46b2-b84e-1a0beccaf593`；原 `eds-ued` / `6ac19714-…` 已废弃）
 
 本机发 update 无需再 `eas init`。CLI 用法：
 
@@ -33,7 +33,7 @@ npm run preview:update
 
 ### 2. GitHub 连接 EAS Workflows
 
-1. [expo.dev](https://expo.dev) → 本项目 → **GitHub** → 连接 `EDS-UED/work-cregis-mobile`。
+1. [expo.dev](https://expo.dev) → **@theyangsongs-team/cregis** → **GitHub** → 连接 `EDS-UED/work-cregis-mobile`（从旧 `eds-ued` 迁过后需在 **新** 项目下重连）。
 2. 启用 **EAS Workflows**（仓库内已含 `.eas/workflows/publish-preview-update.yml`）。
 
 ### 3. Secrets（eds-mobile 为 private 时）

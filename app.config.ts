@@ -8,20 +8,21 @@ process.env.EXPO_PUBLIC_USE_RN_FETCH ??= '1';
 
 const baseUrl = process.env.EXPO_BASE_URL ?? '';
 
-/** Cregis UED · @theyangsongs-team/eds-ued — https://expo.dev/accounts/theyangsongs-team/projects/eds-ued */
+/** Cregis UED · @theyangsongs-team/cregis — https://expo.dev/accounts/theyangsongs-team/projects/cregis */
+/** 2026-11 · 自 `@theyangsongs-team/eds-ued` 迁移（slug 与 projectId 绑定不可改）。 */
 const easProjectId =
-  process.env.EAS_PROJECT_ID ?? '6ac19714-fbe5-4de6-ab92-ea1bb47a0ff5';
+  process.env.EAS_PROJECT_ID ?? '00ddabfa-c1cb-46b2-b84e-1a0beccaf593';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Cregis UED',
-  slug: 'eds-ued',
+  slug: 'cregis',
   owner: 'theyangsongs-team',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
-  scheme: 'eds-ued',
+  scheme: 'cregis',
   ...(easProjectId
     ? {
         runtimeVersion: {

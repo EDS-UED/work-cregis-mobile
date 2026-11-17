@@ -447,7 +447,7 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
 
 - Team：**theyangsongs-team**
 - 项目显示名：**Cregis UED**（`app.config.ts` → `name`）
-- Slug / Dashboard URL：**`eds-ued`**（勿与已删的个人 `@theyangsong/cregis-ued` 混淆）
+- Slug / Dashboard URL：**`cregis`**（`@theyangsongs-team/cregis` · 勿与已删的个人 `@theyangsong/cregis-ued` 混淆）
 - 同事预览：Expo Go → Dashboard **Deploy → Over-the-air updates** → 最新 **Preview** 二维码（channel **`preview`**）
 
 **Agent 纪律（默认）**
@@ -475,7 +475,7 @@ Token 若含 `build:tokens`：`--blur-xs` / `--depth-xs` 等为 `var(--scale-1)`
    - **兜底**：本机 `npm run preview:update`（仍须 eds-mobile 已在 GitHub `main`）。
 
 4. **收尾告知用户**  
-   给出 **Updates → Preview** 链接（`https://expo.dev/accounts/theyangsongs-team/projects/eds-ued/deployments` 或当次 update 页），并说明同事需 **Expo Go SDK 58**（与 `work.md` §1 锁定一致）。
+   给出 **Updates → Preview** 链接（`https://expo.dev/accounts/theyangsongs-team/projects/cregis/deployments` 或当次 update 页），并说明同事需 **Expo Go SDK 58**（与 `work.md` §1 锁定一致）。
 
 **本地 link（不替代 push）**：用户 **「同步」** 或 §3.1.2 才对齐本机 dist；**同事只看 EAS**，不看 sibling 目录。
 
