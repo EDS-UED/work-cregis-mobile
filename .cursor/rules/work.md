@@ -329,7 +329,7 @@ Design system（`../eds-mobile`）可独立演进；**业务仓默认不跟、�
 
 ### 3.1.1 EDS 联调 · 业务反馈清单（Cregis → eds-mobile）
 
-**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 同步 2026-11-16 · eds-mobile `0c05ddc`）**
+**业务集成对齐（与当前 `@eds-evergreen/mobile` dist 一致 · 同步 2026-11-17 · eds-mobile `c6a4799` + 全量 `pnpm build:mobile`）**
 
 | EDS 约定 | 业务用法 |
 |----------|----------|
