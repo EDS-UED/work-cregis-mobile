@@ -1,4 +1,5 @@
 export {
+  EgDataListRowPressable,
   EgDataList,
   EgDataListPrimaryText,
   EgDataListReddot,

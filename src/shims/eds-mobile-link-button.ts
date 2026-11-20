@@ -1,1 +1,2 @@
-export { EgLinkButton } from '@eds/internal/dist/components/molecules/button/link-button/EgLinkButton.js';
+export { EgLink, EgLink as EgLinkButton } from '@eds/internal/dist/components/molecules/button/link/index.js';
+export type { EgLinkProps } from '@eds/internal/dist/components/molecules/button/link/EgLink.types.js';

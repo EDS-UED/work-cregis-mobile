@@ -15,6 +15,7 @@ import { SceneText } from '@/scenes/shared/SceneText';
 import type { HomeTodoItem } from '@/store';
 import { edsCryptoSymbolForCurrency } from '@/utils/edsCryptoSymbol';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
+import { maskEmail } from '@/utils/maskEmail';
 
 type HomeTodoDetailSheetProps = {
   visible: boolean;
@@ -26,19 +27,6 @@ function truncateAddress(address: string): string {
   const trimmed = address.trim();
   if (trimmed.length <= 16) return trimmed;
   return `${trimmed.slice(0, 6)}...${trimmed.slice(-6)}`;
-}
-
-/** 邮箱脱敏 · `x******x@domain`。 */
-function maskEmail(email: string): string {
-  const trimmed = email.trim();
-  const at = trimmed.indexOf('@');
-  if (at <= 0) return trimmed;
-  const local = trimmed.slice(0, at);
-  const domain = trimmed.slice(at);
-  if (local.length === 1) return `*${domain}`;
-  if (local.length === 2) return `${local[0]}*${domain}`;
-  const innerStars = '*'.repeat(Math.max(local.length - 2, 6));
-  return `${local[0]}${innerStars}${local[local.length - 1]}${domain}`;
 }
 
 function DetailFieldRow({

@@ -1,16 +1,18 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { EgAvatar, EgButtonGlass } from '@/eds/button-glass';
+import { EgMessage } from '@/eds/feedback';
 import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { formatNotificationCountBadge } from '@/scenes/messages/messagesFormat';
+import {
+  MESSAGE_MOCK_ITEMS,
+  messageTotalUnreadCount,
+} from '@/scenes/messages/messagesMock';
 import { HomeScanPageShotTrigger } from '@/scenes/home/HomeScanPageShotTrigger';
 import { useHomeStackNavigation } from '@/scenes/home/useHomeStackNavigation';
 import { SceneText } from '@/scenes/shared/SceneText';
-import {
-  useHomeUserAvatarColorIndex,
-  useHomeUserDisplayName,
-} from '@/scenes/shared/homeUserIdentity';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
 
@@ -18,12 +20,26 @@ import companyAvatar from '../../../assets/company-avatar.png';
 
 function useOpenTeamCenter() {
   const navigation = useHomeStackNavigation();
-  return useCallback(() => navigation.navigate('TeamCenter'), [navigation]);
+  const companyName = useHomeStore((state) => state.companyName);
+  const teams = useHomeStore((state) => state.teams);
+  const setActiveTeam = useHomeStore((state) => state.setActiveTeam);
+  return useCallback(() => {
+    navigation.navigate('TeamCenter');
+    const companyTeam = teams.find((team) => team.name === companyName);
+    if (companyTeam) {
+      setActiveTeam(companyTeam.id);
+    }
+  }, [companyName, navigation, setActiveTeam, teams]);
 }
 
 function useOpenMessages() {
   const navigation = useHomeStackNavigation();
   return useCallback(() => navigation.navigate('Messages'), [navigation]);
+}
+
+function useOpenPersonalCenter() {
+  const navigation = useHomeStackNavigation();
+  return useCallback(() => navigation.navigate('PersonalCenter'), [navigation]);
 }
 
 function HomeCompanyAvatar() {
@@ -34,20 +50,6 @@ function HomeCompanyAvatar() {
       source={companyAvatar}
       size="lg"
       accessibilityLabel={companyName}
-    />
-  );
-}
-
-function HomeUserAvatar() {
-  const userDisplayName = useHomeUserDisplayName();
-  const userAvatarColorIndex = useHomeUserAvatarColorIndex();
-
-  return (
-    <EgAvatar
-      name={userDisplayName}
-      size="lg"
-      colorIndex={userAvatarColorIndex}
-      accessibilityLabel={userDisplayName}
     />
   );
 }
@@ -77,6 +79,50 @@ const glassIconDefaults = {
   iconCount: 1 as const,
   size: 'md' as const,
 };
+
+function useHomeNoticeBadgeLabel(): string | undefined {
+  const total = useMemo(() => messageTotalUnreadCount(MESSAGE_MOCK_ITEMS), []);
+  return formatNotificationCountBadge(total);
+}
+
+/** 通知玻璃钮 + 右上 `EgMessage`（未读合计）。 */
+function HomeNavNoticeGlassButton() {
+  const { t } = useTranslation();
+  const { mode, spacing } = useEdsTheme();
+  const openMessages = useOpenMessages();
+  const badgeLabel = useHomeNoticeBadgeLabel();
+  const badgeOffset = edsPx(spacing['spacing-1']);
+
+  return (
+    <View style={styles.noticeCapsuleHost}>
+      <EgButtonGlass
+        {...glassIconDefaults}
+        icon="eds-notice"
+        mode={mode}
+        onPress={openMessages}
+        accessibilityLabel={t('home.notifications')}
+        testID="home-nav-notice-glass"
+      />
+      {badgeLabel ? (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.noticeCapsuleBadge,
+            { top: -badgeOffset, right: -badgeOffset - edsPx(spacing['spacing-1']) },
+          ]}
+        >
+          <EgMessage
+            mode={mode}
+            tone="danger"
+            label={badgeLabel}
+            accessibilityLabel={t('messages.unreadBadge')}
+            testID="home-nav-notice-message"
+          />
+        </View>
+      ) : null}
+    </View>
+  );
+}
 
 /** iOS 26+ 系统栏 — `EgButtonGlass`（`iconCount={1}`）。 */
 export function HomeNavCompanyGlassNav() {
@@ -120,49 +166,32 @@ export function HomeNavScanGlassNav() {
 
 /** iOS 26+ 系统栏 — `eds-notice`。 */
 export function HomeNavNoticeGlassNav() {
-  const { t } = useTranslation();
-  const { mode } = useEdsTheme();
-
-  const openMessages = useOpenMessages();
-
-  return (
-    <EgButtonGlass
-      {...glassIconDefaults}
-      icon="eds-notice"
-      mode={mode}
-      onPress={openMessages}
-      accessibilityLabel={t('home.notifications')}
-      testID="home-nav-notice-glass"
-    />
-  );
+  return <HomeNavNoticeGlassButton />;
 }
 
-/** iOS 26+ 系统栏 — 用户头像。 */
+/** iOS 26+ 系统栏 — 个人设置 `eds-gear`。 */
 export function HomeNavUserGlassNav() {
   const { t } = useTranslation();
-  const navigation = useHomeStackNavigation();
   const { mode } = useEdsTheme();
-  const userDisplayName = useHomeUserDisplayName();
+  const openPersonalCenter = useOpenPersonalCenter();
 
   return (
     <EgButtonGlass
       {...glassIconDefaults}
+      icon="eds-gear"
       mode={mode}
-      avatarSlot={<HomeUserAvatar />}
-      onPress={() => navigation.navigate('PersonalCenter')}
-      accessibilityLabel={t('home.userAvatar', { name: userDisplayName })}
+      onPress={openPersonalCenter}
+      accessibilityLabel={t('profile.title')}
       testID="home-nav-user-glass"
     />
   );
 }
 
-/** Overlay 顶栏右栏 — 三颗 `EgButtonGlass`（扫码、通知、个人），间距 `spacing-2-5`（10px）。 */
+/** Overlay 顶栏右栏 — 三颗 `EgButtonGlass`（扫码、通知、设置），间距 `spacing-2-5`（10px）。 */
 function HomeNavTrailingGlass() {
   const { t } = useTranslation();
-  const navigation = useHomeStackNavigation();
-  const openMessages = useOpenMessages();
+  const openPersonalCenter = useOpenPersonalCenter();
   const { mode, spacing } = useEdsTheme();
-  const userDisplayName = useHomeUserDisplayName();
   const gap = edsPx(spacing['spacing-2-5']);
 
   return (
@@ -176,20 +205,13 @@ function HomeNavTrailingGlass() {
           testID="home-nav-scan-glass"
         />
       </HomeScanPageShotTrigger>
+      <HomeNavNoticeGlassButton />
       <EgButtonGlass
         {...glassIconDefaults}
-        icon="eds-notice"
+        icon="eds-gear"
         mode={mode}
-        onPress={openMessages}
-        accessibilityLabel={t('home.notifications')}
-        testID="home-nav-notice-glass"
-      />
-      <EgButtonGlass
-        {...glassIconDefaults}
-        mode={mode}
-        avatarSlot={<HomeUserAvatar />}
-        onPress={() => navigation.navigate('PersonalCenter')}
-        accessibilityLabel={t('home.userAvatar', { name: userDisplayName })}
+        onPress={openPersonalCenter}
+        accessibilityLabel={t('profile.title')}
         testID="home-nav-user-glass"
       />
     </View>
@@ -254,6 +276,14 @@ const styles = StyleSheet.create({
   trailingCapsules: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  noticeCapsuleHost: {
+    position: 'relative',
+    overflow: 'visible',
+  },
+  noticeCapsuleBadge: {
+    position: 'absolute',
+    zIndex: 1,
   },
   headerCompanyName: {
     maxWidth: HOME_COMPANY_NAME_MAX_WIDTH,

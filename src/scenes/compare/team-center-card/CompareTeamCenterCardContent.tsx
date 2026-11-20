@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import type { CompareTeamCenterCardVariant } from '@/scenes/compare/team-center-card/compareTeamCenterCardVariant';
 import {
-  CompareTeamCenterMenuSectionCard,
-  type CompareTeamCenterMenuCardTone,
-} from '@/scenes/compare/team-center-card/CompareTeamCenterMenuSectionCard';
+  TeamCenterMenuSectionCard,
+  type TeamCenterMenuCardTone,
+} from '@/scenes/team/TeamCenterMenuSectionCard';
 import { CompareTeamCenterCardPageShotHost } from '@/scenes/compare/team-center-card/CompareTeamCenterCardPageShotHost';
 import { TeamCenterMenuRow } from '@/scenes/team/TeamCenterMenuRow';
 import { TeamCenterPlanCard } from '@/scenes/team/TeamCenterPlanCard';
@@ -19,7 +19,7 @@ type CompareTeamCenterCardContentProps = {
 
 const MENU_CARD_TONE: Record<
   CompareTeamCenterCardVariant,
-  CompareTeamCenterMenuCardTone
+  TeamCenterMenuCardTone
 > = {
   traditional: 'page',
   gray: 'shallow',
@@ -54,86 +54,86 @@ export function CompareTeamCenterCardContent({
           <TeamCenterPlanCard />
         </View>
 
-        <CompareTeamCenterMenuSectionCard
-            sectionTitle={t('team.sectionSecurity')}
-            cardTone={menuCardTone}
-          >
-            <TeamCenterMenuRow
-              testID="team-row-team-security"
-              label={t('team.teamSecurity')}
-              subtitle={t('team.teamSecuritySubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-          </CompareTeamCenterMenuSectionCard>
+        <TeamCenterMenuSectionCard
+          sectionTitle={t('team.sectionSecurity')}
+          cardTone={menuCardTone}
+        >
+          <TeamCenterMenuRow
+            testID="team-row-team-security"
+            label={t('team.teamSecurity')}
+            subtitle={t('team.teamSecuritySubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+        </TeamCenterMenuSectionCard>
 
-          <CompareTeamCenterMenuSectionCard
-            sectionTitle={t('team.sectionAdmin')}
-            cardTone={menuCardTone}
-          >
-            <TeamCenterMenuRow
-              testID="team-row-member-management"
-              label={t('team.members')}
-              subtitle={t('team.memberManagementSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-role-management"
-              label={t('team.roles')}
-              subtitle={t('team.roleManagementSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-team-api"
-              label={t('team.teamApi')}
-              subtitle={t('team.teamApiSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-webhook"
-              label={t('team.webhook')}
-              subtitle={t('team.webhookSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-          </CompareTeamCenterMenuSectionCard>
+        <TeamCenterMenuSectionCard
+          sectionTitle={t('team.sectionAdmin')}
+          cardTone={menuCardTone}
+        >
+          <TeamCenterMenuRow
+            testID="team-row-member-management"
+            label={t('team.members')}
+            subtitle={t('team.memberManagementSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-role-management"
+            label={t('team.roles')}
+            subtitle={t('team.roleManagementSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-team-api"
+            label={t('team.teamApi')}
+            subtitle={t('team.teamApiSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-webhook"
+            label={t('team.webhook')}
+            subtitle={t('team.webhookSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+        </TeamCenterMenuSectionCard>
 
-          <CompareTeamCenterMenuSectionCard
-            sectionTitle={t('team.sectionTeamAccount')}
-            cardTone={menuCardTone}
-          >
-            <TeamCenterMenuRow
-              testID="team-row-team-account"
-              label={t('team.teamAccount')}
-              subtitle={t('team.viewTeamAccount')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-fee-records"
-              label={t('team.feeRecords')}
-              subtitle={t('team.feeRecordsSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-gas-payment-records"
-              label={t('team.gasPaymentRecords')}
-              subtitle={t('team.gasPaymentRecordsSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-            <TeamCenterMenuRow
-              testID="team-row-order-management"
-              label={t('team.orderManagement')}
-              subtitle={t('team.orderManagementSubtitle')}
-              onPress={() => undefined}
-              inCardShell
-            />
-          </CompareTeamCenterMenuSectionCard>
+        <TeamCenterMenuSectionCard
+          sectionTitle={t('team.sectionTeamAccount')}
+          cardTone={menuCardTone}
+        >
+          <TeamCenterMenuRow
+            testID="team-row-team-account"
+            label={t('team.teamAccount')}
+            subtitle={t('team.viewTeamAccount')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-fee-records"
+            label={t('team.feeRecords')}
+            subtitle={t('team.feeRecordsSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-gas-payment-records"
+            label={t('team.gasPaymentRecords')}
+            subtitle={t('team.gasPaymentRecordsSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+          <TeamCenterMenuRow
+            testID="team-row-order-management"
+            label={t('team.orderManagement')}
+            subtitle={t('team.orderManagementSubtitle')}
+            onPress={() => undefined}
+            inCardShell
+          />
+        </TeamCenterMenuSectionCard>
       </View>
     </CompareTeamCenterCardPageShotHost>
   );

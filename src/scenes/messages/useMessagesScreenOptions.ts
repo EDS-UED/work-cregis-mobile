@@ -2,15 +2,14 @@ import { useCallback } from 'react';
 import type { StackNavigationOptions } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 
-import { egNavBarNativeStackScreenOptions } from '@/eds/nav-bar';
-import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
+import { EgEdsAnimaPage, shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useMessagesIosNativeHeaderItems } from '@/scenes/messages/useMessagesIosNativeHeaderItems';
 import { edsPageBackground } from '@/utils/edsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
-type MessagesNav = { goBack: () => void };
+type ScreenOptionsProps = Parameters<ReturnType<typeof EgEdsAnimaPage>>[0];
 
 /** 通知 — EDS page + `box-page`；右栏 `eds-clear` + 未读红点。 */
 export function useMessagesScreenOptions() {
@@ -20,15 +19,13 @@ export function useMessagesScreenOptions() {
   const iosRight = useMessagesIosNativeHeaderItems();
 
   return useCallback(
-    ({ navigation }: { navigation: MessagesNav }): StackNavigationOptions => {
+    (props: ScreenOptionsProps): StackNavigationOptions => {
       const title = t('messages.title');
 
       if (shouldUseEgEdsAnimaNativePage()) {
+        const base = EgEdsAnimaPage({ mode })(props) as StackNavigationOptions;
         return {
-          ...egNavBarNativeStackScreenOptions({
-            onBack: () => navigation.goBack(),
-            mode,
-          }),
+          ...base,
           title,
           ...iosRight,
           contentStyle: { backgroundColor: pageBackground },

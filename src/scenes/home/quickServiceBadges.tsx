@@ -5,7 +5,7 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { edsPx } from '@/utils/edsTheme';
 
 type QuickServiceActionBadgeProps = {
-  kind: 'remove' | 'add' | 'addDisabled';
+  kind: 'remove' | 'removeDecor' | 'add' | 'addDisabled';
   mode: 'light' | 'dark';
   size?: number;
   onPress?: () => void;
@@ -22,13 +22,15 @@ export function QuickServiceActionBadge({
 }: QuickServiceActionBadgeProps) {
   const { colors, spacing } = useEdsTheme();
   const badgeSize = size ?? edsPx(spacing['spacing-5']);
-  const disabled = kind === 'addDisabled' || (kind === 'remove' && !onPress);
-  const isRemove = kind === 'remove';
+  const isRemoveIcon = kind === 'remove' || kind === 'removeDecor';
+  const disabled =
+    kind === 'addDisabled' || (isRemoveIcon && !onPress);
+  const removeDanger = kind === 'remove';
 
-  const iconName = isRemove ? 'eds-disable-fill' : 'eds-add-circle-fill';
+  const iconName = isRemoveIcon ? 'eds-disable-fill' : 'eds-add-circle-fill';
   const colorToken = disabled
     ? 'status-disable-base'
-    : isRemove
+    : removeDanger
       ? 'status-danger'
       : 'material-decor';
 
@@ -37,7 +39,7 @@ export function QuickServiceActionBadge({
       name={iconName}
       mode={mode}
       displayPx={badgeSize}
-      fillTone={isRemove ? 'primary' : disabled ? 'primary' : 'decor'}
+      fillTone={removeDanger ? 'primary' : disabled ? 'primary' : 'decor'}
       strokeColorToken={colorToken}
       accessibilityLabel=""
     />

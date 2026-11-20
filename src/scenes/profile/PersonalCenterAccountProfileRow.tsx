@@ -9,9 +9,10 @@ import {
   useHomeUserDisplayName,
 } from '@/scenes/shared/homeUserIdentity';
 import { SceneText } from '@/scenes/shared/SceneText';
+import { maskEmail } from '@/utils/maskEmail';
 import { edsPx } from '@/utils/edsTheme';
 
-const DEMO_MASKED_EMAIL = 't******o@gmail.com';
+const DEMO_ACCOUNT_EMAIL = 'testo@gmail.com';
 
 type PersonalCenterAccountProfileRowProps = {
   isLast?: boolean;
@@ -74,7 +75,7 @@ export function PersonalCenterAccountProfileRow({
             {displayName}
           </SceneText>
           <SceneText variant="bodySmallSecondary" numberOfLines={1}>
-            {DEMO_MASKED_EMAIL}
+            {maskEmail(DEMO_ACCOUNT_EMAIL)}
           </SceneText>
         </View>
       </View>

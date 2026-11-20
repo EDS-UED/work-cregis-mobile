@@ -45,33 +45,17 @@ export function TeamCenterMenuRow({
       gap={mediaGap}
     >
       <TeamCenterMenuLeadIcon />
-      <View
-        style={{
-          flex: 1,
-          minWidth: 0,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: edsPx(spacing['spacing-8']),
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            minWidth: 0,
-            gap: edsPx(spacing['spacing-05']),
-          }}
-        >
-          <SceneText variant="bodySemibold">{label}</SceneText>
-          <SceneText variant="bodySmallSecondary">{subtitle}</SceneText>
-        </View>
-        <EgSymbol
-          name="eds-arrow-right-mini-ios"
-          mode={mode}
-          size="sm"
-          strokeColorToken="text-base-secondary"
-          accessibilityLabel=""
-        />
+      <View style={{ flex: 1, minWidth: 0, gap: edsPx(spacing['spacing-05']) }}>
+        <SceneText variant="bodySemibold">{label}</SceneText>
+        <SceneText variant="bodySmallSecondary">{subtitle}</SceneText>
       </View>
+      <EgSymbol
+        name="eds-arrow-right-mini-ios"
+        mode={mode}
+        size="sm"
+        strokeColorToken="text-base-secondary"
+        accessibilityLabel=""
+      />
     </EgDataListRow>
   );
 }

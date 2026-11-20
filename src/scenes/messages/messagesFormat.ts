@@ -1,3 +1,14 @@
+/** `EgMessage` 未读数 · `0` 不展示；`>99` 固定 `99+`。 */
+export function formatNotificationCountBadge(count: number): string | undefined {
+  if (count <= 0) {
+    return undefined;
+  }
+  if (count > 99) {
+    return '99+';
+  }
+  return String(count);
+}
+
 /** 地址展示 · 前 4 + … + 后 4。 */
 export function formatMessageAddressShort(address: string): string {
   const trimmed = address.trim();

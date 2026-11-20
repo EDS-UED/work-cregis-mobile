@@ -46,7 +46,7 @@ export function HomeTodoFilterBar<T extends string>({
       items={items}
       selectedId={selectedId}
       parentContentInset={parentContentInset ?? edsSceneContentInset(spacing)}
-      onSelect={(id) => onSelect(id as T)}
+      onSelect={(id: string) => onSelect(id as T)}
       contentKey={contentKey}
       onContentSwitchStart={onContentSwitchStart}
       contentSwipeToSwitch={contentSwipeToSwitch}

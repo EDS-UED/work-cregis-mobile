@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   EgNavBar,
@@ -20,43 +21,48 @@ type HomeTopBarProps = {
 };
 
 /** 首页顶栏 overlay：`EgNavBar` + canvas `EgButtonGlass`（Android / iOS ≤25）。 */
-export function HomeTopBar({ scrollOffset }: HomeTopBarProps) {
+export const HomeTopBar = memo(function HomeTopBar({ scrollOffset }: HomeTopBarProps) {
   const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
   const nativeNavBar = shouldUseEgNavBarNativeStack();
   const shellHeight = egNavBarScrollContentReserve(insets.top);
+  const rowGap = edsPx(spacing['spacing-3']);
 
-  const styles = StyleSheet.create({
-    shell: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: shellHeight,
-      zIndex: 10,
-    },
-    navBackground: {
-      ...StyleSheet.absoluteFill,
-      zIndex: 0,
-    },
-    contentRow: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: insets.top,
-      bottom: 0,
-      zIndex: 2,
-      elevation: 2,
-      paddingTop: EG_NAV_BAR_PADDING_TOP,
-      paddingBottom: EG_NAV_BAR_PADDING_BOTTOM,
-      paddingHorizontal: EG_NAV_BAR_PADDING_HORIZONTAL,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: edsPx(spacing['spacing-3']),
-    },
-  });
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        shell: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: shellHeight,
+          zIndex: 10,
+        },
+        navBackground: {
+          ...StyleSheet.absoluteFill,
+          zIndex: 0,
+        },
+        contentRow: {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: insets.top,
+          bottom: 0,
+          zIndex: 2,
+          elevation: 2,
+          paddingTop: EG_NAV_BAR_PADDING_TOP,
+          paddingBottom: EG_NAV_BAR_PADDING_BOTTOM,
+          paddingHorizontal: EG_NAV_BAR_PADDING_HORIZONTAL,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: rowGap,
+        },
+      }),
+    [insets.top, rowGap, shellHeight],
+  );
 
   if (nativeNavBar) {
     return null;
@@ -81,7 +87,7 @@ export function HomeTopBar({ scrollOffset }: HomeTopBarProps) {
       </View>
     </View>
   );
-}
+});
 
 export function homeScrollTopReserve(insetsTop: number, extraBottom: number) {
   return egNavBarScrollContentReserve(insetsTop) + extraBottom;

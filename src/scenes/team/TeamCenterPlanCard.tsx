@@ -11,17 +11,18 @@ import {
   useTeamCenterPlanCardShellStyle,
 } from '@/scenes/team/TeamCenterPlanCardContent';
 import { TEAM_PLAN_PAGE_SHOT_ID } from '@/scenes/team/teamPlanPageShot';
+import {
+  getTeamCenterPlanCardLastSize,
+  setTeamCenterPlanCardLastSize,
+} from '@/scenes/team/teamCenterPlanCardLayout';
 
-/** page-shot `morph` 副本挂载即为新实例 · 沿用上次实测尺寸，首帧即有线稿 / 扫光。 */
-let lastCardSize = { width: 0, height: 0 };
-
-function TeamCenterPlanCardFace() {
+export function TeamCenterPlanCardFace() {
   const shellStyles = useTeamCenterPlanCardShellStyle();
-  const [cardSize, setCardSize] = useState(lastCardSize);
+  const [cardSize, setCardSize] = useState(getTeamCenterPlanCardLastSize);
 
   const onCardLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
-    lastCardSize = { width, height };
+    setTeamCenterPlanCardLastSize({ width, height });
     setCardSize((prev) =>
       prev.width === width && prev.height === height ? prev : { width, height },
     );

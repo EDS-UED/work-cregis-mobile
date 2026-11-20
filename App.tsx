@@ -1,6 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { enableFreeze } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+enableFreeze(true);
 
 import { AppProviders } from './src/providers/AppProviders';
 import { RootNavigator } from './src/navigation/RootNavigator';

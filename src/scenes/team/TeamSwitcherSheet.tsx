@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { EgAvatar } from '@/eds/button-glass';
 import { EgOptionButton } from '@/eds/scene-buttons';
-import { EgSheets } from '@/eds/sheets';
+import { EgSheets, type EgSheetsActionsBlankCompensation } from '@/eds/sheets';
 import { EgSymbol } from '@/eds/home-ui';
 import { EgIconAdd } from '@/eds/team-icons';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
@@ -139,7 +139,7 @@ function TeamSwitcherCreateRow({ onPress }: { onPress: () => void }) {
   );
 }
 
-/** 团队切换 · EgSheets 默认 medium · 可拉到 large · 列表 DL · Web3 走 action 插槽。 */
+/** 团队切换 · EgSheets 默认 adaptive · 可拉到 large · 列表 DL · Web3 走 action 插槽。 */
 export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps) {
   const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();
@@ -199,13 +199,15 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
       visible={visible}
       onDismiss={onDismiss}
       mode={mode}
-      detents={['medium', 'large']}
-      initialDetent="medium"
+      detents={['adaptive', 'large']}
+      initialDetent="adaptive"
       title={t('team.switcherTitle')}
       showTitle
       showRight
       dismissible
+      showActions
       actions={sheetActions}
+      actionsBlankCompensation={'spacing-14' as EgSheetsActionsBlankCompensation}
     >
       <EgDataList
         sceneContentInset={edsSceneContentInset(spacing)}

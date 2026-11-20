@@ -1,3 +1,5 @@
+import type { MessageCategory } from '@/scenes/messages/messagesMock';
+import type { TeamCenterDetailId } from '@/scenes/team/teamCenterDetail';
 import type { TabRouteName } from '@/types/app';
 
 export type RootTabParamList = {
@@ -11,7 +13,9 @@ export type HomeStackParamList = {
   HomeMain: undefined;
   PersonalCenter: undefined;
   TeamCenter: undefined;
+  TeamCenterDetail: { id: TeamCenterDetailId };
   Messages: undefined;
+  MessagesCategory: { category: MessageCategory };
   Scan: undefined;
 };
 

@@ -79,6 +79,20 @@ export const MESSAGE_MOCK_UNREAD_TARGETS: Record<MessageCategory, number> = {
   amlAlert: 0,
 };
 
+/** 通知前置 / 首页胶囊 · 各分类未读之和（与 hub 行 `EgMessage` 数字合计一致）。 */
+export function messageTotalUnreadCount(
+  items: readonly { category: MessageCategory; unread: boolean }[] = MESSAGE_MOCK_ITEMS,
+): number {
+  const counts = messageCategoryUnreadCounts(items);
+  return (
+    counts.transaction +
+    counts.teamActivity +
+    counts.collaboration +
+    counts.announcement +
+    counts.amlAlert
+  );
+}
+
 /** 通知分段角标 · 各分类未读条数。 */
 export function messageCategoryUnreadCounts(
   items: readonly { category: MessageCategory; unread: boolean }[],
@@ -98,7 +112,7 @@ export function messageCategoryUnreadCounts(
   return counts;
 }
 
-/** Mock · 文案在组件内用 i18n key 映射（见 `MessagesScene`）。 */
+/** Mock · 文案在组件内用 i18n key 映射（见 `MessagesCategoryScene`）。 */
 export type MessageListItemDef = Omit<MessageListItem, 'title' | 'subtitle'> & {
   titleKey?: `messages.${string}`;
   subtitleKey?: `messages.${string}`;

@@ -34,3 +34,15 @@ export function teamPlanTierAccent(tier: TeamPlanTier, mode: ThemeMode): string 
       return undefined;
   }
 }
+
+/** 版本名 / 钻石标 · 各档强调色（基础版 `text-base-secondary`）。 */
+export function teamPlanTierLabelColor(
+  tier: TeamPlanTier,
+  mode: ThemeMode,
+  secondaryText: string,
+): string {
+  return teamPlanTierAccent(tier, mode) ?? secondaryText;
+}
+
+/** 账户卡版本钻石资源名 · 着色见 `TeamPlanTierDiamondIcon`（与 `teamPlanTierLabelColor` 同色）。 */
+export const TEAM_PLAN_TIER_DIAMOND_SYMBOL = 'eds-diamond-fill' as const;

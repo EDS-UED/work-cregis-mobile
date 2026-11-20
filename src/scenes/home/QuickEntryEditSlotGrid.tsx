@@ -445,6 +445,7 @@ export function QuickEntryEditSlotGrid({
           gap: sectionGap,
           alignSelf: 'stretch',
           paddingBottom: edsPx(spacing['spacing-8']),
+          backgroundColor: String(colors['material-card-shallow']),
         },
       ]}
     >

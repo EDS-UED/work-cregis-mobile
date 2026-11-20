@@ -1,37 +1,57 @@
-import { useLayoutEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useCallback } from 'react';
+import {
+  useFocusEffect,
+  useNavigation,
+  type NavigationState,
+} from '@react-navigation/native';
 
+import {
+  applyHomeTabBarStyleForTabState,
+  CREGIS_RN_TAB_BAR_STYLE,
+  getHomeStackFocusedRouteName,
+  shouldHideTabBarForHomeStackRoute,
+} from '@/navigation/homeTabScreenOptions';
 import { shouldUseNativeRootTabBar } from '@/navigation/nativeEdsRuntime';
 
-const RN_TAB_BAR_STYLE = {
-  position: 'absolute' as const,
-  backgroundColor: 'transparent',
-  borderTopWidth: 0,
-  elevation: 0,
+type NavWithParent = {
+  getParent: () => NavWithParent | undefined;
+  getState: () => { type?: string } | undefined;
+  setOptions: (options: { tabBarStyle?: object }) => void;
 };
 
-/** Stack 子页（设置 / 团队中心等）— 隐藏底部 Tab，离开时恢复。 */
+function findTabNavigator(navigation: NavWithParent): NavWithParent | undefined {
+  let tab: NavWithParent | undefined = navigation.getParent();
+  while (tab && tab.getState()?.type !== 'tab') {
+    tab = tab.getParent();
+  }
+  return tab;
+}
+
+/** Stack 子页 — 聚焦隐藏 Tab；`homeTabScreenOptions` 已藏条时跳过重复 `setOptions`。 */
 export function useHideTabBarForInnerPage(enabled: boolean) {
   const navigation = useNavigation();
 
-  useLayoutEffect(() => {
-    if (!enabled) return;
-    let tab = navigation.getParent();
-    while (tab && tab.getState()?.type !== 'tab') {
-      tab = tab.getParent();
-    }
-    if (!tab) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!enabled) return;
+      const tab = findTabNavigator(navigation as NavWithParent);
+      if (!tab) return;
 
-    if (shouldUseNativeRootTabBar()) {
+      const tabState = tab.getState() as NavigationState | undefined;
+      const focused = getHomeStackFocusedRouteName(tabState);
+      if (shouldHideTabBarForHomeStackRoute(focused)) {
+        return;
+      }
+
       tab.setOptions({ tabBarStyle: { display: 'none' } });
-      return () => {
-        tab.setOptions({ tabBarStyle: undefined });
-      };
-    }
 
-    tab.setOptions({ tabBarStyle: { display: 'none' } });
-    return () => {
-      tab.setOptions({ tabBarStyle: RN_TAB_BAR_STYLE });
-    };
-  }, [enabled, navigation]);
+      return () => {
+        applyHomeTabBarStyleForTabState(
+          (options) => tab.setOptions(options),
+          tab.getState() as NavigationState | undefined,
+          shouldUseNativeRootTabBar() ? undefined : CREGIS_RN_TAB_BAR_STYLE,
+        );
+      };
+    }, [enabled, navigation]),
+  );
 }

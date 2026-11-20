@@ -8,28 +8,20 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPageBackground, edsPx } from '@/utils/edsTheme';
 
-/** `page` — `box-page`；`shallow` — `material-card-shallow`（对齐个人中心 `EgItemGroup`）。 */
-export type CompareTeamCenterMenuCardTone = 'page' | 'shallow';
+/** `page` — `box-page`；`shallow` — `material-card-shallow`。 */
+export type TeamCenterMenuCardTone = 'page' | 'shallow';
 
-const PERSONAL_CENTER_SECTION_TONE: Record<
-  CompareTeamCenterMenuCardTone,
-  boolean
-> = {
-  page: true,
-  shallow: true,
-};
-
-type CompareTeamCenterMenuSectionCardProps = PropsWithChildren<{
+type TeamCenterMenuSectionCardProps = PropsWithChildren<{
   sectionTitle: string;
-  cardTone: CompareTeamCenterMenuCardTone;
+  cardTone: TeamCenterMenuCardTone;
 }>;
 
-/** 对比 · 团队中心菜单分块 — 小标题 + 圆角卡片内 `EgDataList`。 */
-export function CompareTeamCenterMenuSectionCard({
+/** 团队中心 · 小标题 + 圆角灰底卡内 `EgDataList` 行。 */
+export function TeamCenterMenuSectionCard({
   sectionTitle,
   cardTone,
   children,
-}: CompareTeamCenterMenuSectionCardProps) {
+}: TeamCenterMenuSectionCardProps) {
   const colors = useThemeColors();
   const { spacing } = useEdsTheme();
 
@@ -38,16 +30,10 @@ export function CompareTeamCenterMenuSectionCard({
       StyleSheet.create({
         section: {
           gap: edsPx(spacing['spacing-2']),
-          ...(PERSONAL_CENTER_SECTION_TONE[cardTone]
-            ? { marginBottom: edsPx(spacing['spacing-4']) }
-            : null),
+          marginBottom: edsPx(spacing['spacing-4']),
         },
         sectionTitle: {
-          marginLeft: edsPx(
-            spacing[
-              PERSONAL_CENTER_SECTION_TONE[cardTone] ? 'spacing-5' : 'spacing-2'
-            ],
-          ),
+          marginLeft: edsPx(spacing['spacing-5']),
         },
         card: {
           backgroundColor:

@@ -8,15 +8,10 @@ export const HOME_QUICK_ENTRY_WRAP_AFTER = HOME_QUICK_ENTRY_PER_ROW;
 export type QuickServiceId =
   | 'send'
   | 'receive'
-  | 'todoList'
-  | 'walletWithdraw'
-  | 'subAddressWithdraw'
   | 'subAddressManage'
+  | 'withdrawRecord'
   | 'callbackRecord'
-  | 'developer'
-  | 'ipWhitelist'
-  | 'callbackSettings'
-  | 'notificationSettings'
+  | 'projectSettings'
   | 'amlAutoRule'
   | 'amlQueryRecord'
   | 'strategy'
@@ -30,10 +25,18 @@ export type QuickServiceId =
   | 'member'
   | 'role'
   | 'teamApi'
+  | 'webhook'
   | 'appMarketTeamRole'
   | 'remittance'
   | 'swap'
   /** @deprecated 旧版目录项，仅用于解析已保存的快捷入口 */
+  | 'todoList'
+  | 'walletWithdraw'
+  | 'subAddressWithdraw'
+  | 'developer'
+  | 'ipWhitelist'
+  | 'callbackSettings'
+  | 'notificationSettings'
   | 'paymentRequest'
   | 'exchange'
   | 'aml'
@@ -80,15 +83,10 @@ export const QUICK_SERVICE_SECTIONS: QuickServiceSection[] = [
     id: 'waas',
     titleKey: 'home.quickServiceSectionWaas',
     items: [
-      { id: 'todoList', icon: icon(), labelKey: 'home.quickServiceTodoList' },
-      { id: 'walletWithdraw', icon: icon(), labelKey: 'home.quickServiceWalletWithdraw' },
-      { id: 'subAddressWithdraw', icon: icon(), labelKey: 'home.quickServiceSubAddressWithdraw' },
       { id: 'subAddressManage', icon: icon(), labelKey: 'home.quickServiceSubAddressManage' },
+      { id: 'withdrawRecord', icon: icon(), labelKey: 'home.quickServiceWithdrawRecord' },
       { id: 'callbackRecord', icon: icon(), labelKey: 'home.quickServiceCallbackRecord' },
-      { id: 'developer', icon: icon(), labelKey: 'home.quickServiceDeveloper' },
-      { id: 'ipWhitelist', icon: icon(), labelKey: 'home.quickServiceIpWhitelist' },
-      { id: 'callbackSettings', icon: icon(), labelKey: 'home.quickServiceCallbackSettings' },
-      { id: 'notificationSettings', icon: icon(), labelKey: 'home.quickServiceNotificationSettings' },
+      { id: 'projectSettings', icon: icon(), labelKey: 'home.quickServiceProjectSettings' },
     ],
   },
   {
@@ -114,6 +112,7 @@ export const QUICK_SERVICE_SECTIONS: QuickServiceSection[] = [
       { id: 'member', icon: icon(), labelKey: 'home.quickServiceMember' },
       { id: 'role', icon: icon(), labelKey: 'home.quickServiceRole' },
       { id: 'teamApi', icon: icon(), labelKey: 'home.quickServiceTeamApi' },
+      { id: 'webhook', icon: icon(), labelKey: 'home.quickServiceWebhook' },
     ],
   },
   {
@@ -129,6 +128,13 @@ export const QUICK_SERVICE_SECTIONS: QuickServiceSection[] = [
 
 /** 旧版项：不在分区网格展示，仍可解析历史快捷入口 ID。 */
 const LEGACY_QUICK_SERVICES: QuickServiceDef[] = [
+  { id: 'todoList', icon: icon(), labelKey: 'home.quickServiceTodoList' },
+  { id: 'walletWithdraw', icon: icon(), labelKey: 'home.quickServiceWalletWithdraw' },
+  { id: 'subAddressWithdraw', icon: icon(), labelKey: 'home.quickServiceSubAddressWithdraw' },
+  { id: 'developer', icon: icon(), labelKey: 'home.quickServiceDeveloper' },
+  { id: 'ipWhitelist', icon: icon(), labelKey: 'home.quickServiceIpWhitelist' },
+  { id: 'callbackSettings', icon: icon(), labelKey: 'home.quickServiceCallbackSettings' },
+  { id: 'notificationSettings', icon: icon(), labelKey: 'home.quickServiceNotificationSettings' },
   {
     id: 'paymentRequest',
     icon: 'eds-arrow-deposit',

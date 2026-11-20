@@ -40,7 +40,7 @@ function BalanceVisibilityIcon({
 
   return (
     <EgSymbol
-      name={balanceVisible ? 'eds-close-eye' : 'eds-eye'}
+      name={balanceVisible ? 'eds-eye' : 'eds-close-eye'}
       displayPx={iconPx}
       mode={mode}
       strokeColorToken="text-base-secondary"

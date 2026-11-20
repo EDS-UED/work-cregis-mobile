@@ -1,5 +1,12 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,17 +17,20 @@ import {
   EgIconListLatticeMobile,
   EgSymbol,
 } from "@/eds/home-ui";
+import { EgSymbolAction } from "@/eds/scene-buttons";
 import {
   egTabBarScrollContentReserveWithSafeArea,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
 } from "@/eds/nav-bar";
 import { shouldUseEgTabBarNativeStack } from "@/eds/runtime";
+import { EgOdometer } from "@/eds/animations";
 import mobileTheme from "@/eds/tokens";
 import { edsMotionSpring } from "@/utils/edsMotion";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
+import { useEdsMainScrollLayout } from "@/hooks/useEdsMainScrollLayout";
 import { useEdsTheme } from "@/hooks/useEdsTheme";
 import { useEdsTypography } from "@/hooks/useEdsTypography";
 import { HomeTodoEmptyState } from "@/scenes/home/HomeTodoEmptyState";
@@ -108,7 +118,7 @@ function HomeBalanceVisibilityIcon({
       }}
     >
       <EgSymbol
-        name={balanceVisible ? "eds-close-eye" : "eds-eye"}
+        name={balanceVisible ? "eds-eye" : "eds-close-eye"}
         displayPx={iconPx}
         mode={mode}
         strokeColorToken="text-base-secondary"
@@ -118,10 +128,11 @@ function HomeBalanceVisibilityIcon({
   );
 }
 
-/** 显示/隐藏余额 — 点按范围为标题行 + 金额；无点按缩放动效。 */
+/** 显示/隐藏余额 — 点按范围为标题行 + 金额；无点按缩放动效。右侧 `EgSymbolAction` 独立热区。 */
 function HomeBalanceBlock({
   balanceVisible,
   balanceText,
+  balanceOdometerIntroKey,
   estTotalValueLabel,
   mode,
   colors,
@@ -130,9 +141,13 @@ function HomeBalanceBlock({
   onToggle,
   hideBalanceLabel,
   showBalanceLabel,
+  assetChartLabel,
+  onAssetChartPress,
 }: {
   balanceVisible: boolean;
   balanceText: string;
+  /** 换栈/换 Tab 回首页时递增，强制 EgOdometer 重挂载播 intro（首次 focus 不递增，避免与冷启动双播）。 */
+  balanceOdometerIntroKey: number;
   estTotalValueLabel: string;
   mode: "light" | "dark";
   colors: ReturnType<typeof useEdsTheme>["colors"];
@@ -141,37 +156,77 @@ function HomeBalanceBlock({
   onToggle: () => void;
   hideBalanceLabel: string;
   showBalanceLabel: string;
+  assetChartLabel: string;
+  onAssetChartPress?: () => void;
 }) {
+  const typography = useEdsTypography();
   const labelIconGap = edsPx(spacing["spacing-1"]);
+  const assetChartGap = edsPx(spacing["spacing-3"]);
+  const balanceAmountTextStyle = useMemo(
+    () => [
+      typography.display,
+      { color: String(colors["text-base-primary"]) },
+    ],
+    [typography.display, colors],
+  );
 
   return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="button"
-      accessibilityLabel={balanceVisible ? hideBalanceLabel : showBalanceLabel}
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: assetChartGap,
+        alignSelf: "stretch",
+      }}
     >
-      <View style={{ gap: labelToAmountGap }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: labelIconGap,
-          }}
-        >
-          <SceneText
-            variant="bodyMediumStrong"
-            style={{ color: String(colors["text-base-secondary"]) }}
+      <Pressable
+        onPress={onToggle}
+        accessibilityRole="button"
+        accessibilityLabel={balanceVisible ? hideBalanceLabel : showBalanceLabel}
+        style={{ flex: 1, flexShrink: 1, minWidth: 0 }}
+      >
+        <View style={{ gap: labelToAmountGap }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: labelIconGap,
+            }}
           >
-            {estTotalValueLabel}
-          </SceneText>
-          <HomeBalanceVisibilityIcon
-            balanceVisible={balanceVisible}
-            mode={mode}
-          />
+            <SceneText
+              variant="bodyMediumStrong"
+              style={{ color: String(colors["text-base-secondary"]) }}
+            >
+              {estTotalValueLabel}
+            </SceneText>
+            <HomeBalanceVisibilityIcon
+              balanceVisible={balanceVisible}
+              mode={mode}
+            />
+          </View>
+          {balanceVisible ? (
+            <EgOdometer
+              key={`${balanceText}-${balanceOdometerIntroKey}`}
+              value={balanceText}
+              animateIntro
+              textStyle={balanceAmountTextStyle}
+              testID="home-balance-amount"
+            />
+          ) : (
+            <SceneText variant="display">{balanceText}</SceneText>
+          )}
         </View>
-        <SceneText variant="display">{balanceText}</SceneText>
-      </View>
-    </Pressable>
+      </Pressable>
+      <EgSymbolAction
+        size="xl"
+        tone="plain"
+        icon="eds-pie-chart-color"
+        mode={mode}
+        onPress={onAssetChartPress}
+        accessibilityLabel={assetChartLabel}
+        testID="home-balance-asset-chart"
+      />
+    </View>
   );
 }
 
@@ -362,7 +417,11 @@ export function HomeScene() {
   const { t } = useTranslation();
   const { colors, mode, spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
-  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll();
+  const nativeNavBar = shouldUseEgNavBarNativeStack();
+  const nativeTabBar = shouldUseEgTabBarNativeStack();
+  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll({
+    nativeScrollEdge: true,
+  });
   const balanceVisible = useHomeStore((state) => state.balanceVisible);
   const totalBalanceDisplay = useHomeStore(
     (state) => state.totalBalanceDisplay,
@@ -382,6 +441,18 @@ export function HomeScene() {
   const [quickServicesVisible, setQuickServicesVisible] = useState(false);
   const [todoSheetItem, setTodoSheetItem] = useState<HomeTodoItem | null>(null);
   const [todoSheetVisible, setTodoSheetVisible] = useState(false);
+  const [balanceOdometerIntroKey, setBalanceOdometerIntroKey] = useState(0);
+  const skipOdometerIntroOnNextFocus = useRef(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (skipOdometerIntroOnNextFocus.current) {
+        skipOdometerIntroOnNextFocus.current = false;
+        return;
+      }
+      setBalanceOdometerIntroKey((key) => key + 1);
+    }, []),
+  );
 
   const quickEntryServices = useMemo(
     () => resolveQuickServices(quickEntryIds),
@@ -421,12 +492,17 @@ export function HomeScene() {
   const balanceToQuickActionsGap = edsPx(spacing["spacing-5"]);
   const pageDividerMarginTop = edsPx(spacing["spacing-8"]);
   const pageDividerMarginBottom = edsPx(spacing["spacing-6"]);
-  const nativeNavBar = shouldUseEgNavBarNativeStack();
-  const nativeTabBar = shouldUseEgTabBarNativeStack();
   const tabBarReserve = nativeTabBar
     ? 0
     : egTabBarScrollContentReserveWithSafeArea(insets.bottom);
   const topReserve = homeScrollTopReserve(insets.top, navContentGap);
+  const scrollPaddingTop = nativeNavBar ? navContentGap : topReserve;
+  const scrollPaddingBottom = tabBarReserve;
+  const scrollLayout = useEdsMainScrollLayout({
+    layoutActive: nativeNavBar,
+    paddingTop: scrollPaddingTop,
+    paddingBottom: scrollPaddingBottom,
+  });
 
   const balanceText = balanceVisible ? totalBalanceDisplay : "**********";
   const styles = useMemo(
@@ -434,7 +510,6 @@ export function HomeScene() {
       StyleSheet.create({
         root: { flex: 1, backgroundColor: edsPageBackground(colors) },
         content: {
-          flexGrow: 1,
           paddingHorizontal: sceneContentInset,
         },
         balanceSection: {},
@@ -458,7 +533,6 @@ export function HomeScene() {
           alignSelf: "stretch",
         },
         todoSection: {
-          flexGrow: 1,
           gap: edsPx(spacing["spacing-3"]),
           alignSelf: "stretch",
         },
@@ -500,6 +574,7 @@ export function HomeScene() {
         <HomeBalanceBlock
           balanceVisible={balanceVisible}
           balanceText={balanceText}
+          balanceOdometerIntroKey={balanceOdometerIntroKey}
           estTotalValueLabel={t("home.estTotalValue")}
           mode={mode}
           colors={colors}
@@ -508,6 +583,7 @@ export function HomeScene() {
           onToggle={toggleBalanceVisible}
           hideBalanceLabel={t("home.hideBalance")}
           showBalanceLabel={t("home.showBalance")}
+          assetChartLabel={t("home.assetDistribution")}
         />
       </View>
 
@@ -572,7 +648,16 @@ export function HomeScene() {
         <EgDivider variant="page" mode={mode} />
       </View>
 
-      <View style={styles.todoSection}>
+      <View
+        style={[
+          styles.todoSection,
+          nativeNavBar && scrollLayout.contentOverflows
+            ? { flexGrow: 1 }
+            : !nativeNavBar
+              ? { flexGrow: 1 }
+              : null,
+        ]}
+      >
         <SceneText variant="title">{t("home.todoTitle")}</SceneText>
         <HomeTodoFilterBar
           options={todoFilterOptions}
@@ -603,37 +688,65 @@ export function HomeScene() {
     </>
   );
 
+  const homeTopBarOverlay = useMemo(
+    () => <HomeTopBar scrollOffset={scrollOffset} />,
+    [scrollOffset],
+  );
+
+  const homeScrollProps = {
+    onScroll,
+    scrollEventThrottle,
+    scrollEnabled: scrollLayout.scrollEnabled,
+    showsVerticalScrollIndicator: scrollLayout.showsVerticalScrollIndicator,
+    bounces: scrollLayout.bounces,
+    alwaysBounceVertical: scrollLayout.alwaysBounceVertical,
+    overScrollMode: scrollLayout.overScrollMode,
+    contentContainerStyle: [
+      styles.content,
+      scrollLayout.contentContainerExtras.flexGrow != null
+        ? { flexGrow: scrollLayout.contentContainerExtras.flexGrow }
+        : null,
+      { paddingTop: scrollPaddingTop },
+      scrollLayout.contentContainerExtras.paddingBottom != null
+        ? { paddingBottom: scrollLayout.contentContainerExtras.paddingBottom }
+        : null,
+    ],
+  };
+
+  const scrollContent = (
+    <View onLayout={scrollLayout.onContentLayout} collapsable={false}>
+      {scrollBody}
+    </View>
+  );
+
   if (nativeNavBar) {
     return (
       <ScrollView
         style={[nativeNavScrollSurfaceStyle(colors), styles.root]}
         contentInsetAdjustmentBehavior="automatic"
-        onScroll={onScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: navContentGap, paddingBottom: tabBarReserve },
-        ]}
+        onLayout={scrollLayout.onViewportLayout}
+        {...homeScrollProps}
       >
-        {scrollBody}
+        {scrollContent}
       </ScrollView>
     );
   }
 
   return (
-    <EdsGlassScreenShell
-      style={styles.root}
-      overlay={<HomeTopBar scrollOffset={scrollOffset} />}
-    >
+    <EdsGlassScreenShell style={styles.root} overlay={homeTopBarOverlay}>
       <ScrollView
         style={overlayNavScrollSurfaceStyle()}
         nestedScrollEnabled
         contentInsetAdjustmentBehavior="never"
         onScroll={onScroll}
         scrollEventThrottle={scrollEventThrottle}
+        bounces
+        alwaysBounceVertical
+        overScrollMode="always"
         contentContainerStyle={[
           styles.content,
-          { paddingTop: topReserve, paddingBottom: tabBarReserve },
+          { flexGrow: 1 },
+          { paddingTop: scrollPaddingTop, paddingBottom: scrollPaddingBottom },
         ]}
       >
         {scrollBody}

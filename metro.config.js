@@ -197,6 +197,7 @@ if (useLinkedMetro) {
     projectRoot,
     edsDistRoot,
     path.join(tokensRoot, 'dist'),
+    animationsRoot,
     path.join(animationsRoot, 'dist'),
   ];
   config.resolver.nodeModulesPaths = [consumerNodeModules];

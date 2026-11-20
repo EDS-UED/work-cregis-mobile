@@ -6,6 +6,7 @@ import { HomeStackNavigator } from '@/navigation/stacks/HomeStackNavigator';
 import { TransactionRecordsStackNavigator } from '@/navigation/stacks/TransactionRecordsStackNavigator';
 import type { RootTabParamList } from '@/navigation/types';
 import { cregisNativeTabBarScreenOptions } from '@/navigation/cregisNativeTabBarScreenOptions';
+import { homeTabScreenOptionsNative } from '@/navigation/homeTabScreenOptions';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 
 const NativeTab = createNativeBottomTabNavigator<RootTabParamList>();
@@ -16,7 +17,11 @@ export function RootTabNavigatorNativeTabs() {
 
   return (
     <NativeTab.Navigator screenOptions={cregisNativeTabBarScreenOptions({ mode })}>
-      <NativeTab.Screen name="Home" component={HomeStackNavigator} />
+      <NativeTab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={homeTabScreenOptionsNative}
+      />
       <NativeTab.Screen name="Wallet" component={AssetsStackNavigator} />
       <NativeTab.Screen name="Collaboration" component={CollaborationStackNavigator} />
       <NativeTab.Screen name="TransactionRecords" component={TransactionRecordsStackNavigator} />

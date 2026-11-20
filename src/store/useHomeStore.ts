@@ -2,6 +2,9 @@ import type { ImageSourcePropType } from 'react-native';
 import { create } from 'zustand';
 
 import companyAvatar from '../../assets/company-avatar.png';
+import companyAvatar1 from '../../assets/company-avatar-1.png';
+import companyAvatar2 from '../../assets/company-avatar-2.png';
+import companyAvatar3 from '../../assets/company-avatar-3.png';
 import {
   DEFAULT_QUICK_ENTRY_IDS,
   type QuickServiceId,
@@ -49,15 +52,33 @@ const MOCK_COMPANY_NAME = 'Quant Inc.';
 
 /** 四个团队各对应一档版本（基础 / 高级 / 商业 / 企业）。 */
 const TEAM_SWITCHER_SEED: TeamSwitcherItem[] = [
-  { id: 'tm_tony', name: '深度求锁科技', planTier: 'basic', colorIndex: 4 },
+  {
+    id: 'tm_tony',
+    name: '深度求锁科技',
+    planTier: 'basic',
+    colorIndex: 4,
+    avatarSource: companyAvatar1,
+  },
   {
     id: 'tm_product',
     name: MOCK_COMPANY_NAME,
     planTier: 'advanced',
     avatarSource: companyAvatar,
   },
-  { id: 'tm_hello', name: 'ClearPath Ltd.', planTier: 'business', colorIndex: 7 },
-  { id: 'tm_test2', name: 'Bridge Inc.', planTier: 'enterprise', colorIndex: 1 },
+  {
+    id: 'tm_hello',
+    name: 'ClearPath Ltd.',
+    planTier: 'business',
+    colorIndex: 7,
+    avatarSource: companyAvatar2,
+  },
+  {
+    id: 'tm_test2',
+    name: 'Bridge Inc.',
+    planTier: 'enterprise',
+    colorIndex: 1,
+    avatarSource: companyAvatar3,
+  },
 ];
 
 type HomeState = {
@@ -192,7 +213,9 @@ function todoFilterCounts(items: HomeTodoItem[]): Record<HomeTodoFilter, number>
   };
 }
 
-const defaultTeam = TEAM_SWITCHER_SEED[1]!;
+const defaultTeam =
+  TEAM_SWITCHER_SEED.find((team) => team.name === MOCK_COMPANY_NAME) ??
+  TEAM_SWITCHER_SEED[1]!;
 
 export const useHomeStore = create<HomeState>((set, get) => ({
   companyName: MOCK_COMPANY_NAME,

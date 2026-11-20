@@ -1,6 +1,10 @@
 import type { ComponentType } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CregisTabBar } from '@/navigation/CregisTabBar';
+import {
+  CREGIS_RN_TAB_BAR_STYLE,
+  homeTabScreenOptions,
+} from '@/navigation/homeTabScreenOptions';
 import { shouldUseNativeRootTabBar } from '@/navigation/nativeEdsRuntime';
 import { HomeStackNavigator } from '@/navigation/stacks/HomeStackNavigator';
 import type { RootTabParamList } from '@/navigation/types';
@@ -55,7 +59,11 @@ function RootTabNavigatorRn() {
         },
       }}
     >
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={homeTabScreenOptions}
+      />
       <Tab.Screen name="Wallet" component={WalletStack} options={{ lazy: true }} />
       <Tab.Screen name="Collaboration" component={CollaborationStack} options={{ lazy: true }} />
       <Tab.Screen

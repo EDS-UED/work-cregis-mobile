@@ -21,14 +21,17 @@ export function useHomeMainScreenOptions(): StackNavigationOptions {
 
   return useMemo(() => {
     if (shouldUseEgEdsAnimaNativePage()) {
+      const hiddenTitle = egNavBarNativeStackOptions({
+        title: t('tabs.home'),
+        showTitle: false,
+        showLeft: false,
+        showRight: false,
+        mode,
+      });
+      /** 只改标题/栏项；scroll edge 交给栈底 `EgEdsAnimaPage` defer + `useEgNavBarScroll`。 */
       return {
-        ...egNavBarNativeStackOptions({
-          title: t('tabs.home'),
-          showTitle: false,
-          showLeft: false,
-          showRight: false,
-          mode,
-        }),
+        title: hiddenTitle.title,
+        headerTitleStyle: hiddenTitle.headerTitleStyle,
         ...iosItems,
         contentStyle: { backgroundColor: pageBackground },
       } as StackNavigationOptions;

@@ -9,12 +9,14 @@ import {
   EG_NAV_BAR_PADDING_TOP,
   egNavBarScrollContentReserve,
   egTabBarScrollContentReserveWithSafeArea,
+  egNavBarNativeStackOptions,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
 } from '@/eds/nav-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import { useEdsMainScrollLayout } from '@/hooks/useEdsMainScrollLayout';
 import { useHideTabBarForInnerPage } from '@/hooks/useHideTabBarForInnerPage';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { EdsGlassScreenShell } from '@/scenes/shared/EdsGlassScreenShell';
@@ -41,6 +43,8 @@ type SceneScaffoldProps = PropsWithChildren<{
   contentPaddingHorizontal?: number;
   /** 系统栏 / RN overlay 栏自定义标题（如团队头像 + 下拉）。 */
   customHeaderTitle?: () => ReactElement;
+  /** 顶栏主标题（默认展示；团队中心等仅右栏胶囊时可关）。 */
+  showNavTitle?: boolean;
   /** overlay 顶栏右侧槽（iOS 26+ 系统栏请走 Stack `screenOptions`）。 */
   overlayNavTrailing?: ReactNode;
 }>;
@@ -52,6 +56,7 @@ export function SceneScaffold({
   pageBackground = 'default',
   contentPaddingHorizontal,
   customHeaderTitle,
+  showNavTitle = true,
   overlayNavTrailing,
   children,
 }: SceneScaffoldProps) {
@@ -60,7 +65,9 @@ export function SceneScaffold({
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const nativeNavBar = shouldUseEgNavBarNativeStack();
-  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll();
+  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll({
+    nativeScrollEdge: true,
+  });
 
   useHideTabBarForInnerPage(showNavBack);
   /** RN 栈 / 非原生 Nav — overlay `EgNavBar`；iOS 26+ 由 `EgEdsAnimaPage` 系统栏承担。 */
@@ -78,22 +85,41 @@ export function SceneScaffold({
   const navContentGap = edsNavContentGap(spacing);
   const backLabel = t('common.back');
 
+  const nativeScrollPaddingTop = navContentGap;
+  const nativeScrollPaddingBottom = tabBarReserve;
+  const overlayScrollPaddingTop = topReserve + navContentGap;
+  const overlayScrollPaddingBottom = overlayBottomReserve;
+
   useLayoutEffect(() => {
     if (nativeNavBar) {
-      navigation.setOptions(
-        customHeaderTitle ? { headerTitle: customHeaderTitle } : { title },
-      );
+      if (customHeaderTitle) {
+        navigation.setOptions({ headerTitle: customHeaderTitle });
+        return;
+      }
+      if (!showNavTitle) {
+        const hiddenTitle = egNavBarNativeStackOptions({
+          title,
+          showTitle: false,
+          mode,
+        });
+        /** 只改标题可见性，勿展开整包 options（会冲掉 `unstable_headerLeftItems` 玻璃返回）。 */
+        navigation.setOptions({
+          title: hiddenTitle.title,
+          headerTitleStyle: hiddenTitle.headerTitleStyle,
+        });
+        return;
+      }
+      navigation.setOptions({ title });
       return;
     }
     navigation.setOptions({ headerShown: false, title });
-  }, [customHeaderTitle, nativeNavBar, navigation, title]);
+  }, [customHeaderTitle, mode, nativeNavBar, navigation, showNavTitle, title]);
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         root: { flex: 1 },
         content: {
-          flexGrow: 1,
           paddingHorizontal:
             contentPaddingHorizontal ?? edsSceneContentInset(spacing),
           paddingBottom: edsSceneContentInset(spacing),
@@ -140,36 +166,91 @@ export function SceneScaffold({
     [contentPaddingHorizontal, spacing],
   );
 
-  const body = (
-    <>
-      {subtitle ? (
-        <View style={styles.subtitleBlock}>
-          <SceneText variant="footnote">{subtitle}</SceneText>
-        </View>
-      ) : null}
-      {children}
-    </>
-  );
-
   const pageBg =
     pageBackground === 'card'
       ? edsPageCardBackground(colors)
       : edsPageBackground(colors);
   const pageStyle = [styles.root, { backgroundColor: pageBg }];
 
+  const sceneContentPaddingBottom = edsSceneContentInset(spacing);
+  /** 栈内页（`showNavBack`）固定 inset，勿走 layout 闸 — push 首帧更轻。 */
+  const nativeScrollLayoutGate =
+    !showNavBack && nativeScrollPaddingBottom > 0;
+  const overlayScrollLayoutGate =
+    !showNavBack && overlayScrollPaddingBottom > 0;
+  const nativeScrollLayout = useEdsMainScrollLayout({
+    layoutActive: nativeScrollLayoutGate,
+    paddingTop: nativeScrollPaddingTop,
+    paddingBottom: nativeScrollPaddingBottom,
+    contentExtentBottom: sceneContentPaddingBottom,
+  });
+  const overlayScrollLayout = useEdsMainScrollLayout({
+    layoutActive: overlayScrollLayoutGate,
+    paddingTop: overlayScrollPaddingTop,
+    paddingBottom: overlayScrollPaddingBottom,
+    contentExtentBottom: sceneContentPaddingBottom,
+  });
+
+  const body = (
+  <>
+    {subtitle ? (
+      <View style={styles.subtitleBlock}>
+        <SceneText variant="footnote">{subtitle}</SceneText>
+      </View>
+    ) : null}
+    {children}
+  </>
+  );
+
   if (!overlayNav) {
+    /** iOS 26+：ScrollView 须为屏内首子链（对齐 `EgPage` · `useEgNavBarScroll` hidden→soft）。 */
     return (
       <ScrollView
-        style={[nativeNavScrollSurfaceStyle(colors), { backgroundColor: pageBg }]}
+        style={[
+          nativeNavScrollSurfaceStyle(colors),
+          { flex: 1, backgroundColor: pageBg },
+        ]}
         contentInsetAdjustmentBehavior="automatic"
         onScroll={onScroll}
         scrollEventThrottle={scrollEventThrottle}
+        onLayout={
+          nativeScrollLayoutGate
+            ? nativeScrollLayout.onViewportLayout
+            : undefined
+        }
+        scrollEnabled={nativeScrollLayout.scrollEnabled}
+        showsVerticalScrollIndicator={
+          nativeScrollLayoutGate
+            ? nativeScrollLayout.showsVerticalScrollIndicator
+            : true
+        }
+        bounces={nativeScrollLayout.bounces}
+        alwaysBounceVertical={nativeScrollLayout.alwaysBounceVertical}
+        overScrollMode={nativeScrollLayout.overScrollMode}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: navContentGap, paddingBottom: tabBarReserve },
+          nativeScrollLayoutGate
+            ? nativeScrollLayout.contentContainerExtras.flexGrow != null
+              ? { flexGrow: nativeScrollLayout.contentContainerExtras.flexGrow }
+              : null
+            : { flexGrow: 1 },
+          { paddingTop: nativeScrollPaddingTop },
+          nativeScrollLayoutGate
+            ? nativeScrollLayout.contentContainerExtras.paddingBottom != null
+              ? { paddingBottom: nativeScrollLayout.contentContainerExtras.paddingBottom }
+              : null
+            : nativeScrollPaddingBottom > 0
+              ? { paddingBottom: nativeScrollPaddingBottom }
+              : null,
         ]}
       >
-        {body}
+        {nativeScrollLayoutGate ? (
+          <View onLayout={nativeScrollLayout.onContentLayout} collapsable={false}>
+            {body}
+          </View>
+        ) : (
+          body
+        )}
       </ScrollView>
     );
   }
@@ -189,7 +270,7 @@ export function SceneScaffold({
             chromeContext="overlay"
             mode={mode}
             title={title}
-            showTitle={!customHeaderTitle}
+            showTitle={showNavTitle && !customHeaderTitle}
             background="auto"
             showLeft={showNavBack}
             left={
@@ -234,21 +315,73 @@ export function SceneScaffold({
         </View>
       }
     >
-      <ScrollView
-        style={overlayNavScrollSurfaceStyle()}
-        nestedScrollEnabled
-        onScroll={onScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingTop: topReserve + navContentGap,
-            paddingBottom: overlayBottomReserve,
-          },
-        ]}
-      >
-        {body}
-      </ScrollView>
+      {overlayScrollLayoutGate ? (
+        <View
+          style={{ flex: 1, minHeight: 0 }}
+          onLayout={overlayScrollLayout.onViewportLayout}
+          collapsable={false}
+        >
+          <View
+            style={[
+              { flex: 1, minHeight: 0 },
+              overlayScrollLayout.scrollShellInsetStyle,
+            ]}
+          >
+            <ScrollView
+              style={overlayNavScrollSurfaceStyle()}
+              nestedScrollEnabled
+              onScroll={onScroll}
+              scrollEventThrottle={scrollEventThrottle}
+              scrollEnabled={overlayScrollLayout.scrollEnabled}
+              showsVerticalScrollIndicator={
+                overlayScrollLayout.showsVerticalScrollIndicator
+              }
+              bounces={overlayScrollLayout.bounces}
+              alwaysBounceVertical={overlayScrollLayout.alwaysBounceVertical}
+              overScrollMode={overlayScrollLayout.overScrollMode}
+              contentContainerStyle={[
+                styles.content,
+                overlayScrollLayout.contentContainerExtras.flexGrow != null
+                  ? { flexGrow: overlayScrollLayout.contentContainerExtras.flexGrow }
+                  : null,
+                { paddingTop: overlayScrollPaddingTop },
+                overlayScrollLayout.contentContainerExtras.paddingBottom != null
+                  ? { paddingBottom: overlayScrollLayout.contentContainerExtras.paddingBottom }
+                  : null,
+              ]}
+            >
+              <View
+                onLayout={overlayScrollLayout.onContentLayout}
+                collapsable={false}
+              >
+                {body}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      ) : (
+        <View style={{ flex: 1, minHeight: 0 }}>
+          <ScrollView
+            style={overlayNavScrollSurfaceStyle()}
+            nestedScrollEnabled
+            onScroll={onScroll}
+            scrollEventThrottle={scrollEventThrottle}
+            bounces
+            alwaysBounceVertical
+            overScrollMode="always"
+            contentContainerStyle={[
+              styles.content,
+              { flexGrow: 1 },
+              { paddingTop: overlayScrollPaddingTop },
+              overlayScrollPaddingBottom > 0
+                ? { paddingBottom: overlayScrollPaddingBottom }
+                : null,
+            ]}
+          >
+            {body}
+          </ScrollView>
+        </View>
+      )}
     </EdsGlassScreenShell>
   );
 }

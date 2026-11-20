@@ -1,3 +1,5 @@
+export { EgDataListRowPressable } from '@eds/internal/dist/components/organisms/data-list/egDataListRowPressable.js';
+
 export {
   EgDataList,
   EgDataListPrimaryText,

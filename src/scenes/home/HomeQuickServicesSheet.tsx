@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useMotionLayoutContentSwitch } from '@/eds/layout-content';
 import { EgSheets } from '@/eds/sheets';
 import { EgDecorButton } from '@/eds/scene-buttons';
 import type { EgSheetsDetent, EgSheetsProps } from '@/eds/sheets';
@@ -40,7 +41,7 @@ type ServiceTileProps = {
   tilePadding: number;
   labelGap: number;
   mode: ReturnType<typeof useEdsTheme>['mode'];
-  badge?: 'add' | 'remove' | 'addDisabled';
+  badge?: 'add' | 'remove' | 'removeDecor' | 'addDisabled';
   onBadgePress?: () => void;
   onPress?: () => void;
 };
@@ -139,7 +140,11 @@ export function HomeQuickServicesSheet({
   const quickEntryIds = useHomeStore((state) => state.quickEntryIds);
   const setQuickEntryIds = useHomeStore((state) => state.setQuickEntryIds);
 
-  const [editing, setEditing] = useState(false);
+  /** 顶栏 browse ↔ edit（layout slot）与正文分轨，避免编辑栅格同帧挂载顶栏动画。 */
+  const [navEditing, setNavEditing] = useState(false);
+  const [bodyMode, setBodyMode] = useState<'browse' | 'edit'>('browse');
+  const { reset: resetLayoutSwitch, switchContent: switchBodyMode } =
+    useMotionLayoutContentSwitch();
   const [sheetDetent, setSheetDetent] = useState<EgSheetsDetent>('large');
   const [draftEntryIds, setDraftEntryIds] = useState<QuickServiceId[]>([
     ...quickEntryIds,
@@ -164,7 +169,7 @@ export function HomeQuickServicesSheet({
     [colors, spacing],
   );
 
-  const activeIds = editing ? draftEntryIds : quickEntryIds;
+  const activeIds = bodyMode === 'edit' ? draftEntryIds : quickEntryIds;
   const pinnedTools = useMemo(
     () => resolveQuickServices(activeIds),
     [activeIds],
@@ -173,36 +178,43 @@ export function HomeQuickServicesSheet({
 
   useEffect(() => {
     if (!visible) {
-      setEditing(false);
+      setNavEditing(false);
+      setBodyMode('browse');
+      resetLayoutSwitch();
       setSheetDetent('large');
     }
-  }, [visible]);
+  }, [resetLayoutSwitch, visible]);
 
   useEffect(() => {
-    if (!editing) {
+    if (bodyMode === 'browse' && !navEditing) {
       setDraftEntryIds([...quickEntryIds]);
     }
-  }, [editing, quickEntryIds]);
+  }, [bodyMode, navEditing, quickEntryIds]);
 
   const openEdit = useCallback(() => {
     setDraftEntryIds([...quickEntryIds]);
-    setEditing(true);
+    setNavEditing(true);
+    switchBodyMode(() => setBodyMode('edit'));
     setSheetDetent('large');
-  }, [quickEntryIds]);
+  }, [quickEntryIds, switchBodyMode]);
 
   const cancelEdit = useCallback(() => {
-    setDraftEntryIds([...quickEntryIds]);
-    setEditing(false);
-  }, [quickEntryIds]);
+    setNavEditing(false);
+    switchBodyMode(() => {
+      setBodyMode('browse');
+      setDraftEntryIds([...quickEntryIds]);
+    });
+  }, [quickEntryIds, switchBodyMode]);
 
   const saveAndClose = useCallback(() => {
     setQuickEntryIds(draftEntryIds);
-    setEditing(false);
+    setNavEditing(false);
+    switchBodyMode(() => setBodyMode('browse'));
     onDismiss();
-  }, [draftEntryIds, onDismiss, setQuickEntryIds]);
+  }, [draftEntryIds, onDismiss, setQuickEntryIds, switchBodyMode]);
 
   const editRightAction = useMemo((): EgSheetsProps['rightAction'] => {
-    if (!editing) return undefined;
+    if (!navEditing) return undefined;
     const label = t('home.quickServiceSave');
     return {
       kind: 'text',
@@ -210,7 +222,7 @@ export function HomeQuickServicesSheet({
       onPress: saveAndClose,
       accessibilityLabel: label,
     };
-  }, [editing, saveAndClose, t]);
+  }, [navEditing, saveAndClose, t]);
 
   const addToDraft = useCallback((id: QuickServiceId) => {
     setDraftEntryIds((current) => {
@@ -245,8 +257,9 @@ export function HomeQuickServicesSheet({
         const addMode = options?.badge === 'add' && options.canAdd;
         const slotsFull = draftEntryIds.length >= HOME_QUICK_ENTRY_MAX;
         const inDraft = draftIdSet.has(item.id);
+        const showRemoveFromCatalog = addMode && inDraft;
         const showAdd = addMode && !inDraft && !slotsFull;
-        const showAddDisabled = addMode && (inDraft || slotsFull);
+        const showAddDisabled = addMode && !inDraft && slotsFull;
         const showRemove = options?.badge === 'remove';
 
         return (
@@ -266,19 +279,21 @@ export function HomeQuickServicesSheet({
               labelGap={labelGap}
               mode={mode}
               badge={
-                showAdd
-                  ? 'add'
-                  : showAddDisabled
-                    ? 'addDisabled'
-                    : showRemove
-                      ? 'remove'
-                      : undefined
+                showRemoveFromCatalog
+                  ? 'removeDecor'
+                  : showRemove
+                    ? 'remove'
+                    : showAdd
+                      ? 'add'
+                      : showAddDisabled
+                        ? 'addDisabled'
+                        : undefined
               }
               onBadgePress={
-                showAdd
-                  ? () => addToDraft(item.id)
-                  : showRemove
-                    ? () => removeFromDraft(item.id)
+                showRemoveFromCatalog || showRemove
+                  ? () => removeFromDraft(item.id)
+                  : showAdd
+                    ? () => addToDraft(item.id)
                     : undefined
               }
             />
@@ -371,14 +386,14 @@ export function HomeQuickServicesSheet({
       onDetentChange={setSheetDetent}
       title={t('home.quickServicesTitle')}
       showTitle
-      showLeft={editing}
+      showLeft={navEditing}
       onBack={cancelEdit}
       showRight
       rightAction={editRightAction}
       dismissible
       showActions={false}
     >
-      {editing ? editBody : browseBody}
+      {bodyMode === 'edit' ? editBody : browseBody}
     </EgSheets>
   );
 }
