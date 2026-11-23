@@ -37,3 +37,22 @@ export function getTeamSwitcherDataListRowLayout(
 ): DataListRowLayout {
   return getDataListRowLayout(spacing);
 }
+
+/**
+ * 团队行外框高度 · DL `padV` + 头像/主副文案 token（行高在 typography）。
+ */
+export function teamSwitcherTeamRowHeight(
+  spacing: typeof mobileTheme.spacing,
+  typography: typeof mobileTheme.typography.base,
+): number {
+  const layout = getTeamSwitcherDataListRowLayout(spacing);
+  const padVertical = edsPx(layout.padV) * 2;
+  /** 主标题常态单行；双行由首行 `onLayout` 校准。 */
+  const textBlock =
+    edsPx(typography['line-height-body-medium']) +
+    edsPx(spacing['spacing-05']) +
+    edsPx(typography['line-height-body-small']);
+  const avatar = edsPx(spacing['avatar-3xl']);
+  const height = padVertical + Math.max(avatar, textBlock);
+  return Number.isFinite(height) && height > 0 ? height : 72;
+}

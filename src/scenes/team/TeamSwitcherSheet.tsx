@@ -103,9 +103,6 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
           alignSelf: 'stretch',
           width: '100%',
         },
-        caption: {
-          textAlign: 'center',
-        },
       }),
     [spacing],
   );
@@ -121,9 +118,6 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
           onPress={() => undefined}
           style={sheetActionStyles.optionFill}
         />
-        <SceneText variant="bodySmallSecondary" style={sheetActionStyles.caption}>
-          {t('team.web3WalletCaption')}
-        </SceneText>
       </View>
     ),
     [mode, sheetActionStyles, t],

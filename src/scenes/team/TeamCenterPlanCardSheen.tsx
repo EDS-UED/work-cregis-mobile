@@ -43,15 +43,8 @@ function sheenGradientStops(soft: boolean): { offset: number; opacity: number }[
 }
 
 type TeamCenterPlanCardSheenProps = {
-  /** 裁切视口宽（扫光路径仍按此宽计算）。 */
   width: number;
-  /** 裁切视口高。 */
   height: number;
-  /**
-   * 光带宽高按此布局计算（不传则与视口相同）。
-   * 账户版本下卡传套餐卡实测尺寸，避免矮卡压缩光带 / 改变视觉倾角。
-   */
-  bandLayout?: { width: number; height: number };
   /** `material-same-white-weaken`：浅色纯白、深色 12% 白，强度随模式自适应 */
   color: string;
   /** 非基础版：彩色底上扫光峰值压低（基础版保持满强度）。 */
@@ -59,20 +52,13 @@ type TeamCenterPlanCardSheenProps = {
 };
 
 /** 套餐卡扫光 · 倾斜柔光带左 → 右扫过，停 2s 循环；卡片 `overflow: hidden` 负责裁切。 */
-export function TeamCenterPlanCardSheen({
-  width,
-  height,
-  bandLayout,
-  color,
-  soft = false,
-}: TeamCenterPlanCardSheenProps) {
+export function TeamCenterPlanCardSheen({ width, height, color, soft = false }: TeamCenterPlanCardSheenProps) {
   const reduceMotion = useReducedMotion();
   const clock = useSharedValue(0);
   const active = !reduceMotion && width > 0 && height > 0;
 
-  const bandFrom = bandLayout ?? { width, height };
-  const bandWidth = Math.round(bandFrom.width * BAND_WIDTH_RATIO);
-  const bandHeight = Math.round(bandFrom.height * 2);
+  const bandWidth = Math.round(width * BAND_WIDTH_RATIO);
+  const bandHeight = Math.round(height * 2);
 
   useEffect(() => {
     if (!active) {

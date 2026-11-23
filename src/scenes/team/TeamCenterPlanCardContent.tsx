@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EgDecorButton, EgOptionButton } from '@/eds/scene-buttons';
+import { EgSymbol } from '@/eds/home-ui';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChevron';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
@@ -13,6 +14,7 @@ import { CregisTeamLineArt } from '@/scenes/team/CregisTeamLineArt';
 import { TeamCenterPlanCardBackdrop } from '@/scenes/team/TeamCenterPlanCardBackdrop';
 import { TeamCenterPlanCardSheen } from '@/scenes/team/TeamCenterPlanCardSheen';
 import { TEAM_PLAN_TIER_LABEL_KEY } from '@/scenes/team/teamPlanTier';
+
 export function useTeamCenterPlanCardShellStyle() {
   const colors = useThemeColors();
   const { spacing } = useEdsTheme();
@@ -22,8 +24,8 @@ export function useTeamCenterPlanCardShellStyle() {
       StyleSheet.create({
         card: {
           backgroundColor: String(colors['material-card-moderate']),
-          borderRadius: edsPx(spacing['radius-lg']),
-          paddingTop: edsPx(spacing['spacing-5']),
+          borderRadius: edsPx(spacing['radius-md']),
+          paddingTop: edsPx(spacing['spacing-6']),
           paddingBottom: edsPx(spacing['spacing-6']),
           paddingHorizontal: edsPx(spacing['spacing-6']),
           overflow: 'hidden',
@@ -39,11 +41,22 @@ const TEAM_PLAN_LINE_VIEW_HEIGHT = 170;
 const TEAM_PLAN_LINE_ASPECT =
   TEAM_PLAN_LINE_VIEW_WIDTH / TEAM_PLAN_LINE_VIEW_HEIGHT;
 
-/** 套餐卡正文 · 扫光 / 线稿 / 文案 / 按钮。 */
-export function TeamCenterPlanCardContent({ width, height }: { width: number; height: number }) {
+type TeamCenterPlanCardContentProps = {
+  width: number;
+  height: number;
+  showAccountLink?: boolean;
+};
+
+/** 套餐卡正文 · 扫光 / 线稿 / 文案（page-shot Hero 与团队中心预览共用）。 */
+export function TeamCenterPlanCardContent({
+  width,
+  height,
+  showAccountLink = true,
+}: TeamCenterPlanCardContentProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
-  const { mode, spacing } = useEdsTheme();
+  const { mode, spacing, typography } = useEdsTheme();
+  const accountLinkLineHeight = edsPx(typography['line-height-body-small']);
   const teamPlanTier = useHomeStore((state) => state.teamPlanTier);
   const teamSubscriptionExpires = useHomeStore((state) => state.teamSubscriptionExpires);
   const lineArtHeight = height;
@@ -67,19 +80,25 @@ export function TeamCenterPlanCardContent({ width, height }: { width: number; he
           alignSelf: 'stretch',
         },
         titleBlock: {
-          gap: edsPx(spacing['spacing-1-5']),
-          marginBottom: edsPx(spacing['spacing-7']),
+          gap: edsPx(spacing['spacing-05']),
+          marginBottom: showAccountLink ? edsPx(spacing['spacing-7']) : 0,
         },
-        expiresLabel: {
-          color: colors['text-base-tertiary'],
-        },
-        actions: {
+        accountLink: {
           flexDirection: 'row',
+          alignItems: 'center',
           alignSelf: 'flex-start',
-          gap: edsPx(spacing['spacing-2-5']),
+          gap: edsPx(spacing['spacing-0']),
+        },
+        accountLinkIconSlot: {
+          height: accountLinkLineHeight,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        accountLinkIconNudge: {
+          marginTop: -edsPx(spacing['spacing-05']),
         },
       }),
-    [colors, spacing],
+    [accountLinkLineHeight, showAccountLink, spacing],
   );
 
   return (
@@ -103,24 +122,24 @@ export function TeamCenterPlanCardContent({ width, height }: { width: number; he
       <View style={styles.body}>
         <View style={styles.titleBlock}>
           <SceneText variant="headline">{t(TEAM_PLAN_TIER_LABEL_KEY[teamPlanTier])}</SceneText>
-          <SceneText variant="bodyMediumStrong" style={styles.expiresLabel}>
+          <SceneText variant="bodyMedium">
             {t('team.subscriptionExpires', { date: teamSubscriptionExpires })}
           </SceneText>
         </View>
-        <View style={styles.actions}>
-          <EgDecorButton
-            label={t('team.upgrade')}
-            mode={mode}
-            size="sm"
-            onPress={() => undefined}
-          />
-          <EgOptionButton
-            label={t('team.renewFee')}
-            mode={mode}
-            size="sm"
-            onPress={() => undefined}
-          />
-        </View>
+        {showAccountLink ? (
+          <View style={styles.accountLink} pointerEvents="none" importantForAccessibility="no-hide-descendants">
+            <SceneText variant="bodySmallStrong">{t('team.viewTeamAccountShort')}</SceneText>
+            <View style={[styles.accountLinkIconSlot, styles.accountLinkIconNudge]}>
+              <EgSymbol
+                name="eds-arrow-right-mini-ios"
+                mode={mode}
+                size="xs"
+                strokeColorToken={LIST_ROW_CHEVRON_STROKE_TOKEN}
+                accessibilityLabel=""
+              />
+            </View>
+          </View>
+        ) : null}
       </View>
     </>
   );

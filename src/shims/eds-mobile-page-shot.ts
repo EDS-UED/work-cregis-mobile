@@ -10,3 +10,5 @@ export type {
   EgEdsAnimaPageShotSource,
   EgEdsAnimaPageShotTriggerProps,
 } from '@eds/internal/dist/components/shared/motion/EgEdsAnimaPageShot.d.ts';
+
+export { EgPageShotContent } from '@eds/internal/dist/components/templates/page-shot/index.js';

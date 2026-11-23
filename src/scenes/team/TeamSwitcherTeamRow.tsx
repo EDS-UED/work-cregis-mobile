@@ -19,6 +19,8 @@ type TeamSwitcherTeamRowProps = {
   team: TeamSwitcherItem;
   selected: boolean;
   onSelect: () => void;
+  /** 长按拖拽柄等待或拖拽中 · 关 DL 点按，避免与外层 lift 双层缩放发糊。 */
+  suppressRowPress?: boolean;
   /** 仅拖拽柄参与排序手势时传入。 */
   dragHandle?: ReactNode;
 };
@@ -27,6 +29,7 @@ export function TeamSwitcherTeamRow({
   team,
   selected,
   onSelect,
+  suppressRowPress = false,
   dragHandle,
 }: TeamSwitcherTeamRowProps) {
   const { t } = useTranslation();
@@ -47,11 +50,14 @@ export function TeamSwitcherTeamRow({
     />
   );
 
+  const rowInteractive = !suppressRowPress;
+
   return (
     <EgDataListRow
       mode={mode}
       accessibilityLabel={team.name}
-      onPress={onSelect}
+      onPress={rowInteractive ? onSelect : undefined}
+      interactive={rowInteractive}
       axis="row"
       gap={mediaGap}
       layout={layout}
@@ -100,23 +106,5 @@ export function TeamSwitcherTeamRow({
         />
       ) : null}
     </EgDataListRow>
-  );
-}
-
-/** 测量团队行高度 · 与可拖拽列表首帧一致。 */
-export function TeamSwitcherTeamRowMeasure({
-  team,
-  selected,
-  onSelect,
-  onLayoutHeight,
-}: TeamSwitcherTeamRowProps & { onLayoutHeight: (height: number) => void }) {
-  return (
-    <View
-      onLayout={(event) => {
-        onLayoutHeight(event.nativeEvent.layout.height);
-      }}
-    >
-      <TeamSwitcherTeamRow team={team} selected={selected} onSelect={onSelect} />
-    </View>
   );
 }

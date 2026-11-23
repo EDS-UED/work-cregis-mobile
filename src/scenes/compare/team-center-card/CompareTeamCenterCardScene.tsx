@@ -1,14 +1,10 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
+import { useCallback, useState } from 'react';
 import { useHomeStore } from '@/store';
 import type { CompareTeamCenterCardVariant } from '@/scenes/compare/team-center-card/compareTeamCenterCardVariant';
 import { CompareTeamCenterCardContent } from '@/scenes/compare/team-center-card/CompareTeamCenterCardContent';
-import { TeamCenterNavSwitcherButton } from '@/scenes/team/TeamCenterNavSwitcherButton';
+import { TeamCenterNavTitle } from '@/scenes/team/TeamCenterNavTitle';
 import { TeamSwitcherSheet } from '@/scenes/team/TeamSwitcherSheet';
-import { useTeamCenterIosNativeHeaderItems } from '@/scenes/team/useTeamCenterIosNativeHeaderItems';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
-import { useTranslation } from 'react-i18next';
 
 type CompareTeamCenterCardSceneProps = {
   variant: CompareTeamCenterCardVariant;
@@ -16,37 +12,24 @@ type CompareTeamCenterCardSceneProps = {
 
 /** 对比页 · 团队中心快照（正文三张菜单卡片 · 底纹 traditional / gray）。 */
 function CompareTeamCenterCardSceneShell({ variant }: CompareTeamCenterCardSceneProps) {
-  const { t } = useTranslation();
-  const navigation = useNavigation();
-  const nativeNavBar = shouldUseEgNavBarNativeStack();
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const title =
-    variant === 'traditional'
-      ? t('compare.teamCenterCardTraditionalTitle')
-      : t('compare.teamCenterCardGrayTitle');
 
   const openSwitcher = useCallback(() => setSwitcherOpen(true), []);
   const closeSwitcher = useCallback(() => setSwitcherOpen(false), []);
-  const iosNavRight = useTeamCenterIosNativeHeaderItems(openSwitcher);
 
-  useLayoutEffect(() => {
-    if (!nativeNavBar) {
-      return;
-    }
-    navigation.setOptions(iosNavRight);
-  }, [iosNavRight, nativeNavBar, navigation]);
+  const renderNavTitle = useCallback(
+    () => <TeamCenterNavTitle onOpenSwitcher={openSwitcher} />,
+    [openSwitcher],
+  );
 
   return (
     <>
       <SceneScaffold
-        title={title}
+        title={teamDisplayName}
         showNavBack
         pageBackground={variant === 'traditional' ? 'card' : 'default'}
-        overlayNavTrailing={
-          nativeNavBar ? undefined : (
-            <TeamCenterNavSwitcherButton onPress={openSwitcher} />
-          )
-        }
+        customHeaderTitle={renderNavTitle}
       >
         <CompareTeamCenterCardContent variant={variant} />
       </SceneScaffold>

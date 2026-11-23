@@ -15,7 +15,6 @@ export type HomeStackParamList = {
   TeamCenter: undefined;
   TeamCenterDetail: { id: TeamCenterDetailId };
   Messages: undefined;
-  MessagesCategory: { category: MessageCategory };
   Scan: undefined;
 };
 

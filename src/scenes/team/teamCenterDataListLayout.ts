@@ -40,3 +40,19 @@ export function getTeamCenterDataListRowLayout(
     titleSubGap: edsPx(spacing['spacing-05']),
   };
 }
+
+/** 行间分割线 · 左边与 `TeamCenterMenuRow` 主标题左缘对齐。 */
+export function teamCenterMenuRowDividerInsets(
+  spacing: typeof mobileTheme.spacing,
+  inCardShell: boolean,
+): { paddingLeft: number; paddingRight: number } {
+  const layout = getTeamCenterDataListRowLayout(spacing);
+  const marginH = inCardShell ? 0 : layout.marginH;
+  const leadIconSlot = edsPx(spacing['capsule-md']);
+  const mediaGap = teamCenterDataListMediaGap(spacing);
+
+  return {
+    paddingLeft: marginH + layout.padH + leadIconSlot + mediaGap,
+    paddingRight: marginH + layout.padH,
+  };
+}

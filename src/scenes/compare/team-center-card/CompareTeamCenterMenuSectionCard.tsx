@@ -2,26 +2,34 @@ import type { PropsWithChildren } from 'react';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { EgDataList, egDataListRowGap } from '@/eds/data-list';
+import { EgDataList } from '@/eds/data-list';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPageBackground, edsPx } from '@/utils/edsTheme';
 
-/** `page` — `box-page`；`shallow` — `material-card-shallow`。 */
-export type TeamCenterMenuCardTone = 'page' | 'shallow';
+/** `page` — `box-page`；`shallow` — `material-card-shallow`（对齐个人中心 `EgItemGroup`）。 */
+export type CompareTeamCenterMenuCardTone = 'page' | 'shallow';
 
-type TeamCenterMenuSectionCardProps = PropsWithChildren<{
+const PERSONAL_CENTER_SECTION_TONE: Record<
+  CompareTeamCenterMenuCardTone,
+  boolean
+> = {
+  page: true,
+  shallow: true,
+};
+
+type CompareTeamCenterMenuSectionCardProps = PropsWithChildren<{
   sectionTitle: string;
-  cardTone: TeamCenterMenuCardTone;
+  cardTone: CompareTeamCenterMenuCardTone;
 }>;
 
-/** 团队中心 · 小标题 + 圆角灰底卡内 `EgDataList` 行。 */
-export function TeamCenterMenuSectionCard({
+/** 对比 · 团队中心菜单分块 — 小标题 + 圆角卡片内 `EgDataList`。 */
+export function CompareTeamCenterMenuSectionCard({
   sectionTitle,
   cardTone,
   children,
-}: TeamCenterMenuSectionCardProps) {
+}: CompareTeamCenterMenuSectionCardProps) {
   const colors = useThemeColors();
   const { spacing } = useEdsTheme();
 
@@ -30,10 +38,16 @@ export function TeamCenterMenuSectionCard({
       StyleSheet.create({
         section: {
           gap: edsPx(spacing['spacing-2']),
-          marginBottom: edsPx(spacing['spacing-4']),
+          ...(PERSONAL_CENTER_SECTION_TONE[cardTone]
+            ? { marginBottom: edsPx(spacing['spacing-4']) }
+            : null),
         },
         sectionTitle: {
-          marginLeft: edsPx(spacing['spacing-5']),
+          marginLeft: edsPx(
+            spacing[
+              PERSONAL_CENTER_SECTION_TONE[cardTone] ? 'spacing-5' : 'spacing-2'
+            ],
+          ),
         },
         card: {
           backgroundColor:
@@ -57,7 +71,7 @@ export function TeamCenterMenuSectionCard({
         {sectionTitle}
       </SceneText>
       <View style={styles.card}>
-        <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
+        <EgDataList sceneContentInset={0} rowGap={edsPx(spacing['spacing-0'])}>
           {children}
         </EgDataList>
       </View>

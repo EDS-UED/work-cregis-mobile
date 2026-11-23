@@ -8,6 +8,7 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import type { CompareTeamCenterCardVariant } from '@/scenes/compare/team-center-card/compareTeamCenterCardVariant';
 import { edsPageBackground, edsPageCardBackground } from '@/utils/edsTheme';
 
+import { egNavBarNativeStackClearHeaderItems } from '@/navigation/screenOptions/egNavBarNativeStackClearHeaderItems';
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 
 type ScreenOptionsProps = Parameters<ReturnType<typeof EgEdsAnimaPage>>[0];
@@ -42,6 +43,7 @@ export function useCompareTeamCenterCardScreenOptions(
         return {
           ...base,
           title,
+          ...egNavBarNativeStackClearHeaderItems(),
           contentStyle: { backgroundColor: pageBackground },
         } as StackNavigationOptions;
       }

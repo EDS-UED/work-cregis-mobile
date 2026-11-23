@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -13,10 +13,12 @@ import Animated, {
 
 import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { TeamSwitcherTeamRow } from '@/scenes/team/TeamSwitcherTeamRow';
 import {
-  TeamSwitcherTeamRow,
-  TeamSwitcherTeamRowMeasure,
-} from '@/scenes/team/TeamSwitcherTeamRow';
+  getTeamSwitcherDataListRowLayout,
+  teamSwitcherTeamRowHeight,
+} from '@/scenes/team/teamSwitcherDataListLayout';
+import { edsPx } from '@/utils/edsTheme';
 import type { TeamSwitcherItem } from '@/store';
 import {
   edsHapticDragReorderLift,
@@ -35,7 +37,7 @@ import {
 } from './teamSwitcherReorderWorklets';
 
 const LONG_PRESS_MS = 260;
-const LIFT_SCALE = 1.02;
+const LIFT_SCALE = 1.03;
 const DRAG_OVERSHOOT_RATIO = 0.35;
 const SETTLE_TIMING = { duration: 220, easing: Easing.bezier(0.2, 0, 0, 1) };
 const LIFT_TIMING = { duration: 160, easing: Easing.out(Easing.quad) };
@@ -76,6 +78,28 @@ function DraggableTeamSwitcherRow({
     edsHapticDragReorderSelection();
   }, []);
 
+  const [suppressRowPress, setSuppressRowPress] = useState(false);
+  const blockRowPressAfterDrag = useRef(false);
+
+  const onSortDragStart = useCallback(() => {
+    setSuppressRowPress(true);
+  }, []);
+
+  const onSortDragEnd = useCallback((didActivateDrag: boolean) => {
+    setSuppressRowPress(false);
+    if (didActivateDrag) {
+      blockRowPressAfterDrag.current = true;
+    }
+  }, []);
+
+  const handleSelect = useCallback(() => {
+    if (blockRowPressAfterDrag.current) {
+      blockRowPressAfterDrag.current = false;
+      return;
+    }
+    onSelect();
+  }, [onSelect]);
+
   useAnimatedReaction(
     () => positions.value[team.id],
     (next, prev) => {
@@ -103,6 +127,7 @@ function DraggableTeamSwitcherRow({
         active.value = true;
         startY.value = y.value;
         lift.value = withTiming(1, LIFT_TIMING);
+        runOnJS(onSortDragStart)();
         runOnJS(onDragLift)();
       })
       .onUpdate((event) => {
@@ -114,14 +139,31 @@ function DraggableTeamSwitcherRow({
         }
       })
       .onFinalize(() => {
-        if (!active.value) return;
-        active.value = false;
-        const target = teamSwitcherRowOrigin(positions.value[team.id], geometry);
-        y.value = withTiming(target.y, SETTLE_TIMING);
+        const wasActive = active.value;
+        if (wasActive) {
+          active.value = false;
+          const target = teamSwitcherRowOrigin(positions.value[team.id], geometry);
+          y.value = withTiming(target.y, SETTLE_TIMING);
+          runOnJS(onCommit)(positions.value);
+        }
         lift.value = withTiming(0, SETTLE_TIMING);
-        runOnJS(onCommit)(positions.value);
+        runOnJS(onSortDragEnd)(wasActive);
       });
-  }, [active, count, geometry, lift, onCommit, onDragLift, onDragReorder, positions, startY, team.id, y]);
+  }, [
+    active,
+    count,
+    geometry,
+    lift,
+    onCommit,
+    onDragLift,
+    onDragReorder,
+    onSortDragStart,
+    onSortDragEnd,
+    positions,
+    startY,
+    team.id,
+    y,
+  ]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     zIndex: lift.value > 0 ? 10 : 1,
@@ -131,19 +173,19 @@ function DraggableTeamSwitcherRow({
     ],
   }));
 
-  const dragHandle = (
-    <GestureDetector gesture={pan}>
-      <View>
-        <EgSymbol
-          name="eds-drag-indicator"
-          mode={mode}
-          size="md"
-          strokeColorToken="stroke-base-tertiary"
-          accessibilityLabel=""
-        />
-      </View>
-    </GestureDetector>
+  const layout = getTeamSwitcherDataListRowLayout(spacing);
+  const dragIcon = (
+    <EgSymbol
+      name="eds-drag-indicator"
+      mode={mode}
+      size="md"
+      strokeColorToken="stroke-base-tertiary"
+      accessibilityLabel=""
+    />
   );
+  const handleTouchWidth =
+    edsPx(spacing['symbol-md']) + edsPx(spacing['spacing-2']);
+  const handleOverlayLeft = layout.marginH + layout.padH;
 
   return (
     <Animated.View
@@ -161,9 +203,23 @@ function DraggableTeamSwitcherRow({
       <TeamSwitcherTeamRow
         team={team}
         selected={selected}
-        onSelect={onSelect}
-        dragHandle={dragHandle}
+        onSelect={handleSelect}
+        suppressRowPress={suppressRowPress}
+        dragHandle={dragIcon}
       />
+      {/** 透明手势层盖住拖拽柄 · 不与 DL `Pressable` 抢首触。 */}
+      <GestureDetector gesture={pan}>
+        <View
+          style={{
+            position: 'absolute',
+            left: handleOverlayLeft,
+            top: 0,
+            height: geometry.rowHeight,
+            width: handleTouchWidth,
+            zIndex: 20,
+          }}
+        />
+      </GestureDetector>
     </Animated.View>
   );
 }
@@ -184,17 +240,19 @@ export function TeamSwitcherDraggableList({
   onSelect,
   onReorder,
 }: TeamSwitcherDraggableListProps) {
-  const [rowHeight, setRowHeight] = useState(0);
+  const { spacing, typography } = useEdsTheme();
+  /** 固定 token 行高 · 避免首帧 onLayout 改 geometry 重建 Pan（首次长按常被掐断）。 */
+  const rowHeight = useMemo(
+    () => teamSwitcherTeamRowHeight(spacing, typography),
+    [spacing, typography],
+  );
+
   const teamIds = useMemo(() => teams.map((team) => team.id), [teams]);
   const positions = useSharedValue<TeamSwitcherPositions>(teamSwitcherToPositions(teamIds));
 
   useEffect(() => {
     positions.value = teamSwitcherToPositions(teamIds);
   }, [positions, teamIds]);
-
-  const onMeasureHeight = useCallback((height: number) => {
-    setRowHeight((prev) => Math.max(prev, height));
-  }, []);
 
   const geometry = useMemo<TeamSwitcherListGeometry>(
     () => ({
@@ -204,10 +262,10 @@ export function TeamSwitcherDraggableList({
     [rowGap, rowHeight],
   );
 
-  const listHeight = useMemo(() => {
-    if (rowHeight <= 0 || teams.length === 0) return undefined;
-    return teams.length * rowHeight + (teams.length - 1) * rowGap;
-  }, [rowGap, rowHeight, teams.length]);
+  const listHeight = useMemo(
+    () => teams.length * rowHeight + (teams.length - 1) * rowGap,
+    [rowGap, rowHeight, teams.length],
+  );
 
   const onCommit = useCallback(
     (next: TeamSwitcherPositions) => {
@@ -224,22 +282,6 @@ export function TeamSwitcherDraggableList({
     },
     [onReorder, teamIds, teams],
   );
-
-  if (rowHeight === 0) {
-    return (
-      <>
-        {teams.map((team) => (
-          <TeamSwitcherTeamRowMeasure
-            key={team.id}
-            team={team}
-            selected={team.id === activeTeamId}
-            onSelect={() => onSelect(team.id)}
-            onLayoutHeight={onMeasureHeight}
-          />
-        ))}
-      </>
-    );
-  }
 
   return (
     <View

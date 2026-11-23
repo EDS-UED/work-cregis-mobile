@@ -47,6 +47,8 @@ type SceneScaffoldProps = PropsWithChildren<{
   showNavTitle?: boolean;
   /** overlay 顶栏右侧槽（iOS 26+ 系统栏请走 Stack `screenOptions`）。 */
   overlayNavTrailing?: ReactNode;
+  /** 短页滚动闸（与首页 `useEdsMainScrollLayout`）：未溢出隐藏滚动条、不撑 `flexGrow`。 */
+  shortPageScrollLayout?: boolean;
 }>;
 
 export function SceneScaffold({
@@ -58,6 +60,7 @@ export function SceneScaffold({
   customHeaderTitle,
   showNavTitle = true,
   overlayNavTrailing,
+  shortPageScrollLayout = false,
   children,
 }: SceneScaffoldProps) {
   const { colors, mode, spacing } = useEdsTheme();
@@ -173,11 +176,13 @@ export function SceneScaffold({
   const pageStyle = [styles.root, { backgroundColor: pageBg }];
 
   const sceneContentPaddingBottom = edsSceneContentInset(spacing);
-  /** 栈内页（`showNavBack`）固定 inset，勿走 layout 闸 — push 首帧更轻。 */
+  /** Tab 根 / 显式短页走 layout 闸；其余栈内页默认 `flexGrow:1`（减轻 push 首帧）。 */
   const nativeScrollLayoutGate =
-    !showNavBack && nativeScrollPaddingBottom > 0;
+    shortPageScrollLayout ||
+    (!showNavBack && nativeScrollPaddingBottom > 0);
   const overlayScrollLayoutGate =
-    !showNavBack && overlayScrollPaddingBottom > 0;
+    shortPageScrollLayout ||
+    (!showNavBack && overlayScrollPaddingBottom > 0);
   const nativeScrollLayout = useEdsMainScrollLayout({
     layoutActive: nativeScrollLayoutGate,
     paddingTop: nativeScrollPaddingTop,

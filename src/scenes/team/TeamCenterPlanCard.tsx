@@ -10,19 +10,19 @@ import {
   TeamCenterPlanCardContent,
   useTeamCenterPlanCardShellStyle,
 } from '@/scenes/team/TeamCenterPlanCardContent';
-import { TEAM_PLAN_PAGE_SHOT_ID } from '@/scenes/team/teamPlanPageShot';
 import {
-  getTeamCenterPlanCardLastSize,
-  setTeamCenterPlanCardLastSize,
-} from '@/scenes/team/teamCenterPlanCardLayout';
+  getTeamPlanCardLastLayoutSize,
+  setTeamPlanCardLastLayoutSize,
+} from '@/scenes/team/teamPlanCardLayout';
+import { TEAM_PLAN_PAGE_SHOT_ID } from '@/scenes/team/teamPlanPageShot';
 
-export function TeamCenterPlanCardFace() {
+function TeamCenterPlanCardFace() {
   const shellStyles = useTeamCenterPlanCardShellStyle();
-  const [cardSize, setCardSize] = useState(getTeamCenterPlanCardLastSize);
+  const [cardSize, setCardSize] = useState(getTeamPlanCardLastLayoutSize);
 
   const onCardLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
-    setTeamCenterPlanCardLastSize({ width, height });
+    setTeamPlanCardLastLayoutSize({ width, height });
     setCardSize((prev) =>
       prev.width === width && prev.height === height ? prev : { width, height },
     );
@@ -35,7 +35,7 @@ export function TeamCenterPlanCardFace() {
   );
 }
 
-/** 团队中心套餐卡 · 仅外包 `EgEdsAnimaPageShotTrigger`（`morph`：根页顶部与卡面不同）。 */
+/** 团队中心套餐卡 · 布局与样式独立于订阅根页；`morph` 仅负责飞行动效。 */
 export function TeamCenterPlanCard() {
   const { t } = useTranslation();
   const { spacing } = useEdsTheme();
@@ -43,7 +43,7 @@ export function TeamCenterPlanCard() {
   return (
     <EgEdsAnimaPageShotTrigger
       id={TEAM_PLAN_PAGE_SHOT_ID}
-      radius={edsPx(spacing['radius-lg'])}
+      radius={edsPx(spacing['radius-md'])}
       stretch
       morph
       accessibilityLabel={t('team.subscription')}

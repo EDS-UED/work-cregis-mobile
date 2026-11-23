@@ -1,31 +1,77 @@
 import { createCregisPageStackNavigator } from '@/navigation/createCregisPageStackNavigator';
 
+import type { ComponentType } from 'react';
 import { HomeMainScreen } from '@/scenes/home/HomeMainScreen';
 import { MessagesCategoryScene } from '@/scenes/messages/MessagesCategoryScene';
-import { MessagesHubScene } from '@/scenes/messages/MessagesHubScene';
-import { PersonalCenterScene } from '@/scenes/profile/PersonalCenterScene';
-import { ScanScene } from '@/scenes/scan/ScanScene';
-import { TeamCenterDetailScene } from '@/scenes/team/TeamCenterDetailScene';
-import { TeamCenterScene } from '@/scenes/team/TeamCenterScene';
-import { usePersonalCenterScreenOptions } from '@/scenes/profile/usePersonalCenterScreenOptions';
-import { useTeamCenterScreenOptions } from '@/scenes/team/useTeamCenterScreenOptions';
-import { useTeamCenterDetailScreenOptions } from '@/scenes/team/useTeamCenterDetailScreenOptions';
 import { useMessagesCategoryScreenOptions } from '@/scenes/messages/useMessagesCategoryScreenOptions';
 import { useMessagesScreenOptions } from '@/scenes/messages/useMessagesScreenOptions';
+import { usePersonalCenterScreenOptions } from '@/scenes/profile/usePersonalCenterScreenOptions';
 import { useScanScreenOptions } from '@/scenes/scan/useScanScreenOptions';
+import { useTeamCenterDetailScreenOptions } from '@/scenes/team/useTeamCenterDetailScreenOptions';
+import { useTeamCenterScreenOptions } from '@/scenes/team/useTeamCenterScreenOptions';
 import { edsPageStackNavigatorExtraProps } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
 import { useCregisStackScreenOptions } from '@/navigation/screenOptions/useCregisStackScreenOptions';
 import type { HomeStackParamList } from '@/navigation/types';
 
 const Stack = createCregisPageStackNavigator<HomeStackParamList>();
 
+let personalCenterScreen: ComponentType<object> | null = null;
+let teamCenterScreen: ComponentType<object> | null = null;
+let teamCenterDetailScreen: ComponentType<object> | null = null;
+let messagesHubScreen: ComponentType<object> | null = null;
+let scanScreen: ComponentType<object> | null = null;
+
+function PersonalCenterRoute(props: object) {
+  if (!personalCenterScreen) {
+    personalCenterScreen = require('@/scenes/profile/PersonalCenterScene')
+      .PersonalCenterScene as ComponentType<object>;
+  }
+  const Screen = personalCenterScreen;
+  return <Screen {...props} />;
+}
+
+function TeamCenterDetailRoute(props: object) {
+  if (!teamCenterDetailScreen) {
+    teamCenterDetailScreen = require('@/scenes/team/TeamCenterDetailScene')
+      .TeamCenterDetailScene as ComponentType<object>;
+  }
+  const Screen = teamCenterDetailScreen;
+  return <Screen {...props} />;
+}
+
+function TeamCenterRoute(props: object) {
+  if (!teamCenterScreen) {
+    teamCenterScreen = require('@/scenes/team/TeamCenterScene')
+      .TeamCenterScene as ComponentType<object>;
+  }
+  const Screen = teamCenterScreen;
+  return <Screen {...props} />;
+}
+
+function MessagesHubRoute(props: object) {
+  if (!messagesHubScreen) {
+    messagesHubScreen = require('@/scenes/messages/MessagesHubScene')
+      .MessagesHubScene as ComponentType<object>;
+  }
+  const Screen = messagesHubScreen;
+  return <Screen {...props} />;
+}
+
+function ScanRoute(props: object) {
+  if (!scanScreen) {
+    scanScreen = require('@/scenes/scan/ScanScene').ScanScene as ComponentType<object>;
+  }
+  const Screen = scanScreen;
+  return <Screen {...props} />;
+}
+
 export function HomeStackNavigator() {
   const personalCenterOptions = usePersonalCenterScreenOptions();
   const teamCenterOptions = useTeamCenterScreenOptions();
   const teamCenterDetailOptions = useTeamCenterDetailScreenOptions();
   const messagesOptions = useMessagesScreenOptions();
-  const scanOptions = useScanScreenOptions();
   const messagesCategoryOptions = useMessagesCategoryScreenOptions();
+  const scanOptions = useScanScreenOptions();
   const screenOptions = useCregisStackScreenOptions();
 
   return (
@@ -36,7 +82,7 @@ export function HomeStackNavigator() {
       <Stack.Screen name="HomeMain" component={HomeMainScreen} />
       <Stack.Screen
         name="PersonalCenter"
-        component={PersonalCenterScene}
+        component={PersonalCenterRoute}
         options={(props) => ({
           ...screenOptions(props),
           ...personalCenterOptions,
@@ -44,7 +90,7 @@ export function HomeStackNavigator() {
       />
       <Stack.Screen
         name="TeamCenter"
-        component={TeamCenterScene}
+        component={TeamCenterRoute}
         options={(props) => ({
           ...screenOptions(props),
           ...teamCenterOptions(props),
@@ -52,7 +98,7 @@ export function HomeStackNavigator() {
       />
       <Stack.Screen
         name="TeamCenterDetail"
-        component={TeamCenterDetailScene}
+        component={TeamCenterDetailRoute}
         options={(props) => ({
           ...screenOptions(props),
           ...teamCenterDetailOptions(props),
@@ -60,7 +106,7 @@ export function HomeStackNavigator() {
       />
       <Stack.Screen
         name="Messages"
-        component={MessagesHubScene}
+        component={MessagesHubRoute}
         options={(props) => ({
           ...screenOptions(props),
           ...messagesOptions(props),
@@ -76,11 +122,8 @@ export function HomeStackNavigator() {
       />
       <Stack.Screen
         name="Scan"
-        component={ScanScene}
-        options={(props) => ({
-          ...screenOptions(props),
-          ...scanOptions,
-        })}
+        component={ScanRoute}
+        options={scanOptions}
       />
     </Stack.Navigator>
   );
