@@ -2,90 +2,26 @@ import { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EgAvatar } from '@/eds/button-glass';
 import { EgOptionButton } from '@/eds/scene-buttons';
 import { EgSheets, type EgSheetsActionsBlankCompensation } from '@/eds/sheets';
-import { EgSymbol } from '@/eds/home-ui';
 import { EgIconAdd } from '@/eds/team-icons';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { EgDataList, EgDataListRow } from '@/eds/data-list';
 import {
   getTeamSwitcherDataListRowLayout,
+  teamSwitcherCreateRowContentStyle,
   teamSwitcherDataListMediaGap,
 } from '@/scenes/team/teamSwitcherDataListLayout';
+import { TeamSwitcherDraggableList } from '@/scenes/team/TeamSwitcherDraggableList';
 import { SceneText } from '@/scenes/shared/SceneText';
-import { TEAM_PLAN_TIER_LABEL_KEY, teamPlanTierAccent } from '@/scenes/team/teamPlanTier';
-import { useHomeStore, type TeamSwitcherItem } from '@/store';
+import { useHomeStore } from '@/store';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 type TeamSwitcherSheetProps = {
   visible: boolean;
   onDismiss: () => void;
 };
-
-function TeamSwitcherRow({
-  team,
-  selected,
-  onSelect,
-}: {
-  team: TeamSwitcherItem;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const { t } = useTranslation();
-  const { mode, spacing } = useEdsTheme();
-  const layout = getTeamSwitcherDataListRowLayout(spacing);
-  const tierKey = TEAM_PLAN_TIER_LABEL_KEY[team.planTier];
-  const mediaGap = teamSwitcherDataListMediaGap(spacing);
-  const tierColor = teamPlanTierAccent(team.planTier, mode);
-
-  return (
-    <EgDataListRow
-      mode={mode}
-      accessibilityLabel={team.name}
-      onPress={onSelect}
-      axis="row"
-      gap={mediaGap}
-      layout={layout}
-    >
-      <EgAvatar
-        name={team.name}
-        size="3xl"
-        source={team.avatarSource}
-        colorIndex={team.colorIndex}
-        accessibilityLabel={team.name}
-      />
-      <View
-        style={{
-          flex: 1,
-          minWidth: 0,
-          gap: edsPx(spacing['spacing-05']),
-        }}
-      >
-        <SceneText variant="bodySemibold" numberOfLines={2}>
-          {team.name}
-        </SceneText>
-        <SceneText
-          variant="bodySmallSecondary"
-          numberOfLines={1}
-          style={tierColor ? { color: tierColor } : undefined}
-        >
-          {t(tierKey)}
-        </SceneText>
-      </View>
-      {selected ? (
-        <EgSymbol
-          name="eds-enable-fill"
-          mode={mode}
-          displayPx={edsPx(spacing['symbol-md'])}
-          strokeColorToken="material-decor"
-          accessibilityLabel=""
-        />
-      ) : null}
-    </EgDataListRow>
-  );
-}
 
 function TeamSwitcherCreateRow({ onPress }: { onPress: () => void }) {
   const { t } = useTranslation();
@@ -95,6 +31,10 @@ function TeamSwitcherCreateRow({ onPress }: { onPress: () => void }) {
   const mediaGap = teamSwitcherDataListMediaGap(spacing);
   const avatarSlot = edsPx(spacing['capsule-md']);
   const addShell = edsPx(spacing['capsule-md']);
+  const contentStyle = useMemo(
+    () => teamSwitcherCreateRowContentStyle(spacing),
+    [spacing],
+  );
 
   const addIconShellStyle = useMemo(
     () =>
@@ -124,6 +64,7 @@ function TeamSwitcherCreateRow({ onPress }: { onPress: () => void }) {
       axis="row"
       gap={mediaGap}
       layout={layout}
+      contentStyle={contentStyle}
     >
       <View style={addIconShellStyle.slot}>
         <View style={addIconShellStyle.shell}>
@@ -146,6 +87,8 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
   const teams = useHomeStore((state) => state.teams);
   const activeTeamId = useHomeStore((state) => state.activeTeamId);
   const setActiveTeam = useHomeStore((state) => state.setActiveTeam);
+  const setTeamSwitcherOrder = useHomeStore((state) => state.setTeamSwitcherOrder);
+  const listRowGap = edsPx(spacing['spacing-1']);
 
   const sheetActionStyles = useMemo(
     () =>
@@ -194,6 +137,13 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
     [onDismiss, setActiveTeam],
   );
 
+  const handleReorder = useCallback(
+    (ordered: typeof teams) => {
+      setTeamSwitcherOrder(ordered);
+    },
+    [setTeamSwitcherOrder],
+  );
+
   return (
     <EgSheets
       visible={visible}
@@ -209,18 +159,14 @@ export function TeamSwitcherSheet({ visible, onDismiss }: TeamSwitcherSheetProps
       actions={sheetActions}
       actionsBlankCompensation={'spacing-14' as EgSheetsActionsBlankCompensation}
     >
-      <EgDataList
-        sceneContentInset={edsSceneContentInset(spacing)}
-        rowGap={edsPx(spacing['spacing-1'])}
-      >
-        {teams.map((team) => (
-          <TeamSwitcherRow
-            key={team.id}
-            team={team}
-            selected={team.id === activeTeamId}
-            onSelect={() => handleSelect(team.id)}
-          />
-        ))}
+      <EgDataList sceneContentInset={edsSceneContentInset(spacing)} rowGap={listRowGap}>
+        <TeamSwitcherDraggableList
+          teams={teams}
+          activeTeamId={activeTeamId}
+          rowGap={listRowGap}
+          onSelect={handleSelect}
+          onReorder={handleReorder}
+        />
         <TeamSwitcherCreateRow onPress={() => undefined} />
       </EgDataList>
     </EgSheets>

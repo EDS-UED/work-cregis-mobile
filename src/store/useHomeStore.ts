@@ -86,6 +86,7 @@ type HomeState = {
   activeTeamId: string;
   teams: TeamSwitcherItem[];
   setActiveTeam: (teamId: string) => void;
+  setTeamSwitcherOrder: (teams: TeamSwitcherItem[]) => void;
   teamDisplayName: string;
   teamPlanTier: TeamPlanTier;
   teamSubscriptionExpires: string;
@@ -229,6 +230,26 @@ export const useHomeStore = create<HomeState>((set, get) => ({
       teamDisplayName: team.name,
       teamId,
       teamPlanTier: team.planTier,
+    });
+  },
+  setTeamSwitcherOrder: (teams) => {
+    const { activeTeamId } = get();
+    const active = teams.find((item) => item.id === activeTeamId);
+    if (active) {
+      set({ teams });
+      return;
+    }
+    const fallback = teams[0];
+    if (!fallback) {
+      set({ teams });
+      return;
+    }
+    set({
+      teams,
+      activeTeamId: fallback.id,
+      teamDisplayName: fallback.name,
+      teamId: fallback.id,
+      teamPlanTier: fallback.planTier,
     });
   },
   teamDisplayName: defaultTeam.name,
