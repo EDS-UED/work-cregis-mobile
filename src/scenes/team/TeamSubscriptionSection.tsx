@@ -8,6 +8,8 @@ import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 type TeamSubscriptionSectionProps = PropsWithChildren<{
   title: string;
+  /** 根页已由 `EG_PAGE_CONTENT_PADDING_HORIZONTAL` 留白时传 `false`。 */
+  pageGutter?: boolean;
   trailing?: {
     label: string;
     onPress?: () => void;
@@ -18,11 +20,12 @@ type TeamSubscriptionSectionProps = PropsWithChildren<{
 /** 订阅稿 · 分组标题 + 可选右侧链。 */
 export function TeamSubscriptionSection({
   title,
+  pageGutter = true,
   trailing,
   children,
 }: TeamSubscriptionSectionProps) {
   const { spacing, colors } = useEdsTheme();
-  const sceneInset = edsSceneContentInset(spacing);
+  const sceneInset = pageGutter ? edsSceneContentInset(spacing) : 0;
 
   const styles = useMemo(
     () =>
@@ -43,10 +46,6 @@ export function TeamSubscriptionSection({
         },
         trailPress: {
           flexShrink: 0,
-        },
-        body: {
-          gap: edsPx(spacing['spacing-3']),
-          paddingHorizontal: sceneInset,
         },
       }),
     [sceneInset, spacing],
@@ -72,12 +71,12 @@ export function TeamSubscriptionSection({
   return (
     <View style={styles.section}>
       <View style={styles.head}>
-        <SceneText variant="bodySmallSemibold" style={[styles.title, { color: colors['text-base-secondary'] }]}>
+        <SceneText variant="title" style={styles.title}>
           {title}
         </SceneText>
         {trailingNode}
       </View>
-      <View style={styles.body}>{children}</View>
+      {children}
     </View>
   );
 }

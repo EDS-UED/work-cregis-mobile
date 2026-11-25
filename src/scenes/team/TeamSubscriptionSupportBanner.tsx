@@ -22,7 +22,7 @@ export function TeamSubscriptionSupportBanner() {
           flexDirection: 'row',
           alignItems: 'center',
           gap: edsPx(spacing['spacing-3']),
-          backgroundColor: String(colors['material-card-shallow']),
+          backgroundColor: String(colors['material-card-same-white']),
           borderRadius: edsPx(spacing['radius-lg']),
           paddingVertical: edsPx(spacing['spacing-4']),
           paddingHorizontal: edsPx(spacing['spacing-3']),

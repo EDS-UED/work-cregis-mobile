@@ -49,13 +49,21 @@ type TeamCenterPlanCardSheenProps = {
   color: string;
   /** 非基础版：彩色底上扫光峰值压低（基础版保持满强度）。 */
   soft?: boolean;
+  /** page-shot 跟手缩放时关循环动画，减轻掉帧。 */
+  animated?: boolean;
 };
 
 /** 套餐卡扫光 · 倾斜柔光带左 → 右扫过，停 2s 循环；卡片 `overflow: hidden` 负责裁切。 */
-export function TeamCenterPlanCardSheen({ width, height, color, soft = false }: TeamCenterPlanCardSheenProps) {
+export function TeamCenterPlanCardSheen({
+  width,
+  height,
+  color,
+  soft = false,
+  animated = true,
+}: TeamCenterPlanCardSheenProps) {
   const reduceMotion = useReducedMotion();
   const clock = useSharedValue(0);
-  const active = !reduceMotion && width > 0 && height > 0;
+  const active = animated && !reduceMotion && width > 0 && height > 0;
 
   const bandWidth = Math.round(width * BAND_WIDTH_RATIO);
   const bandHeight = Math.round(height * 2);

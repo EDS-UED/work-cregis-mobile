@@ -1,120 +1,59 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Dimensions,
-  Platform,
-  StyleSheet,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-
-import type { EgEdsAnimaPageShotRootApi } from '@/eds/page-shot';
-import { useEgNavBarScroll } from '@/eds/nav-bar';
-import { useThemeColors } from '@/hooks/useEffectiveTheme';
-import { TeamPlanPageShotHero } from '@/scenes/team/TeamPlanPageShotHero';
-import { TeamSubscriptionPageShotContent } from '@/scenes/team/TeamSubscriptionPageShotContent';
+import { useMemo } from 'react';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const SCROLL_TOP_EPSILON = 2;
-/** 顶缘下拉 · 速度超过阈值即关闭（与 page-shot `pullDown` 互补，防 Scroll 吃手势）。 */
-const TOP_PULL_CLOSE_VELOCITY = 120;
+import {
+  EgPageShotContent,
+  EG_PAGE_CONTENT_PADDING_BOTTOM,
+  EG_PAGE_CONTENT_PADDING_HORIZONTAL,
+  type EgPageShotRootApi,
+} from '@/eds/page-shot';
+import { useThemeColors } from '@/hooks/useEffectiveTheme';
+import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { edsPx } from '@/utils/edsTheme';
+import { TeamPlanPageShotHero } from '@/scenes/team/TeamPlanPageShotHero';
+import { TeamSubscriptionPageShotContent } from '@/scenes/team/TeamSubscriptionPageShotContent';
 
 type TeamPlanPageShotRootProps = {
-  api: EgEdsAnimaPageShotRootApi;
+  api: EgPageShotRootApi;
 };
 
 /**
- * 套餐 page-shot · 单 ScrollView 同滚。
- * 顶：`bounces` 关 + 下拉 `close`；底：保留回弹。
+ * 订阅根页 · `EgPageShotContent`（DS `CardShotRoot` 形）· 勿改顶区/正文稿面，动效见触发器 `morph` 与宿主。
  */
 export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
+  const { mode, spacing } = useEdsTheme();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const pageWidth = Dimensions.get('window').width;
-  const scrollYRef = useRef(0);
-  const dragStartYRef = useRef(0);
-  const [atScrollTop, setAtScrollTop] = useState(true);
-  const { onScroll, scrollEventThrottle } = useEgNavBarScroll({ nativeScrollEdge: false });
-
-  const reportScroll = useCallback(
-    (y: number) => {
-      onScroll({ nativeEvent: { contentOffset: { y } } });
-    },
-    [onScroll],
-  );
-
-  const syncAtTop = useCallback((y: number) => {
-    const next = y <= SCROLL_TOP_EPSILON;
-    setAtScrollTop((prev) => (prev === next ? prev : next));
-    scrollYRef.current = y;
-    reportScroll(y);
-  }, [reportScroll]);
-
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      syncAtTop(event.nativeEvent.contentOffset.y);
-    },
-    [syncAtTop],
-  );
-
-  const handleScrollBeginDrag = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    dragStartYRef.current = event.nativeEvent.contentOffset.y;
-  }, []);
-
-  const tryCloseFromTopPull = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset, velocity } = event.nativeEvent;
-      if (contentOffset.y > SCROLL_TOP_EPSILON) return;
-      if (dragStartYRef.current > SCROLL_TOP_EPSILON) return;
-      const vy = velocity?.y ?? 0;
-      if (vy >= -TOP_PULL_CLOSE_VELOCITY) return;
-      api.close();
-    },
-    [api],
-  );
-
-  const syncScrollSample = useCallback(() => {
-    reportScroll(scrollYRef.current);
-  }, [reportScroll]);
+  const pageBg = String(colors['box-page']);
+  const scrollBottomInset = EG_PAGE_CONTENT_PADDING_BOTTOM + insets.bottom;
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        fill: {
-          flex: 1,
-          backgroundColor: String(colors['material-card-moderate']),
-        },
         body: {
-          backgroundColor: String(colors['box-page']),
-          paddingBottom: insets.bottom,
+          paddingHorizontal: EG_PAGE_CONTENT_PADDING_HORIZONTAL,
+          gap: edsPx(spacing['spacing-3']),
+          backgroundColor: pageBg,
         },
       }),
-    [colors, insets.bottom],
+    [pageBg, spacing],
   );
 
   return (
-    <ScrollView
-      style={styles.fill}
-      contentInsetAdjustmentBehavior="never"
-      bounces={!atScrollTop}
-      alwaysBounceVertical={!atScrollTop}
-      overScrollMode={atScrollTop && Platform.OS === 'android' ? 'never' : 'always'}
-      onScroll={handleScroll}
-      onScrollBeginDrag={handleScrollBeginDrag}
-      scrollEventThrottle={scrollEventThrottle}
-      onContentSizeChange={syncScrollSample}
-      onLayout={() => syncAtTop(0)}
-      onScrollEndDrag={(e) => {
-        handleScroll(e);
-        tryCloseFromTopPull(e);
-      }}
-      onMomentumScrollEnd={handleScroll}
+    <EgPageShotContent
+      mode={mode}
+      api={api}
+      contentPaddingHorizontal={0}
+      contentPaddingTop={0}
+      contentPaddingBottom={scrollBottomInset}
+      style={{ flex: 1, backgroundColor: pageBg }}
     >
-      <TeamPlanPageShotHero pageWidth={pageWidth} topInset={api.topInset} />
-      <View style={styles.body}>
+      <TeamPlanPageShotHero />
+      <Animated.View style={[styles.body, api.bodyStyle] as StyleProp<ViewStyle>}>
         <TeamSubscriptionPageShotContent />
-      </View>
-    </ScrollView>
+      </Animated.View>
+    </EgPageShotContent>
   );
 }
