@@ -11,7 +11,11 @@ export const useTeamPlanPageShotCovering = create<TeamPlanPageShotCoveringState>
   setActive: (active) => set({ active }),
 }));
 
-/** 按下触发器即暂停列表扫光，减少入场首帧与 `morph` 叠层的绘制。 */
+/** 订阅页展开期间暂停列表扫光。收起必须配对放开，否则默认卡光带不再绘制。 */
 export function armTeamPlanPageShotCovering() {
   useTeamPlanPageShotCovering.getState().setActive(true);
+}
+
+export function releaseTeamPlanPageShotCovering() {
+  useTeamPlanPageShotCovering.getState().setActive(false);
 }

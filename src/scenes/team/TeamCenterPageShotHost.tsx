@@ -1,6 +1,7 @@
 import { useCallback, type PropsWithChildren } from 'react';
 
-import { EgPageShot, type EgPageShotRootApi, type EgPageShotSource } from '@/eds/page-shot';
+import type { EgPageShotRootApi, EgPageShotSource } from '@/eds/page-shot';
+import { TeamPlanEgPageShot } from '@/scenes/team/teamPlanEgPageShot';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { TeamPlanPageShotRoot } from '@/scenes/team/TeamPlanPageShotRoot';
@@ -36,7 +37,7 @@ export function TeamCenterPageShotHost({ children }: PropsWithChildren) {
   );
 
   return (
-    <EgPageShot
+    <TeamPlanEgPageShot
       mode={mode}
       title={title}
       background={background}
@@ -44,6 +45,6 @@ export function TeamCenterPageShotHost({ children }: PropsWithChildren) {
       renderRoot={renderRoot}
     >
       {children}
-    </EgPageShot>
+    </TeamPlanEgPageShot>
   );
 }

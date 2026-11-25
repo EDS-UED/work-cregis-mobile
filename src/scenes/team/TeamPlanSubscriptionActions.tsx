@@ -6,7 +6,7 @@ import { EgDecorButton, EgOptionButton } from '@/eds/scene-buttons';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { edsPx } from '@/utils/edsTheme';
 
-/** 订阅顶区 ·「升级」+「续费」· 与早期 `TeamCenterPlanCardContent` 一致。 */
+/** 订阅顶区 ·「升级」+「续费」· `EgDecorButton` / `EgOptionButton`。 */
 export function TeamPlanSubscriptionActions() {
   const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();

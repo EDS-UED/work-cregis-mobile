@@ -10,10 +10,14 @@ import { SceneText } from '@/scenes/shared/SceneText';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
 
+import { CregisTeamLineArt } from '@/scenes/team/CregisTeamLineArt';
 import { TeamCenterPlanCardBackdrop } from '@/scenes/team/TeamCenterPlanCardBackdrop';
 import { TeamCenterPlanCardSheen } from '@/scenes/team/TeamCenterPlanCardSheen';
 import { TEAM_PLAN_TIER_LABEL_KEY } from '@/scenes/team/teamPlanTier';
 import { useTeamPlanPageShotCovering } from '@/scenes/team/teamPlanPageShotCovering';
+
+/** 稿面 viewBox 152×170 · 高度铺满卡片，宽度按比例向左延伸。 */
+const TEAM_PLAN_LINE_ASPECT = 152 / 170;
 
 export function useTeamCenterPlanCardShellStyle() {
   const colors = useThemeColors();
@@ -41,7 +45,7 @@ type TeamCenterPlanCardContentProps = {
   showAccountLink?: boolean;
 };
 
-/** 团队中心列表 · 套餐卡正文（扫光 / 文案）。 */
+/** 团队中心列表 · 套餐卡正文（扫光 / 线稿 / 文案）。 */
 export function TeamCenterPlanCardContent({
   width,
   height,
@@ -54,13 +58,24 @@ export function TeamCenterPlanCardContent({
   const teamPlanTier = useHomeStore((state) => state.teamPlanTier);
   const teamSubscriptionExpires = useHomeStore((state) => state.teamSubscriptionExpires);
   const pageShotCovering = useTeamPlanPageShotCovering((state) => state.active);
+  const lineArtHeight = height;
+  const lineArtWidth = lineArtHeight > 0 ? lineArtHeight * TEAM_PLAN_LINE_ASPECT : 0;
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
+        lineArt: {
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          zIndex: 0,
+        },
         body: {
           position: 'relative',
-          zIndex: 1,
+          zIndex: 2,
           alignSelf: 'stretch',
         },
         titleBlock: {
@@ -95,6 +110,15 @@ export function TeamCenterPlanCardContent({
         soft={teamPlanTier !== 'basic'}
         animated={!pageShotCovering}
       />
+      <View style={styles.lineArt} pointerEvents="none">
+        {lineArtWidth > 0 && teamPlanTier !== 'enterprise' ? (
+          <CregisTeamLineArt
+            width={lineArtWidth}
+            height={lineArtHeight}
+            strokeColor={String(colors['material-card-moderate'])}
+          />
+        ) : null}
+      </View>
       <View style={styles.body}>
         <View style={styles.titleBlock}>
           <SceneText variant="headline">{t(TEAM_PLAN_TIER_LABEL_KEY[teamPlanTier])}</SceneText>

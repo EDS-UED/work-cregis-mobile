@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { useEffect, useMemo } from 'react';
+import { StyleSheet, useWindowDimensions, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +12,11 @@ import {
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { edsPx } from '@/utils/edsTheme';
+import { TeamCenterPlanCardSourceFace } from '@/scenes/team/TeamCenterPlanCard';
+import {
+  armTeamPlanPageShotCovering,
+  releaseTeamPlanPageShotCovering,
+} from '@/scenes/team/teamPlanPageShotCovering';
 import { TeamPlanPageShotHero } from '@/scenes/team/TeamPlanPageShotHero';
 import { TeamSubscriptionPageShotContent } from '@/scenes/team/TeamSubscriptionPageShotContent';
 
@@ -20,13 +25,21 @@ type TeamPlanPageShotRootProps = {
 };
 
 /**
- * 订阅根页 · `EgPageShotContent`（DS `CardShotRoot` 形）· 勿改顶区/正文稿面，动效见触发器 `morph` 与宿主。
+ * 订阅根页 · 展开后的 Hero / 正文布局不变。
+ * 近卡片的一段用 DS `sourceFaceStyle` / `pageFaceStyle`（`motion-ratio-page-shot-morph`）
+ * 在列表套餐卡与订阅 Hero 之间交叉，不改订阅稿面本身。
  */
 export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
   const { mode, spacing } = useEdsTheme();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { width: pageWidth } = useWindowDimensions();
   const pageBg = String(colors['box-page']);
+
+  useEffect(() => {
+    armTeamPlanPageShotCovering();
+    return releaseTeamPlanPageShotCovering;
+  }, []);
   const scrollBottomInset = EG_PAGE_CONTENT_PADDING_BOTTOM + insets.bottom;
 
   const styles = useMemo(
@@ -34,7 +47,8 @@ export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
       StyleSheet.create({
         body: {
           paddingHorizontal: EG_PAGE_CONTENT_PADDING_HORIZONTAL,
-          gap: edsPx(spacing['spacing-3']),
+          paddingTop: edsPx(spacing['spacing-8']),
+          gap: edsPx(spacing['spacing-0']),
           backgroundColor: pageBg,
         },
       }),
@@ -42,18 +56,37 @@ export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
   );
 
   return (
-    <EgPageShotContent
-      mode={mode}
-      api={api}
-      contentPaddingHorizontal={0}
-      contentPaddingTop={0}
-      contentPaddingBottom={scrollBottomInset}
-      style={{ flex: 1, backgroundColor: pageBg }}
-    >
-      <TeamPlanPageShotHero />
-      <Animated.View style={[styles.body, api.bodyStyle] as StyleProp<ViewStyle>}>
-        <TeamSubscriptionPageShotContent />
+    <View style={{ flex: 1 }}>
+      <EgPageShotContent
+        mode={mode}
+        api={api}
+        contentPaddingHorizontal={0}
+        contentPaddingTop={0}
+        contentPaddingBottom={scrollBottomInset}
+        style={{ flex: 1, backgroundColor: pageBg }}
+      >
+        <Animated.View style={[{ alignSelf: 'stretch' }, api.pageFaceStyle] as StyleProp<ViewStyle>}>
+          <TeamPlanPageShotHero />
+        </Animated.View>
+        <Animated.View style={[styles.body, api.bodyStyle] as StyleProp<ViewStyle>}>
+          <TeamSubscriptionPageShotContent />
+        </Animated.View>
+      </EgPageShotContent>
+      <Animated.View
+        pointerEvents="none"
+        style={
+          [
+            { position: 'absolute', top: 0, left: 0, right: 0 },
+            api.sourceFaceStyle,
+          ] as StyleProp<ViewStyle>
+        }
+      >
+        <TeamCenterPlanCardSourceFace
+          cardWidth={api.source.rect.width}
+          cardHeight={api.source.rect.height}
+          pageWidth={pageWidth}
+        />
       </Animated.View>
-    </EgPageShotContent>
+    </View>
   );
 }

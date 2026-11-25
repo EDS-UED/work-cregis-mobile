@@ -18,8 +18,6 @@ import {
 import { useHomeStore } from '@/store';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
-import companyAvatar from '../../../assets/company-avatar.png';
-
 const TEAM_PLAN_LINE_ASPECT = 152 / 170;
 
 /** 订阅 page-shot 顶区 · 与团队中心卡视觉同源但独立实现，不改动列表卡。 */
@@ -29,7 +27,10 @@ export const TeamPlanPageShotHero = memo(function TeamPlanPageShotHero() {
   const { spacing } = useEdsTheme();
   const { width: pageWidth } = useWindowDimensions();
   const sceneInset = edsSceneContentInset(spacing);
-  const companyName = useHomeStore((state) => state.companyName);
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
+  const activeTeamId = useHomeStore((state) => state.activeTeamId);
+  const teams = useHomeStore((state) => state.teams);
+  const activeTeam = teams.find((team) => team.id === activeTeamId);
   const teamPlanTier = useHomeStore((state) => state.teamPlanTier);
   const teamSubscriptionExpires = useHomeStore((state) => state.teamSubscriptionExpires);
   const moderate = String(colors['material-card-moderate']);
@@ -125,17 +126,18 @@ export const TeamPlanPageShotHero = memo(function TeamPlanPageShotHero() {
         <View style={styles.copy}>
           <View style={styles.enterpriseRow}>
             <EgAvatar
-              name={companyName}
-              source={companyAvatar}
+              name={activeTeam?.name ?? teamDisplayName}
               size="sm"
-              accessibilityLabel={companyName}
+              source={activeTeam?.avatarSource}
+              colorIndex={activeTeam?.colorIndex}
+              accessibilityLabel={teamDisplayName}
             />
             <SceneText
               variant="bodySmallSemibold"
               numberOfLines={1}
               style={{ color: String(colors['text-base-primary']) }}
             >
-              {companyName}
+              {teamDisplayName}
             </SceneText>
           </View>
           <View style={styles.planBody}>

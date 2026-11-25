@@ -128,5 +128,6 @@ export function TeamCenterPlanCardSheen({
 const styles = StyleSheet.create({
   band: {
     position: 'absolute',
+    zIndex: 1,
   },
 });

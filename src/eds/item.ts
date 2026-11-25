@@ -8,13 +8,18 @@ export {
   EG_ITEM_MIN_HEIGHT,
   EG_ITEM_PAD_H,
   EG_ITEM_PAD_V,
+  EG_ITEM_PAD_V_LG,
+  EG_ITEM_PAD_V_MD,
+  EG_ITEM_PAD_V_SM,
   EG_ITEM_TAP_RADIUS,
   EG_ITEM_TRAILING_GAP,
   getEgItemDividerInset,
+  resolveEgItemPadVertical,
 } from '@/shims/eds-mobile-item';
 
 export type {
   EgItemGroupProps,
+  EgItemPadSize,
   EgItemProps,
   EgItemTrailingDisplay,
 } from '@/shims/eds-mobile-item';

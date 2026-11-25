@@ -2,11 +2,12 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EgDecorButton } from '@/eds/scene-buttons';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { EgDecorButton } from '@/eds/scene-buttons';
 import { TeamCenterMenuLeadIcon } from '@/scenes/team/TeamCenterMenuLeadIcon';
 import { SceneText } from '@/scenes/shared/SceneText';
+import { teamSubscriptionSectionDividerInsetBottom } from '@/scenes/team/teamSubscriptionItemLayout';
 import { edsPx } from '@/utils/edsTheme';
 
 /** 订阅稿 · 专属客户经理条。 */
@@ -18,6 +19,9 @@ export function TeamSubscriptionSupportBanner() {
   const styles = useMemo(
     () =>
       StyleSheet.create({
+        root: {
+          marginTop: teamSubscriptionSectionDividerInsetBottom(spacing),
+        },
         card: {
           flexDirection: 'row',
           alignItems: 'center',
@@ -37,7 +41,8 @@ export function TeamSubscriptionSupportBanner() {
   );
 
   return (
-    <View style={styles.card}>
+    <View style={styles.root}>
+      <View style={styles.card}>
       <TeamCenterMenuLeadIcon icon="eds-team" />
       <View style={styles.copy}>
         <SceneText variant="bodySemibold">{t('team.subscriptionSupportTitle')}</SceneText>
@@ -48,7 +53,9 @@ export function TeamSubscriptionSupportBanner() {
         mode={mode}
         size="sm"
         onPress={() => undefined}
+        accessibilityLabel={t('team.subscriptionContact')}
       />
+      </View>
     </View>
   );
 }
