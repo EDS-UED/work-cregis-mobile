@@ -58,6 +58,7 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
     <SceneScaffold
       title={t(messageCategoryLabelKey[category])}
       showNavBack
+      shortPageScrollLayout
       overlayNavTrailing={nativeNavBar ? undefined : <MessagesNavClearButton />}
     >
       <EgDataList sceneContentInset={sceneInset} rowGap={sectionGroupGap}>

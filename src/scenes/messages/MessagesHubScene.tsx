@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 
-import { EgDataList, egDataListRowGap } from '@/eds/data-list';
+import { EgDataList } from '@/eds/data-list';
 import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
 import type { HomeStackParamList } from '@/navigation/types';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -22,6 +22,7 @@ import {
   type MessageCategory,
 } from '@/scenes/messages/messagesMock';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
+import { messagesHubRowGap } from '@/scenes/messages/messagesDataListLayout';
 import { edsSceneContentInset } from '@/utils/edsTheme';
 
 type MessagesHubNav = StackNavigationProp<HomeStackParamList, 'Messages'>;
@@ -63,10 +64,11 @@ export function MessagesHubScene() {
     <SceneScaffold
       title={t('messages.title')}
       showNavBack
+      shortPageScrollLayout
       overlayNavTrailing={nativeNavBar ? undefined : <MessagesNavClearButton />}
     >
-      <EgDataList sceneContentInset={sceneInset} rowGap={egDataListRowGap()}>
-        {rows.map((row) => (
+      <EgDataList sceneContentInset={sceneInset} rowGap={messagesHubRowGap(spacing)}>
+        {rows.map((row, index) => (
           <MessagesHubListRow
             key={row.category}
             category={row.category}
@@ -75,6 +77,7 @@ export function MessagesHubScene() {
             timeLabel={row.timeLabel}
             unreadCount={row.unreadCount}
             onPress={() => openCategory(row.category)}
+            isLast={index === rows.length - 1}
           />
         ))}
       </EgDataList>

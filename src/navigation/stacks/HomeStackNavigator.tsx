@@ -123,7 +123,10 @@ export function HomeStackNavigator() {
       <Stack.Screen
         name="Scan"
         component={ScanRoute}
-        options={scanOptions}
+        options={(props) => ({
+          ...screenOptions(props),
+          ...scanOptions(props),
+        })}
       />
     </Stack.Navigator>
   );

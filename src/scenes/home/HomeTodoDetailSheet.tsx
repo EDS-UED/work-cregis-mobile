@@ -11,6 +11,7 @@ import { EgLink } from '@/eds/link-button';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { EgDataList, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
+import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChevron';
 import { SceneText } from '@/scenes/shared/SceneText';
 import type { HomeTodoItem } from '@/store';
 import { edsCryptoSymbolForCurrency } from '@/utils/edsCryptoSymbol';
@@ -238,7 +239,7 @@ export function HomeTodoDetailSheet({ visible, item, onDismiss }: HomeTodoDetail
                 name="eds-arrow-right-ios"
                 mode={mode}
                 displayPx={12}
-                strokeColorToken="stroke-color-brand"
+                strokeColorToken={LIST_ROW_CHEVRON_STROKE_TOKEN}
                 accessibilityLabel=""
               />
             </View>

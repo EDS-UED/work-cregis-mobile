@@ -1,36 +1,45 @@
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import type { StackNavigationOptions } from '@react-navigation/stack';
 import { useTranslation } from 'react-i18next';
 
-import { shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
+import { EgEdsAnimaPage, shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
+import { SCAN_NATIVE_NAV_MODE } from '@/scenes/scan/scanNativeIosHeader';
 
-/** 扫码 Stack 页 · 全屏相机 + 浮层 `ScanTopBar`（不经 EDS 栈头）。 */
-export function useScanScreenOptions(): StackNavigationOptions {
+type ScreenOptionsProps = Parameters<ReturnType<typeof EgEdsAnimaPage>>[0];
+
+/**
+ * 扫码 Stack 页
+ * - iOS 26+：系统 UINavigationBar · `mode: dark`（页内不再叠 `ScanTopBar`）
+ * - 其余：无栈头 + 浮层 `ScanTopBar`
+ */
+export function useScanScreenOptions() {
   const { colors } = useEdsTheme();
   const { t } = useTranslation();
   const scanBackground = String(colors['material-same-black']);
 
-  return useMemo(() => {
-    const title = t('home.scan');
-    const chromeless = {
-      title,
-      headerShown: false,
-    } as const;
+  return useCallback(
+    (props: ScreenOptionsProps): StackNavigationOptions => {
+      const title = t('home.scan');
 
-    if (shouldUseEgEdsAnimaNativePage()) {
+      if (shouldUseEgEdsAnimaNativePage()) {
+        const base = EgEdsAnimaPage({ mode: SCAN_NATIVE_NAV_MODE })(props) as StackNavigationOptions;
+        return {
+          ...base,
+          title,
+          contentStyle: { backgroundColor: scanBackground },
+        } as StackNavigationOptions;
+      }
+
       return {
-        ...chromeless,
-        contentStyle: { backgroundColor: scanBackground },
-      } as StackNavigationOptions;
-    }
-
-    return {
-      ...chromeless,
-      ...edsPagePushedScreenOptions,
-      cardStyle: { backgroundColor: scanBackground, overflow: 'visible' },
-    };
-  }, [scanBackground, t]);
+        title,
+        headerShown: false,
+        ...edsPagePushedScreenOptions,
+        cardStyle: { backgroundColor: scanBackground, overflow: 'visible' },
+      };
+    },
+    [scanBackground, t],
+  );
 }
