@@ -310,11 +310,13 @@ function HomeQuickAction({
         </View>
         <SceneText
           variant="bodySmall"
-          numberOfLines={1}
+          numberOfLines={2}
+          ellipsizeMode="tail"
           style={{
             marginTop: labelGap,
             textAlign: "center",
             width: tileSize,
+            alignSelf: "center",
           }}
         >
           {label}
