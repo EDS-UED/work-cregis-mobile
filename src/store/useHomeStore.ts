@@ -256,7 +256,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   teamPlanTier: defaultTeam.planTier,
   teamSubscriptionExpires: '2028.12.30',
   teamId: defaultTeam.id,
-  teamAccountBalance: '$ 1,280.50',
+  teamAccountBalance: '$ 1,280.53',
   teamGasBalance: '0.045 ETH',
   teamGasBalanceFiat: '($145.20)',
   userDisplayName: 'Alex Mah.',

@@ -8,7 +8,7 @@ import {
   teamSubscriptionSectionDividerInsetTop,
 } from '@/scenes/team/teamSubscriptionItemLayout';
 
-/** 订阅正文 · 权益 / 账户与财务等大块之间的 module 分割线 · 上 16px · 下 28px。 */
+/** 订阅正文 · 权益与财务之间的 module 分割线 · 上下 `spacing-3`（12px）。 */
 export function TeamSubscriptionSectionsDivider() {
   const { mode, spacing } = useEdsTheme();
 

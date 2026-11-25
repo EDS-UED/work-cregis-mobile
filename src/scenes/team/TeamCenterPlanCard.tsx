@@ -21,10 +21,12 @@ const TeamCenterPlanCardFace = memo(function TeamCenterPlanCardFace({
   width,
   height,
   reportLayout = true,
+  lineArtLayoutScale = 1,
 }: {
   width?: number;
   height?: number;
   reportLayout?: boolean;
+  lineArtLayoutScale?: number;
 }) {
   const shellStyles = useTeamCenterPlanCardShellStyle();
   const [cardSize, setCardSize] = useState(getTeamPlanCardLastLayoutSize);
@@ -52,7 +54,11 @@ const TeamCenterPlanCardFace = memo(function TeamCenterPlanCardFace({
       style={[shellStyles.card, locked ? { width, height } : null]}
       onLayout={onCardLayout}
     >
-      <TeamCenterPlanCardContent width={resolvedWidth} height={resolvedHeight} />
+      <TeamCenterPlanCardContent
+        width={resolvedWidth}
+        height={resolvedHeight}
+        lineArtLayoutScale={lineArtLayoutScale}
+      />
     </View>
   );
 });
@@ -88,7 +94,12 @@ export function TeamCenterPlanCardSourceFace({
           ],
         }}
       >
-        <TeamCenterPlanCardFace width={cardWidth} height={cardHeight} reportLayout={false} />
+        <TeamCenterPlanCardFace
+          width={cardWidth}
+          height={cardHeight}
+          reportLayout={false}
+          lineArtLayoutScale={counter}
+        />
       </View>
     </View>
   );

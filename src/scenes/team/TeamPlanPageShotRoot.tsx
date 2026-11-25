@@ -19,6 +19,7 @@ import {
 } from '@/scenes/team/teamPlanPageShotCovering';
 import { TeamPlanPageShotHero } from '@/scenes/team/TeamPlanPageShotHero';
 import { TeamSubscriptionPageShotContent } from '@/scenes/team/TeamSubscriptionPageShotContent';
+import { teamSubscriptionHeroToBenefitsGap } from '@/scenes/team/teamSubscriptionItemLayout';
 
 type TeamPlanPageShotRootProps = {
   api: EgPageShotRootApi;
@@ -47,7 +48,7 @@ export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
       StyleSheet.create({
         body: {
           paddingHorizontal: EG_PAGE_CONTENT_PADDING_HORIZONTAL,
-          paddingTop: edsPx(spacing['spacing-8']),
+          paddingTop: teamSubscriptionHeroToBenefitsGap(spacing),
           gap: edsPx(spacing['spacing-0']),
           backgroundColor: pageBg,
         },

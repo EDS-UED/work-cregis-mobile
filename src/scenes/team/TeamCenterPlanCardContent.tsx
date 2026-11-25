@@ -43,6 +43,8 @@ type TeamCenterPlanCardContentProps = {
   width: number;
   height: number;
   showAccountLink?: boolean;
+  /** 线稿祖先 `transform.scale` · page-shot 飞行稿逆补偿描边。 */
+  lineArtLayoutScale?: number;
 };
 
 /** 团队中心列表 · 套餐卡正文（扫光 / 线稿 / 文案）。 */
@@ -50,6 +52,7 @@ export function TeamCenterPlanCardContent({
   width,
   height,
   showAccountLink = true,
+  lineArtLayoutScale = 1,
 }: TeamCenterPlanCardContentProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
@@ -116,6 +119,7 @@ export function TeamCenterPlanCardContent({
             width={lineArtWidth}
             height={lineArtHeight}
             strokeColor={String(colors['material-card-moderate'])}
+            layoutScale={lineArtLayoutScale}
           />
         ) : null}
       </View>

@@ -15,6 +15,12 @@ import {
   getTeamPlanPageShotHeroBandHeight,
   setTeamPlanPageShotHeroBandHeight,
 } from '@/scenes/team/teamPlanCardLayout';
+import {
+  teamSubscriptionHeroEnterpriseToTierGap,
+  teamSubscriptionHeroForegroundPaddingBottom,
+  teamSubscriptionHeroSubtitleToActionsGap,
+  teamSubscriptionHeroTierTitleBodyGap,
+} from '@/scenes/team/teamSubscriptionItemLayout';
 import { useHomeStore } from '@/store';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
@@ -82,14 +88,14 @@ export const TeamPlanPageShotHero = memo(function TeamPlanPageShotHero() {
         foreground: {
           zIndex: 1,
           paddingHorizontal: sceneInset,
-          paddingBottom: edsPx(spacing['spacing-8']),
+          paddingBottom: teamSubscriptionHeroForegroundPaddingBottom(spacing),
         },
         planBody: {
-          gap: edsPx(spacing['spacing-6']),
+          gap: teamSubscriptionHeroSubtitleToActionsGap(spacing),
         },
         copy: {
           paddingTop: edsPx(spacing['spacing-14']) + edsPx(spacing['spacing-1']),
-          gap: edsPx(spacing['spacing-5']),
+          gap: teamSubscriptionHeroEnterpriseToTierGap(spacing),
         },
         enterpriseRow: {
           flexDirection: 'row',
@@ -97,7 +103,7 @@ export const TeamPlanPageShotHero = memo(function TeamPlanPageShotHero() {
           gap: edsPx(spacing['spacing-1-5']),
         },
         titleBlock: {
-          gap: edsPx(spacing['spacing-05']),
+          gap: teamSubscriptionHeroTierTitleBodyGap(spacing),
         },
       }),
     [bandHeight, cachedBandHeight, lineArtHeight, moderate, sceneInset, spacing],
