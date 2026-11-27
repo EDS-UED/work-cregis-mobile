@@ -44,6 +44,7 @@ import { QuickServiceHomeIcon } from "@/scenes/home/homeQuickServiceIcons";
 import { HomeTodoDetailSheet } from "@/scenes/home/HomeTodoDetailSheet";
 import { HomeTodoFilterBar } from "@/scenes/home/HomeTodoFilterBar";
 import { HomeTopBar, homeScrollTopReserve } from "@/scenes/home/HomeTopBar";
+import { useHomeStackNavigation } from "@/scenes/home/useHomeStackNavigation";
 import { EdsGlassScreenShell } from "@/scenes/shared/EdsGlassScreenShell";
 import { SceneText } from "@/scenes/shared/SceneText";
 import { useHomeStore, type HomeTodoFilter, type HomeTodoItem } from "@/store";
@@ -415,6 +416,7 @@ function HomeTodoRow({
 
 export function HomeScene() {
   const { t } = useTranslation();
+  const navigation = useHomeStackNavigation();
   const { colors, mode, spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
   const nativeNavBar = shouldUseEgNavBarNativeStack();
@@ -584,6 +586,7 @@ export function HomeScene() {
           hideBalanceLabel={t("home.hideBalance")}
           showBalanceLabel={t("home.showBalance")}
           assetChartLabel={t("home.assetDistribution")}
+          onAssetChartPress={() => navigation.navigate("AssetDistribution")}
         />
       </View>
 

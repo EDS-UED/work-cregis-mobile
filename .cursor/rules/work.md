@@ -390,13 +390,15 @@ kill -9 $(lsof -ti :8081) 2>/dev/null; npm run start:metro-only -- --clear
 
 | 分支 | 角色 | push | 合并 |
 |------|------|------|------|
-| **`main`** | 集成 / EAS 对外 | **禁**日常直改、直 push | **仅** **`yang` → `main`**（PR）；**仅维护者**操作 |
-| **`yang`** | 维护者开发 + 收 jojo | 维护者直推 | **`jojo` → `yang`**（PR）→ 验稳 **`yang` → `main`** |
-| **`jojo`** | jojo 开发 | 仅 **`jojo`** | **禁**直推 `main`/`yang`；PR → **`yang`** |
+| **`main`** | 集成 / EAS 对外 | **禁**日常直改、直 push | **仅** **`yang` → `main`**（PR · **0 review**）；**仅维护者**操作 |
+| **`yang`** | 维护者开发 + 收 jojo | 维护者直推 | **`jojo` → `yang`**（PR · **须 yang +1 review**）→ 验稳 **`yang` → `main`** |
+| **`jojo`** | jojo 开发 | 仅 **`jojo`**（`lulujj123`） | **禁**直推 `main`/`yang`；PR → **`yang`** |
 
 ```text
-jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对齐 main
+jojo ──PR（须 yang 审）──► yang ──PR（0 review，EAS check）──► main
 ```
+
+**审批**：**jojo → yang** 至少 1 次 Approve（维护者 yang）；**yang → main** 不要 Approve，等 EAS「Publish preview update」绿后直接 Merge。
 
 换分支：`git fetch origin` → `git checkout yang|jojo && git pull origin <分支>`（维护者 / jojo）。
 
@@ -404,8 +406,8 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 
 | 名 | 分支 | 要点 | Bypass |
 |----|------|------|--------|
-| **`main`** | `main` | 禁删/强推/直 push · PR **+1 review** | **无** |
-| **`work-yang`** | `yang` | 同上；非 bypass 须 PR | **`theyangsong`** |
+| **`main`** | `main` | 禁删/强推/直 push · 合并须 PR · **required review = 0** | **无** |
+| **`work-yang`** | `yang` | 禁删/强推/直 push · **`jojo` → `yang` 须 +1 review** | **`theyangsong`**（直推 `yang`、代合并） |
 | **`work-jojo`** | `jojo` | 禁删/强推/直 push | **`lulujj123`** · **`theyangsong`** |
 
 [23519770](https://github.com/EDS-UED/work-cregis-mobile/rules/23519770) · [27705187](https://github.com/EDS-UED/work-cregis-mobile/rules/27705187) · [27705869](https://github.com/EDS-UED/work-cregis-mobile/rules/27705869)
@@ -637,7 +639,7 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 | 字段 | 值 |
 |------|-----|
 | 文档版本 | 1.6 |
-| §3.3 三分支 · §3.3.1 Git 关键词 · Rulesets 收紧 | 2026-11-20 |
+| §3.3 三分支 · `main` 0 review · `jojo`→`yang` +1 review | 2026-11-20 |
 | §12 踩坑记录 | 2026-11-12 |
 | §2.3.1 Home 顶栏 · §3.1.1 EDS 联调清单（Agent 不改 eds-mobile） | 2026-10-29 |
 | §2.5 设计系统资产门禁 · §2.5.1 个人中心缺口 | 2026-10-27 |

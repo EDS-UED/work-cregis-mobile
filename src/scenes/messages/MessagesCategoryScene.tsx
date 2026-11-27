@@ -4,16 +4,15 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { EgDataList, egDataListRowGap } from '@/eds/data-list';
-import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
 import type { HomeStackParamList } from '@/navigation/types';
+import { useHomeStackNavigation } from '@/scenes/home/useHomeStackNavigation';
 import { HomeTodoEmptyState } from '@/scenes/home/HomeTodoEmptyState';
-import { MessagesNavClearButton } from '@/scenes/messages/MessagesNavClearButton';
+import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { MessagesCollaborationListRow } from '@/scenes/messages/MessagesCollaborationListRow';
 import { MessagesListRow } from '@/scenes/messages/MessagesListRow';
-import { MessagesTeamActivityListRow } from '@/scenes/messages/MessagesTeamActivityListRow';
-import { MessagesTransactionListRow } from '@/scenes/messages/MessagesTransactionListRow';
+import { MessagesNavClearButton } from '@/scenes/messages/MessagesNavClearButton';
 import { MessagesListSectionHeader } from '@/scenes/messages/MessagesListSectionHeader';
+import { resolveNotificationCopy } from '@/scenes/messages/notificationExamples';
 import { messageCategoryLabelKey } from '@/scenes/messages/messagesCategoryPreview';
 import { resolveMessagesSectionLabel } from '@/scenes/messages/messagesSectionLabel';
 import {
@@ -21,6 +20,7 @@ import {
   groupMessageItemsByDateSection,
 } from '@/scenes/messages/messagesMock';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
+import { useHomeStore } from '@/store';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 type MessagesCategorySceneProps = {
@@ -30,10 +30,13 @@ type MessagesCategorySceneProps = {
 /** 通知分类内页 · 无顶部分段 Tab。 */
 export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
   const { category } = route.params;
+  const navigation = useHomeStackNavigation();
   const { t, i18n } = useTranslation();
   const { spacing } = useEdsTheme();
-  const nativeNavBar = shouldUseEgNavBarNativeStack();
   const sceneInset = edsSceneContentInset(spacing);
+  const nativeNavBar = shouldUseEgNavBarNativeStack();
+  const notificationsMarkedRead = useHomeStore((state) => state.notificationsMarkedRead);
+  const markAllNotificationsRead = useHomeStore((state) => state.markAllNotificationsRead);
   const sectionGroupGap = edsPx(spacing['spacing-7']);
 
   const styles = useMemo(
@@ -58,7 +61,9 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
     <SceneScaffold
       title={t(messageCategoryLabelKey[category])}
       showNavBack
-      overlayNavTrailing={nativeNavBar ? undefined : <MessagesNavClearButton />}
+      overlayNavTrailing={
+        nativeNavBar ? undefined : <MessagesNavClearButton onPress={markAllNotificationsRead} />
+      }
     >
       <EgDataList sceneContentInset={sceneInset} rowGap={sectionGroupGap}>
         {!hasListRows ? (
@@ -75,46 +80,34 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
               <View key={`section-${sectionDayOffset}`} style={styles.section}>
                 <MessagesListSectionHeader label={sectionLabel} />
                 <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
-                  {rows.map((item) =>
-                    item.teamActivity ? (
-                      <MessagesTeamActivityListRow
-                        key={item.id}
-                        activity={item.teamActivity}
-                        timeLabel={item.timeHm}
-                        unread={item.unread}
-                        onPress={() => undefined}
-                      />
-                    ) : item.collaboration ? (
-                      <MessagesCollaborationListRow
-                        key={item.id}
-                        collab={item.collaboration}
-                        timeLabel={item.timeHm}
-                        unread={item.unread}
-                        onPress={() => undefined}
-                      />
-                    ) : item.transaction ? (
-                      <MessagesTransactionListRow
-                        key={item.id}
-                        tx={item.transaction}
-                        timeLabel={item.timeHm}
-                        unread={item.unread}
-                        onPress={() => undefined}
-                      />
-                    ) : (
+                  {rows.map((item) => {
+                    const copy = item.notice
+                      ? resolveNotificationCopy(item.notice.copy, i18n.language)
+                      : {
+                          title: item.titleKey ? t(item.titleKey) : '',
+                          body: item.subtitleKey ? t(item.subtitleKey) : '',
+                        };
+                    const announcementId =
+                      category === 'announcement' ? item.notice?.templateKey : undefined;
+                    const canOpen = item.notice?.canRedirect === true;
+                    return (
                       <MessagesListRow
                         key={item.id}
-                        title={t(item.titleKey!)}
-                        subtitle={t(item.subtitleKey!)}
+                        title={copy.title}
+                        subtitle={announcementId ? '' : copy.body}
                         timeLabel={item.timeHm}
-                        unread={item.unread}
-                        avatarLetter={item.avatarLetter}
-                        avatarColorIndex={item.avatarColorIndex}
-                        leadSymbol={item.leadSymbol}
-                        leadSystemPlaceholder={item.category === 'announcement'}
-                        onPress={() => undefined}
+                        unread={notificationsMarkedRead ? false : item.unread}
+                        showArrow={!announcementId && canOpen}
+                        onPress={
+                          announcementId
+                            ? () => navigation.navigate('MessagesAnnouncement', { id: announcementId })
+                            : canOpen
+                              ? () => undefined
+                              : undefined
+                        }
                       />
-                    ),
-                  )}
+                    );
+                  })}
                 </EgDataList>
               </View>
             );

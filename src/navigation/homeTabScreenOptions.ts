@@ -9,10 +9,20 @@ import type { HomeStackParamList } from '@/navigation/types';
 
 export const TAB_BAR_HIDDEN_HOME_STACK_ROUTES = new Set<keyof HomeStackParamList>([
   'PersonalCenter',
+  'ProfileEdit',
+  'IdentityVerification',
+  'AccountEmail',
+  'ResetAccountEmail',
+  'GoogleAuthenticator',
+  'SetTransactionPassword',
+  'LoginDevices',
+  'MpcNetworkSettings',
+  'About',
   'TeamCenter',
   'TeamCenterDetail',
   'Messages',
   'MessagesCategory',
+  'MessagesAnnouncement',
   'Scan',
 ]);
 

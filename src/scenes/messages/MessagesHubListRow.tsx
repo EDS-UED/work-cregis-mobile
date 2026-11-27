@@ -50,26 +50,19 @@ export function MessagesHubListRow({
     >
       <MessagesCategoryHubLeadIcon category={category} />
       <View style={{ flex: 1, minWidth: 0, gap: edsPx(spacing['spacing-05']) }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: edsPx(spacing['spacing-2']),
-            alignSelf: 'stretch',
-          }}
+        <EgDataListPrimaryText
+          mode={mode}
+          weight="heavy"
+          numberOfLines={1}
+          style={{ alignSelf: 'stretch' }}
         >
-          <EgDataListPrimaryText
-            mode={mode}
-            weight="heavy"
-            numberOfLines={1}
-            style={{ flex: 1, minWidth: 0 }}
-          >
-            {title}
-          </EgDataListPrimaryText>
-          {timeLabel ? (
-            <SceneText variant="bodySmallTertiary">{timeLabel}</SceneText>
-          ) : null}
-        </View>
+          {title}
+        </EgDataListPrimaryText>
+        {timeLabel ? (
+          <SceneText variant="bodySmallTertiary" style={{ alignSelf: 'flex-start' }}>
+            {timeLabel}
+          </SceneText>
+        ) : null}
         <View
           style={{
             flexDirection: 'row',

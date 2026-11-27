@@ -1,1 +1,1 @@
-export { EgAvatar, EgButtonGlass } from '@/shims/eds-mobile-button-glass';
+export { EgAvatar, EgButtonGlass, EgGlassCapsule } from '@/shims/eds-mobile-button-glass';

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useEdsTypography } from '@/hooks/useEdsTypography';
 import type { MessageCollaborationMock } from '@/scenes/messages/messagesCollaborationMock';
-import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
 import { EgDataListReddot, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
@@ -40,7 +39,6 @@ export function MessagesCollaborationListRow({
       layout={layout}
       gap={mediaGap}
     >
-      <MessagesListLeadIcon unread={unread} cryptoCurrency={collab.currency} />
       <View style={{ flex: 1, minWidth: 0, gap: edsPx(spacing['spacing-05']) }}>
         <View
           style={{

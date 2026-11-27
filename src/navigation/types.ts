@@ -11,11 +11,22 @@ export type RootTabParamList = {
 
 export type HomeStackParamList = {
   HomeMain: undefined;
+  AssetDistribution: undefined;
   PersonalCenter: undefined;
+  ProfileEdit: undefined;
+  IdentityVerification: undefined;
+  AccountEmail: undefined;
+  ResetAccountEmail: undefined;
+  GoogleAuthenticator: undefined;
+  SetTransactionPassword: undefined;
+  LoginDevices: undefined;
+  MpcNetworkSettings: undefined;
+  About: undefined;
   TeamCenter: undefined;
   TeamCenterDetail: { id: TeamCenterDetailId };
   Messages: undefined;
   MessagesCategory: { category: MessageCategory };
+  MessagesAnnouncement: { id: string };
   Scan: undefined;
 };
 

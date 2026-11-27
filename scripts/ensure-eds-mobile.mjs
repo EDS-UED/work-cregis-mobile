@@ -17,6 +17,54 @@ if (process.env.CREGIS_ENSURE_EDS === '0') {
   process.exit(0);
 }
 
+/**
+ * jojo 使用 GitHub 上的 eds-mobile `main`，不用本机被删过图标的工作区。
+ * 本地改动先 stash，再 fast-forward。构建时不从 desktop 覆盖图标，避免删掉库里已有的 svg。
+ */
+function alignEdsCheckoutToOriginMain() {
+  const fetch = spawnSync('git', ['fetch', 'origin'], {
+    cwd: edsRoot,
+    encoding: 'utf8',
+  });
+  if ((fetch.status ?? 1) !== 0) {
+    console.warn('[ensure-eds-mobile] git fetch failed; building the local checkout');
+    console.warn((fetch.stderr || fetch.stdout || '').trim());
+    return;
+  }
+
+  const porcelain = spawnSync('git', ['status', '--porcelain'], {
+    cwd: edsRoot,
+    encoding: 'utf8',
+  });
+  if ((porcelain.stdout || '').trim()) {
+    console.warn(
+      '[ensure-eds-mobile] stashing local eds-mobile changes so this app uses origin/main',
+    );
+    const stash = spawnSync(
+      'git',
+      ['stash', 'push', '-u', '-m', 'ensure-eds-mobile: local changes before origin/main'],
+      { cwd: edsRoot, encoding: 'utf8' },
+    );
+    if ((stash.status ?? 1) !== 0) {
+      console.warn((stash.stderr || stash.stdout || '').trim());
+    }
+  }
+
+  const pull = spawnSync('git', ['pull', '--ff-only', 'origin', 'main'], {
+    cwd: edsRoot,
+    encoding: 'utf8',
+  });
+  if ((pull.status ?? 1) !== 0) {
+    console.warn('[ensure-eds-mobile] eds-mobile is not a fast-forward of origin/main');
+    console.warn((pull.stderr || pull.stdout || '').trim());
+    return;
+  }
+  const note = (pull.stdout || '').trim();
+  if (note) console.log(`[ensure-eds-mobile] ${note}`);
+}
+
+alignEdsCheckoutToOriginMain();
+
 const edsSrcGlobs = [
   'packages/tokens/spec',
   'packages/components/src',
@@ -121,7 +169,15 @@ if (!mustBuild && !staleCopy) {
 
 if (mustBuild) {
   console.log('[ensure-eds-mobile] building EDS Mobile (tokens · animations · components · assemble)…');
-  const result = spawnSync('pnpm', ['build:mobile'], { cwd: edsRoot, stdio: 'inherit' });
+  const result = spawnSync('pnpm', ['build:mobile'], {
+    cwd: edsRoot,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      // desktop 图标目录比 mobile 少文件；同步会删掉 GitHub 上已有的图标（如 eds-camera-1）。
+      EDS_DESKTOP_ROOT: join(edsRoot, '.no-desktop-icon-sync'),
+    },
+  });
   if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1);
 }
 

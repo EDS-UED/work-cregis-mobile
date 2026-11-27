@@ -1,11 +1,10 @@
-import { buildCollaborationMockPayload } from '@/scenes/messages/messagesCollaborationMock';
 import type { MessageCollaborationMock } from '@/scenes/messages/messagesCollaborationMock';
-import {
-  buildTeamActivityMockPayload,
-  MESSAGE_TEAM_ACTIVITY_PER_SECTION,
-} from '@/scenes/messages/messagesTeamActivityMock';
 import type { MessageTeamActivityMock } from '@/scenes/messages/messagesTeamActivityMock';
-import { HOME_TODO_MOCK_CURRENCIES_FIRST_10 } from '@/store/useHomeStore';
+import { ANNOUNCEMENTS } from '@/scenes/messages/announcements';
+import {
+  NOTIFICATION_EXAMPLES,
+  type NotificationExample,
+} from '@/scenes/messages/notificationExamples';
 
 export type MessageTxDirection = 'send' | 'receive';
 
@@ -43,41 +42,77 @@ export type MessageListItem = {
   leadSymbol?: string;
 };
 
-/** Mock · 各分类列表条数。 */
-export const MESSAGE_MOCK_TARGETS: Record<MessageCategory, number> = {
-  transaction: 8,
-  teamActivity: 32,
-  collaboration: 18,
-  announcement: 52,
-  amlAlert: 0,
-};
+const MESSAGE_CATEGORIES: MessageCategory[] = [
+  'transaction',
+  'teamActivity',
+  'collaboration',
+  'announcement',
+  'amlAlert',
+];
 
-/** Mock · 五 Tab 日期分组数量（0 = 无列表 / 空态）。 */
-export const MESSAGE_MOCK_SECTION_COUNTS: Record<MessageCategory, number> = {
-  transaction: 3,
-  teamActivity: 6,
-  collaboration: 5,
-  announcement: 2,
-  amlAlert: 0,
-};
+function exampleCount(category: MessageCategory): number {
+  if (category === 'announcement') {
+    return ANNOUNCEMENTS.length;
+  }
+  return NOTIFICATION_EXAMPLES.filter((item) => item.category === category).length;
+}
 
-/** Mock · 各分类「今天」分区条数；其余均分到更早日期。 */
-export const MESSAGE_MOCK_TODAY_TARGETS: Record<MessageCategory, number> = {
-  transaction: 3,
-  teamActivity: 1,
-  collaboration: 2,
-  announcement: 3,
-  amlAlert: 0,
-};
+function sectionCountFor(total: number): number {
+  if (total <= 0) {
+    return 0;
+  }
+  if (total === 1) {
+    return 1;
+  }
+  if (total <= 8) {
+    return 2;
+  }
+  return 3;
+}
 
-/** Mock · 各分类未读条数（Tab 角标 ↔ 行首 `EgReddot`）。 */
-export const MESSAGE_MOCK_UNREAD_TARGETS: Record<MessageCategory, number> = {
-  transaction: 2,
-  teamActivity: 13,
-  collaboration: 8,
-  announcement: 3,
-  amlAlert: 0,
-};
+function todayCountFor(total: number, sectionCount: number): number {
+  if (sectionCount <= 1) {
+    return total;
+  }
+  return Math.max(1, Math.ceil(total / sectionCount));
+}
+
+function unreadCountFor(total: number): number {
+  if (total <= 1) {
+    return total;
+  }
+  return 2;
+}
+
+function countRecord(
+  valueFor: (category: MessageCategory) => number,
+): Record<MessageCategory, number> {
+  return {
+    transaction: valueFor('transaction'),
+    teamActivity: valueFor('teamActivity'),
+    collaboration: valueFor('collaboration'),
+    announcement: valueFor('announcement'),
+    amlAlert: valueFor('amlAlert'),
+  };
+}
+
+/** 各分类列表条数 · 与通知模板表一一对应。 */
+export const MESSAGE_MOCK_TARGETS: Record<MessageCategory, number> = countRecord(exampleCount);
+
+/** 日期分组数量（0 = 无列表 / 空态）。 */
+export const MESSAGE_MOCK_SECTION_COUNTS: Record<MessageCategory, number> = countRecord(
+  (category) => sectionCountFor(exampleCount(category)),
+);
+
+/** 各分类「今天」分区条数；其余均分到更早日期。 */
+export const MESSAGE_MOCK_TODAY_TARGETS: Record<MessageCategory, number> = countRecord(
+  (category) => todayCountFor(exampleCount(category), sectionCountFor(exampleCount(category))),
+);
+
+/** 各分类未读条数（分类角标 ↔ 行上 `EgReddot`）。 */
+export const MESSAGE_MOCK_UNREAD_TARGETS: Record<MessageCategory, number> = countRecord(
+  (category) => unreadCountFor(exampleCount(category)),
+);
 
 /** 通知前置 / 首页胶囊 · 各分类未读之和（与 hub 行 `EgMessage` 数字合计一致）。 */
 export function messageTotalUnreadCount(
@@ -112,69 +147,22 @@ export function messageCategoryUnreadCounts(
   return counts;
 }
 
-/** Mock · 文案在组件内用 i18n key 映射（见 `MessagesCategoryScene`）。 */
+export type MessageNoticeMock = {
+  templateKey: string;
+  /** 模板 Landing Page 可进入。 */
+  canRedirect: boolean;
+  copy: NotificationExample['copy'];
+};
+
+/** 列表文案来自通知模板表；旧 payload 仍保留给未迁移行。 */
 export type MessageListItemDef = Omit<MessageListItem, 'title' | 'subtitle'> & {
   titleKey?: `messages.${string}`;
   subtitleKey?: `messages.${string}`;
   transaction?: MessageTransactionMock;
   teamActivity?: MessageTeamActivityMock;
   collaboration?: MessageCollaborationMock;
+  notice?: MessageNoticeMock;
 };
-
-type MessageListItemTemplate = Pick<
-  MessageListItemDef,
-  'titleKey' | 'subtitleKey' | 'leadSymbol' | 'avatarLetter' | 'avatarColorIndex'
->;
-
-const MESSAGE_TX_MOCK_AMOUNTS = [
-  '0.5',
-  '2.5',
-  '100.00035',
-  '5,087.005',
-  '2.000000078',
-  '0.045',
-  '1,280.50',
-  '730,650.83',
-] as const;
-
-const MESSAGE_TX_MOCK_ADDR_FROM = '0x1a2b3c4d5e6f7890abcdef12345678';
-const MESSAGE_TX_MOCK_ADDR_TO = '0x9876fedcba0987654321abcd98765432';
-const MESSAGE_TX_MOCK_WALLET_NAME = 'Quant Vault';
-
-const MESSAGE_MOCK_TEMPLATES: Record<
-  Exclude<MessageCategory, 'transaction' | 'teamActivity' | 'collaboration'>,
-  readonly MessageListItemTemplate[]
-> = {
-  announcement: [
-    {
-      titleKey: 'messages.itemSubscriptionExpiring',
-      subtitleKey: 'messages.itemSubscriptionExpiringSub',
-    },
-    {
-      titleKey: 'messages.itemRenewal',
-      subtitleKey: 'messages.itemRenewalSub',
-    },
-    {
-      titleKey: 'messages.itemUpgrade',
-      subtitleKey: 'messages.itemUpgradeSub',
-    },
-  ],
-  amlAlert: [
-    {
-      titleKey: 'messages.mockAmlTitle',
-      subtitleKey: 'messages.mockAmlSub',
-      leadSymbol: 'eds-notice',
-    },
-  ],
-};
-
-const MESSAGE_CATEGORY_BUILD_ORDER: MessageCategory[] = [
-  'transaction',
-  'teamActivity',
-  'collaboration',
-  'announcement',
-  'amlAlert',
-];
 
 function distributeAcrossSections(
   total: number,
@@ -221,52 +209,46 @@ function buildMockScheduleSlots(
   return slots.sort((a, b) => b.sortKey - a.sortKey);
 }
 
-/** 按段顺序产出 slot（不做全表重排）· 供团队动态等需固定「第 N 日 M 条」场景。 */
-function buildMockScheduleSlotsFixedSections(
-  perSectionCounts: readonly number[],
-): MockScheduleSlot[] {
-  const slots: MockScheduleSlot[] = [];
-  let seq = 0;
-
-  for (let dayOffset = 0; dayOffset < perSectionCounts.length; dayOffset += 1) {
-    const dayCount = perSectionCounts[dayOffset] ?? 0;
-    for (let j = 0; j < dayCount; j += 1) {
-      const minuteOfDay = 8 * 60 + seq * 23 + j * 11;
-      const hours = Math.floor((minuteOfDay % (24 * 60)) / 60);
-      const minutes = minuteOfDay % 60;
-      const timeHm = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      const sortKey = dayOffset * 24 * 60 * 60 + minuteOfDay * 60 + j;
-      slots.push({ sectionDayOffset: dayOffset, timeHm, sortKey });
-      seq += 1;
-    }
-  }
-
-  return slots;
-}
-
-function compareMessagesDisplayOrder(
-  a: Pick<MessageListItemDef, 'sectionDayOffset' | 'sortKey'>,
-  b: Pick<MessageListItemDef, 'sectionDayOffset' | 'sortKey'>,
-): number {
-  if (a.sectionDayOffset !== b.sectionDayOffset) {
-    return a.sectionDayOffset - b.sectionDayOffset;
-  }
-  return b.sortKey - a.sortKey;
-}
-
-function assignTeamActivityByListOrder(drafts: MessageListItemDef[]): void {
-  const ordered = [...drafts].sort(compareMessagesDisplayOrder);
-  ordered.forEach((item, displayIndex) => {
-    item.teamActivity = buildTeamActivityMockPayload(displayIndex);
-  });
-}
-
 function buildMessageMockItems(): MessageListItemDef[] {
   const items: MessageListItemDef[] = [];
-  let seq = 0;
 
-  for (const category of MESSAGE_CATEGORY_BUILD_ORDER) {
-    const total = MESSAGE_MOCK_TARGETS[category];
+  for (const category of MESSAGE_CATEGORIES) {
+    if (category === 'announcement') {
+      const total = ANNOUNCEMENTS.length;
+      const perSection = distributeAcrossSections(
+        total,
+        MESSAGE_MOCK_SECTION_COUNTS[category],
+        MESSAGE_MOCK_TODAY_TARGETS[category],
+      );
+      const schedule = buildMockScheduleSlots(perSection);
+      ANNOUNCEMENTS.forEach((article, index) => {
+        const slot = schedule[index];
+        if (!slot) {
+          return;
+        }
+        items.push({
+          id: `msg-announcement-${article.id}`,
+          category,
+          sectionDayOffset: slot.sectionDayOffset,
+          timeHm: slot.timeHm,
+          sortKey: slot.sortKey,
+          unread: index < MESSAGE_MOCK_UNREAD_TARGETS.announcement,
+          notice: {
+            templateKey: article.id,
+            canRedirect: false,
+            copy: {
+              'zh-CN': { title: article.title['zh-CN'], body: '' },
+              'en-US': { title: article.title['en-US'], body: '' },
+              'zh-TW': { title: article.title['zh-TW'], body: '' },
+            },
+          },
+        });
+      });
+      continue;
+    }
+
+    const examples = NOTIFICATION_EXAMPLES.filter((item) => item.category === category);
+    const total = examples.length;
     const sectionCount = MESSAGE_MOCK_SECTION_COUNTS[category];
     if (total === 0 || sectionCount === 0) {
       continue;
@@ -280,101 +262,25 @@ function buildMessageMockItems(): MessageListItemDef[] {
     const schedule = buildMockScheduleSlots(perSection);
     const unreadCap = Math.min(MESSAGE_MOCK_UNREAD_TARGETS[category], total);
 
-    if (category === 'transaction') {
-      for (let i = 0; i < total; i += 1) {
-        seq += 1;
-        const slot = schedule[i]!;
-        const currency =
-          HOME_TODO_MOCK_CURRENCIES_FIRST_10[i % HOME_TODO_MOCK_CURRENCIES_FIRST_10.length]!;
-        const direction: MessageTxDirection = i % 2 === 0 ? 'send' : 'receive';
-        items.push({
-          id: `msg-${category}-${seq}`,
-          category,
-          sectionDayOffset: slot.sectionDayOffset,
-          timeHm: slot.timeHm,
-          sortKey: slot.sortKey,
-          unread: i < unreadCap,
-          transaction: {
-            amount: MESSAGE_TX_MOCK_AMOUNTS[i % MESSAGE_TX_MOCK_AMOUNTS.length]!,
-            currency,
-            direction,
-            ...(direction === 'send'
-              ? {
-                  addressFrom: MESSAGE_TX_MOCK_ADDR_FROM,
-                  addressTo: MESSAGE_TX_MOCK_ADDR_TO,
-                }
-              : {
-                  walletName: MESSAGE_TX_MOCK_WALLET_NAME,
-                  walletAddress: MESSAGE_TX_MOCK_ADDR_FROM,
-                }),
-          },
-        });
+    examples.forEach((example, index) => {
+      const slot = schedule[index];
+      if (!slot) {
+        return;
       }
-      continue;
-    }
-
-    if (category === 'teamActivity') {
-      const teamSlots = buildMockScheduleSlotsFixedSections(MESSAGE_TEAM_ACTIVITY_PER_SECTION);
-      const teamDrafts: MessageListItemDef[] = teamSlots.map((slot, i) => {
-        seq += 1;
-        return {
-          id: `msg-${category}-${seq}`,
-          category,
-          sectionDayOffset: slot.sectionDayOffset,
-          timeHm: slot.timeHm,
-          sortKey: slot.sortKey,
-          unread: i < unreadCap,
-        };
-      });
-      assignTeamActivityByListOrder(teamDrafts);
-      items.push(...teamDrafts);
-      continue;
-    }
-
-    if (category === 'collaboration') {
-      for (let i = 0; i < total; i += 1) {
-        seq += 1;
-        const slot = schedule[i]!;
-        items.push({
-          id: `msg-${category}-${seq}`,
-          category,
-          sectionDayOffset: slot.sectionDayOffset,
-          timeHm: slot.timeHm,
-          sortKey: slot.sortKey,
-          unread: i < unreadCap,
-          collaboration: buildCollaborationMockPayload(i),
-        });
-      }
-      continue;
-    }
-
-    const templates = MESSAGE_MOCK_TEMPLATES[category];
-    if (templates.length === 0) {
-      continue;
-    }
-
-    for (let i = 0; i < total; i += 1) {
-      seq += 1;
-      const slot = schedule[i]!;
-      const template = templates[i % templates.length]!;
       items.push({
-        id: `msg-${category}-${seq}`,
+        id: `msg-${example.templateKey}`,
         category,
         sectionDayOffset: slot.sectionDayOffset,
         timeHm: slot.timeHm,
         sortKey: slot.sortKey,
-        titleKey: template.titleKey,
-        subtitleKey: template.subtitleKey,
-        unread: i < unreadCap,
-        ...(template.leadSymbol ? { leadSymbol: template.leadSymbol } : {}),
-        ...(template.avatarLetter != null
-          ? {
-              avatarLetter: template.avatarLetter,
-              avatarColorIndex: template.avatarColorIndex,
-            }
-          : {}),
+        unread: index < unreadCap,
+        notice: {
+          templateKey: example.templateKey,
+          canRedirect: example.canRedirect,
+          copy: example.copy,
+        },
       });
-    }
+    });
   }
 
   return items;

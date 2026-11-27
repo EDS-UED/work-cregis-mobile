@@ -5,7 +5,6 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useEdsTypography } from '@/hooks/useEdsTypography';
 import { formatMessageAddressShort } from '@/scenes/messages/messagesFormat';
 import type { MessageTransactionMock } from '@/scenes/messages/messagesMock';
-import { MessagesListLeadIcon } from '@/scenes/messages/MessagesListLeadIcon';
 import { EgDataListReddot, EgDataListRow } from '@/eds/data-list';
 import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
 import { SceneText } from '@/scenes/shared/SceneText';
@@ -18,7 +17,7 @@ type MessagesTransactionListRowProps = {
   onPress?: () => void;
 };
 
-/** 通知 · 交易 Tab 行 · 币种图 + 金额 + 发送/接收副文案。 */
+/** 通知 · 交易列表行 · 金额 + 发送/接收副文案。行首图标不展示。 */
 export function MessagesTransactionListRow({
   tx,
   timeLabel,
@@ -72,7 +71,6 @@ export function MessagesTransactionListRow({
       layout={layout}
       gap={mediaGap}
     >
-      <MessagesListLeadIcon unread={unread} cryptoCurrency={tx.currency} />
       <View style={{ flex: 1, minWidth: 0, gap: edsPx(spacing['spacing-05']) }}>
         <View
           style={{

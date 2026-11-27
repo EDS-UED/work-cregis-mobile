@@ -94,6 +94,16 @@ type HomeState = {
   teamGasBalance: string;
   teamGasBalanceFiat: string;
   userDisplayName: string;
+  setUserDisplayName: (name: string) => void;
+  /** 登录邮箱 · 重置电子邮箱后更新。 */
+  accountEmail: string;
+  setAccountEmail: (email: string) => void;
+  /** 交易密码是否已设置。默认未设置。 */
+  transactionPasswordSet: boolean;
+  setTransactionPasswordSet: (set: boolean) => void;
+  /** 个人头像本地 uri · 未设置时用色板首字母。 */
+  userAvatarUri: string | null;
+  setUserAvatarUri: (uri: string | null) => void;
   userAvatarColorIndex: number;
   totalBalanceDisplay: string;
   balanceVisible: boolean;
@@ -105,6 +115,9 @@ type HomeState = {
   setQuickEntryIds: (ids: QuickServiceId[]) => void;
   toggleBalanceVisible: () => void;
   setTodoFilter: (filter: HomeTodoFilter) => void;
+  /** 通知「标记为已读」后，列表红点与分类角标全部隐藏。 */
+  notificationsMarkedRead: boolean;
+  markAllNotificationsRead: () => void;
 };
 
 /** @see `.cursor/rules/work.md` §4.3 */
@@ -239,6 +252,13 @@ export const useHomeStore = create<HomeState>((set, get) => ({
   teamGasBalance: '0.045 ETH',
   teamGasBalanceFiat: '($145.20)',
   userDisplayName: 'Alex Mah.',
+  setUserDisplayName: (userDisplayName) => set({ userDisplayName }),
+  accountEmail: 'testo@gmail.com',
+  setAccountEmail: (accountEmail) => set({ accountEmail }),
+  transactionPasswordSet: false,
+  setTransactionPasswordSet: (transactionPasswordSet) => set({ transactionPasswordSet }),
+  userAvatarUri: null,
+  setUserAvatarUri: (userAvatarUri) => set({ userAvatarUri }),
   /** DS 头像色板 index 1 · `web3-avatar-2`（`#256034`）。 */
   userAvatarColorIndex: 1,
   totalBalanceDisplay: '$ 730,650.83',
@@ -251,4 +271,6 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     set({ quickEntryIds: quickEntryIds.slice(0, 7) }),
   toggleBalanceVisible: () => set((state) => ({ balanceVisible: !state.balanceVisible })),
   setTodoFilter: (todoFilter) => set({ todoFilter }),
+  notificationsMarkedRead: false,
+  markAllNotificationsRead: () => set({ notificationsMarkedRead: true }),
 }));

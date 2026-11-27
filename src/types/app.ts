@@ -2,6 +2,8 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 
 export type LocaleCode = 'zh-CN' | 'en-US' | 'zh-TW';
 
+export type CurrencyUnit = 'CNY' | 'USD' | 'HKD';
+
 export type TabRouteName = 'Home' | 'Wallet' | 'Collaboration' | 'TransactionRecords';
 
 export type MotionScene =

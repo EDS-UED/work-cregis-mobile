@@ -6,6 +6,7 @@ import {
   MESSAGE_MOCK_ITEMS,
   groupMessageItemsByDateSection,
 } from '@/scenes/messages/messagesMock';
+import { resolveNotificationCopy } from '@/scenes/messages/notificationExamples';
 import { resolveTeamActivityCopy } from '@/scenes/messages/messagesTeamActivityCopy';
 
 /** 前置页五类顺序（与 Tab 旧序不同）。 */
@@ -55,9 +56,19 @@ export function formatCategoryHubSubtitleSegments(
   category: MessageCategory,
   item: MessageListItemDef | undefined,
   t: TFunction,
+  language = 'zh-CN',
 ): CategoryHubSubtitleSegments {
   if (!item) {
     return hubEmptySubtitle(t);
+  }
+
+  if (item.notice) {
+    const copy = resolveNotificationCopy(item.notice.copy, language);
+    return {
+      segmentA: copy.title,
+      segmentB: copy.body ? ` ${copy.body}` : undefined,
+      boldSegmentA: true,
+    };
   }
 
   switch (category) {

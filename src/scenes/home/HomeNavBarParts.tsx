@@ -81,7 +81,11 @@ const glassIconDefaults = {
 };
 
 function useHomeNoticeBadgeLabel(): string | undefined {
-  const total = useMemo(() => messageTotalUnreadCount(MESSAGE_MOCK_ITEMS), []);
+  const notificationsMarkedRead = useHomeStore((state) => state.notificationsMarkedRead);
+  const total = useMemo(
+    () => (notificationsMarkedRead ? 0 : messageTotalUnreadCount(MESSAGE_MOCK_ITEMS)),
+    [notificationsMarkedRead],
+  );
   return formatNotificationCountBadge(total);
 }
 

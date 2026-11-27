@@ -5,14 +5,14 @@ import { EgDivider } from '@/eds/profile-icons';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import {
+  useAccountEmail,
   useHomeUserAvatarColorIndex,
+  useHomeUserAvatarSource,
   useHomeUserDisplayName,
 } from '@/scenes/shared/homeUserIdentity';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { maskEmail } from '@/utils/maskEmail';
 import { edsPx } from '@/utils/edsTheme';
-
-const DEMO_ACCOUNT_EMAIL = 'testo@gmail.com';
 
 type PersonalCenterAccountProfileRowProps = {
   isLast?: boolean;
@@ -24,7 +24,9 @@ export function PersonalCenterAccountProfileRow({
 }: PersonalCenterAccountProfileRowProps) {
   const { mode, spacing } = useEdsTheme();
   const displayName = useHomeUserDisplayName();
+  const accountEmail = useAccountEmail();
   const userAvatarColorIndex = useHomeUserAvatarColorIndex();
+  const avatarSource = useHomeUserAvatarSource();
 
   const rowPaddingH = edsPx(spacing['spacing-4']);
   const rowPaddingV = edsPx(spacing['spacing-4']);
@@ -67,6 +69,7 @@ export function PersonalCenterAccountProfileRow({
             name={displayName}
             size="5xl"
             colorIndex={userAvatarColorIndex}
+            source={avatarSource}
             accessibilityLabel={displayName}
           />
         </View>
@@ -75,7 +78,7 @@ export function PersonalCenterAccountProfileRow({
             {displayName}
           </SceneText>
           <SceneText variant="bodySmallSecondary" numberOfLines={1}>
-            {maskEmail(DEMO_ACCOUNT_EMAIL)}
+            {maskEmail(accountEmail)}
           </SceneText>
         </View>
       </View>

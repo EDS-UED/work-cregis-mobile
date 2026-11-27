@@ -11,7 +11,7 @@ import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageSt
 
 type ScreenOptionsProps = Parameters<ReturnType<typeof EgEdsAnimaPage>>[0];
 
-/** 通知 — EDS page + `box-page`；右栏 `eds-clear` + 未读红点。 */
+/** 通知 — EDS page + `box-page`；右栏「标记为已读」。 */
 export function useMessagesScreenOptions() {
   const { colors, mode } = useEdsTheme();
   const { t } = useTranslation();

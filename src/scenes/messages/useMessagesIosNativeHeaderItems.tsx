@@ -9,11 +9,14 @@ import {
 } from '@/eds/nav-bar';
 
 import { MessagesNavClearButton } from '@/scenes/messages/MessagesNavClearButton';
+import { useHomeStore } from '@/store';
 
 export function useMessagesIosNativeHeaderItems(): Pick<
   NativeStackNavigationOptions,
   'unstable_headerRightItems'
 > {
+  const markAllNotificationsRead = useHomeStore((state) => state.markAllNotificationsRead);
+
   return useMemo(() => {
     if (!shouldUseEgNavBarNativeStack()) {
       return {};
@@ -21,8 +24,10 @@ export function useMessagesIosNativeHeaderItems(): Pick<
 
     return {
       unstable_headerRightItems: (): NativeStackHeaderItem[] => [
-        egNavBarNativeStackHeaderGlassItem(<MessagesNavClearButton />),
+        egNavBarNativeStackHeaderGlassItem(
+          <MessagesNavClearButton onPress={markAllNotificationsRead} />,
+        ),
       ],
     };
-  }, []);
+  }, [markAllNotificationsRead]);
 }
