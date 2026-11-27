@@ -553,6 +553,14 @@ Expo Go：SDK 须与 §1 一致（当前 58）
 
 权威对照见 EDS `packages/tokens/spec/css-dist-reference.md` 透明度档（如 `66` → 40% → tertiary）。
 
+**Icon / SVG 着色（`EgSymbol` 等）**
+
+| 图形类型 | 用哪族 token | 典型入参 |
+|----------|----------------|----------|
+| **线框 / stroke 图标** | **Stroke**（如 `stroke-divider-deep` · `stroke-decor`） | `strokeColorToken` + `strokeScaleToken` |
+| **填充 / Fill 图标** | **Material**（如 `material-decor` · `material-base-quaternary` · `status-success`） | `strokeColorToken` / fill 着色（勿用 `text-base-*` 冒充填色） |
+| **与文案同色** | **Text**（`text-base-primary` · `text-base-secondary` · …） | 仅当图标语义随字色走时使用 |
+
 ### 5.1 Token 与圆角平滑
 
 - 业务：`useEdsTheme()` + `edsPx()` + `src/utils/edsTheme.ts` 命名 helper（`edsPageBackground` · `edsSceneContentInset` · `createEdsTypographyStyles` / `SceneText` variant）

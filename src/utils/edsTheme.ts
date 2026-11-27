@@ -148,6 +148,15 @@ export function createEdsTypographyStyles(
       'weight-semibold',
       'text-base-primary',
     ),
+    /** `typography-body-large-strong` · weight-medium (500) */
+    bodyLargeStrong: edsTextStyle(
+      typography,
+      colors,
+      'size-body-large',
+      'line-height-body-large',
+      'weight-medium',
+      'text-base-primary',
+    ),
     /** `typography-body-medium` · weight-regular (400) */
     bodyMedium: edsTextStyle(
       typography,

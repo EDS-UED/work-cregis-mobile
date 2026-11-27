@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { EgButtonGlass } from '@/eds/button-glass';
-import { EgSymbol } from '@/eds/home-ui';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { EgDivider } from '@/eds/home-ui';
 import {
   egTabBarScrollContentReserveWithSafeArea,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
 } from '@/eds/nav-bar';
 import { shouldUseEgTabBarNativeStack } from '@/eds/runtime';
+import { EgSymbolAction } from '@/eds/scene-buttons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +17,16 @@ import { homeScrollTopReserve } from '@/scenes/home/HomeTopBar';
 import { WalletAssetRow } from '@/scenes/assets/WalletAssetRow';
 import { EdsGlassScreenShell } from '@/scenes/shared/EdsGlassScreenShell';
 import { SceneText } from '@/scenes/shared/SceneText';
+import { BalanceHeroBlock } from '@/scenes/shared/BalanceHeroBlock';
 import { EgDataList } from '@/eds/data-list';
+import {
+  walletCurrencyTitleToListGap,
+  walletListEditorScreenInset,
+} from '@/scenes/assets/walletCurrencySectionLayout';
+import {
+  teamCenterDataListRowGap,
+} from '@/scenes/team/teamCenterDataListLayout';
+import { useEdsMainScrollLayout } from '@/hooks/useEdsMainScrollLayout';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useAssetsStore } from '@/store';
 import {
@@ -25,34 +35,22 @@ import {
   edsPx,
   edsSceneContentInset,
 } from '@/utils/edsTheme';
-import { nativeNavScrollSurfaceStyle } from '@/utils/nativeNavScrollSurface';
-import { overlayNavScrollSurfaceStyle } from '@/utils/nativeNavScrollSurface';
+import {
+  nativeNavScrollSurfaceStyle,
+  overlayNavScrollSurfaceStyle,
+} from '@/utils/nativeNavScrollSurface';
 
-function BalanceVisibilityIcon({
-  balanceVisible,
-  mode,
-}: {
-  balanceVisible: boolean;
-  mode: 'light' | 'dark';
-}) {
-  const { spacing } = useEdsTheme();
-  const iconPx = edsPx(spacing['symbol-xs']);
+type WalletSceneProps = {
+  onOpenWalletSwitcher: () => void;
+};
 
-  return (
-    <EgSymbol
-      name={balanceVisible ? 'eds-eye' : 'eds-close-eye'}
-      displayPx={iconPx}
-      mode={mode}
-      strokeColorToken="text-base-secondary"
-    />
-  );
-}
-
-export function WalletScene() {
+export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
   const { t } = useTranslation();
   const { colors, mode, spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
-  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll();
+  const { scrollOffset, onScroll, scrollEventThrottle } = useEgNavBarScroll({
+    nativeScrollEdge: true,
+  });
   const nativeNavBar = shouldUseEgNavBarNativeStack();
   const nativeTabBar = shouldUseEgTabBarNativeStack();
   const tabBarReserve = nativeTabBar
@@ -60,14 +58,40 @@ export function WalletScene() {
     : egTabBarScrollContentReserveWithSafeArea(insets.bottom);
   const navContentGap = edsNavContentGap(spacing);
   const sceneContentInset = edsSceneContentInset(spacing);
+  const balanceLabelToAmountGap = edsPx(spacing['spacing-2']);
+  const balanceToDividerMarginTop = edsPx(spacing['spacing-8']);
+  const dividerToCurrenciesMarginBottom = edsPx(spacing['spacing-5']);
+  const listRowGap = teamCenterDataListRowGap(spacing);
+  const listEditorScreenInset = walletListEditorScreenInset(spacing);
+  const currencyTitleToListGap = walletCurrencyTitleToListGap(spacing);
 
-  const walletName = useAssetsStore((s) => s.walletName);
   const totalBalance = useAssetsStore((s) => s.totalBalance);
   const balanceVisible = useAssetsStore((s) => s.balanceVisible);
   const assets = useAssetsStore((s) => s.assets);
   const toggleBalanceVisible = useAssetsStore((s) => s.toggleBalanceVisible);
 
+  const [balanceOdometerIntroKey, setBalanceOdometerIntroKey] = useState(0);
+  const skipOdometerIntroOnNextFocus = useRef(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (skipOdometerIntroOnNextFocus.current) {
+        skipOdometerIntroOnNextFocus.current = false;
+        return;
+      }
+      setBalanceOdometerIntroKey((key) => key + 1);
+    }, []),
+  );
+
   const balanceText = balanceVisible ? totalBalance : '**********';
+  const topReserve = homeScrollTopReserve(insets.top, navContentGap);
+  const scrollPaddingTop = nativeNavBar ? navContentGap : topReserve;
+  const scrollPaddingBottom = tabBarReserve;
+  const scrollLayout = useEdsMainScrollLayout({
+    layoutActive: nativeNavBar,
+    paddingTop: scrollPaddingTop,
+    paddingBottom: scrollPaddingBottom,
+  });
 
   const styles = useMemo(
     () =>
@@ -75,66 +99,82 @@ export function WalletScene() {
         root: { flex: 1, backgroundColor: edsPageBackground(colors) },
         content: {
           paddingHorizontal: sceneContentInset,
-          gap: edsPx(spacing['spacing-7']),
         },
-        walletPickerRow: {
+        balanceToListDivider: {
+          marginTop: balanceToDividerMarginTop,
+          marginBottom: dividerToCurrenciesMarginBottom,
+          marginHorizontal: -sceneContentInset,
+          alignSelf: 'stretch',
+        },
+        currencySection: {
+          gap: currencyTitleToListGap,
+          alignSelf: 'stretch',
+        },
+        currencyHeaderBleed: {
+          marginHorizontal: -sceneContentInset,
           flexDirection: 'row',
           alignItems: 'center',
-          gap: edsPx(spacing['spacing-2']),
+          paddingLeft: sceneContentInset,
+          paddingRight: listEditorScreenInset,
         },
-        cryptoHeader: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+        currencyTitle: {
+          flex: 1,
+          minWidth: 0,
         },
       }),
-    [colors, sceneContentInset, spacing],
+    [
+      balanceToDividerMarginTop,
+      colors,
+      currencyTitleToListGap,
+      dividerToCurrenciesMarginBottom,
+      listEditorScreenInset,
+      sceneContentInset,
+    ],
   );
 
   const scrollBody = (
-  <>
-      <Pressable
-        onPress={toggleBalanceVisible}
-        accessibilityRole="button"
-        accessibilityLabel={
-          balanceVisible ? t('home.hideBalance') : t('home.showBalance')
-        }
-      >
-        <View style={{ gap: edsPx(spacing['spacing-3']) }}>
-          <View style={styles.walletPickerRow}>
-            <SceneText variant="bodySemibold">{walletName}</SceneText>
-            <EgSymbol
-              name="eds-arrow-down-mini-ios"
-              size="sm"
-              mode={mode}
-              strokeColorToken="text-base-secondary"
-            />
-            <BalanceVisibilityIcon balanceVisible={balanceVisible} mode={mode} />
-          </View>
-          <SceneText variant="display">{balanceText}</SceneText>
-        </View>
-      </Pressable>
+    <>
+      <BalanceHeroBlock
+        balanceVisible={balanceVisible}
+        balanceText={balanceText}
+        balanceOdometerIntroKey={balanceOdometerIntroKey}
+        balanceLabel={t('scenes.walletAssets')}
+        mode={mode}
+        colors={colors}
+        spacing={spacing}
+        labelToAmountGap={balanceLabelToAmountGap}
+        onToggle={toggleBalanceVisible}
+        hideBalanceLabel={t('home.hideBalance')}
+        showBalanceLabel={t('home.showBalance')}
+        assetChartLabel={t('home.assetDistribution')}
+        showAssetChart={false}
+        amountTestID="wallet-balance-amount"
+      />
 
-      <View style={{ gap: edsPx(spacing['spacing-4']) }}>
-        <View style={styles.cryptoHeader}>
-          <SceneText variant="title">{t('scenes.walletCryptoSection')}</SceneText>
-          <EgButtonGlass
-            kind="icon"
-            iconCount={1}
+      <View style={styles.balanceToListDivider}>
+        <EgDivider variant="page" mode={mode} />
+      </View>
+
+      <View style={styles.currencySection}>
+        <View style={styles.currencyHeaderBleed}>
+          <SceneText variant="title" style={styles.currencyTitle}>
+            {t('scenes.walletCurrenciesSection')}
+          </SceneText>
+          <EgSymbolAction
             size="md"
+            tone="plain"
+            icon="eds-list-editor"
             mode={mode}
-            icon="eds-filter"
-            accessibilityLabel={t('scenes.walletFilter')}
-            testID="wallet-crypto-filter"
+            accessibilityLabel={t('scenes.walletListEditor')}
+            testID="wallet-currency-list-editor"
           />
         </View>
-        <EgDataList sceneContentInset={sceneContentInset}>
-          {assets.map((asset) => (
+        <EgDataList sceneContentInset={sceneContentInset} rowGap={listRowGap}>
+          {assets.map((asset, index) => (
             <WalletAssetRow
-              key={asset.symbol}
+              key={`${asset.symbol}-${index}`}
               item={asset}
               balanceVisible={balanceVisible}
-              multichainLabel={t('scenes.walletMultichain')}
             />
           ))}
         </EgDataList>
@@ -149,18 +189,40 @@ export function WalletScene() {
         contentInsetAdjustmentBehavior="automatic"
         onScroll={onScroll}
         scrollEventThrottle={scrollEventThrottle}
+        onLayout={scrollLayout.onViewportLayout}
+        scrollEnabled={scrollLayout.scrollEnabled}
+        showsVerticalScrollIndicator={scrollLayout.showsVerticalScrollIndicator}
+        bounces={scrollLayout.bounces}
+        alwaysBounceVertical={scrollLayout.alwaysBounceVertical}
+        overScrollMode={scrollLayout.overScrollMode}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: navContentGap, paddingBottom: tabBarReserve },
+          scrollLayout.contentContainerExtras.flexGrow != null
+            ? { flexGrow: scrollLayout.contentContainerExtras.flexGrow }
+            : null,
+          scrollLayout.contentContainerExtras.paddingBottom != null
+            ? { paddingBottom: scrollLayout.contentContainerExtras.paddingBottom }
+            : { paddingBottom: scrollPaddingBottom },
+          { paddingTop: scrollPaddingTop },
         ]}
       >
-        {scrollBody}
+        <View onLayout={scrollLayout.onContentLayout} collapsable={false}>
+          {scrollBody}
+        </View>
       </ScrollView>
     );
   }
 
   return (
-    <EdsGlassScreenShell style={styles.root} overlay={<WalletTopBar scrollOffset={scrollOffset} />}>
+    <EdsGlassScreenShell
+      style={styles.root}
+      overlay={
+        <WalletTopBar
+          scrollOffset={scrollOffset}
+          onOpenWalletSwitcher={onOpenWalletSwitcher}
+        />
+      }
+    >
       <ScrollView
         style={overlayNavScrollSurfaceStyle()}
         nestedScrollEnabled
@@ -169,9 +231,10 @@ export function WalletScene() {
         scrollEventThrottle={scrollEventThrottle}
         contentContainerStyle={[
           styles.content,
+          { flexGrow: 1 },
           {
-            paddingTop: homeScrollTopReserve(insets.top, navContentGap),
-            paddingBottom: tabBarReserve,
+            paddingTop: scrollPaddingTop,
+            paddingBottom: scrollPaddingBottom,
           },
         ]}
       >
