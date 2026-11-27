@@ -17,14 +17,12 @@ import {
   EgIconListLatticeMobile,
   EgSymbol,
 } from "@/eds/home-ui";
-import { EgSymbolAction } from "@/eds/scene-buttons";
 import {
   egTabBarScrollContentReserveWithSafeArea,
   shouldUseEgNavBarNativeStack,
   useEgNavBarScroll,
 } from "@/eds/nav-bar";
 import { shouldUseEgTabBarNativeStack } from "@/eds/runtime";
-import { EgOdometer } from "@/eds/animations";
 import mobileTheme from "@/eds/tokens";
 import { edsMotionSpring } from "@/utils/edsMotion";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -46,6 +44,7 @@ import { HomeTodoFilterBar } from "@/scenes/home/HomeTodoFilterBar";
 import { HomeTopBar, homeScrollTopReserve } from "@/scenes/home/HomeTopBar";
 import { EdsGlassScreenShell } from "@/scenes/shared/EdsGlassScreenShell";
 import { SceneText } from "@/scenes/shared/SceneText";
+import { BalanceHeroBlock } from "@/scenes/shared/BalanceHeroBlock";
 import { useHomeStore, type HomeTodoFilter, type HomeTodoItem } from "@/store";
 import { nativeNavScrollSurfaceStyle } from "@/utils/nativeNavScrollSurface";
 import { EgDataList, EgDataListRow } from "@/eds/data-list";
@@ -95,139 +94,6 @@ function usePressScaleMotion(
     scale.value = withSpring(1, springConfig);
   }, [scale, springConfig]);
   return { animatedStyle, onPressIn, onPressOut, pressing };
-}
-
-/** Token 图标描边 — design token `stroke-sm`（EgSymbol 内建 colorize 为 stroke-lg）。 */
-function HomeBalanceVisibilityIcon({
-  balanceVisible,
-  mode,
-}: {
-  balanceVisible: boolean;
-  mode: "light" | "dark";
-}) {
-  const { spacing } = useEdsTheme();
-  const iconPx = edsPx(spacing["symbol-xs"]);
-
-  return (
-    <View
-      style={{
-        width: iconPx,
-        height: iconPx,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <EgSymbol
-        name={balanceVisible ? "eds-eye" : "eds-close-eye"}
-        displayPx={iconPx}
-        mode={mode}
-        strokeColorToken="text-base-secondary"
-        strokeScaleToken="stroke-xl"
-      />
-    </View>
-  );
-}
-
-/** 显示/隐藏余额 — 点按范围为标题行 + 金额；无点按缩放动效。右侧 `EgSymbolAction` 独立热区。 */
-function HomeBalanceBlock({
-  balanceVisible,
-  balanceText,
-  balanceOdometerIntroKey,
-  estTotalValueLabel,
-  mode,
-  colors,
-  spacing,
-  labelToAmountGap,
-  onToggle,
-  hideBalanceLabel,
-  showBalanceLabel,
-  assetChartLabel,
-  onAssetChartPress,
-}: {
-  balanceVisible: boolean;
-  balanceText: string;
-  /** 换栈/换 Tab 回首页时递增，强制 EgOdometer 重挂载播 intro（首次 focus 不递增，避免与冷启动双播）。 */
-  balanceOdometerIntroKey: number;
-  estTotalValueLabel: string;
-  mode: "light" | "dark";
-  colors: ReturnType<typeof useEdsTheme>["colors"];
-  spacing: ReturnType<typeof useEdsTheme>["spacing"];
-  labelToAmountGap: number;
-  onToggle: () => void;
-  hideBalanceLabel: string;
-  showBalanceLabel: string;
-  assetChartLabel: string;
-  onAssetChartPress?: () => void;
-}) {
-  const typography = useEdsTypography();
-  const labelIconGap = edsPx(spacing["spacing-1"]);
-  const assetChartGap = edsPx(spacing["spacing-3"]);
-  const balanceAmountTextStyle = useMemo(
-    () => [
-      typography.display,
-      { color: String(colors["text-base-primary"]) },
-    ],
-    [typography.display, colors],
-  );
-
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: assetChartGap,
-        alignSelf: "stretch",
-      }}
-    >
-      <Pressable
-        onPress={onToggle}
-        accessibilityRole="button"
-        accessibilityLabel={balanceVisible ? hideBalanceLabel : showBalanceLabel}
-        style={{ flex: 1, flexShrink: 1, minWidth: 0 }}
-      >
-        <View style={{ gap: labelToAmountGap }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: labelIconGap,
-            }}
-          >
-            <SceneText
-              variant="bodyMediumStrong"
-              style={{ color: String(colors["text-base-secondary"]) }}
-            >
-              {estTotalValueLabel}
-            </SceneText>
-            <HomeBalanceVisibilityIcon
-              balanceVisible={balanceVisible}
-              mode={mode}
-            />
-          </View>
-          {balanceVisible ? (
-            <EgOdometer
-              key={`${balanceText}-${balanceOdometerIntroKey}`}
-              value={balanceText}
-              animateIntro
-              textStyle={balanceAmountTextStyle}
-              testID="home-balance-amount"
-            />
-          ) : (
-            <SceneText variant="display">{balanceText}</SceneText>
-          )}
-        </View>
-      </Pressable>
-      <EgSymbolAction
-        size="xl"
-        tone="plain"
-        icon="eds-pie-chart-color"
-        mode={mode}
-        onPress={onAssetChartPress}
-        accessibilityLabel={assetChartLabel}
-        testID="home-balance-asset-chart"
-      />
-    </View>
-  );
 }
 
 type QuickActionProps = {
@@ -309,12 +175,14 @@ function HomeQuickAction({
           </Animated.View>
         </View>
         <SceneText
-          variant="bodySmall"
-          numberOfLines={1}
+          variant="footnotePrimary"
+          numberOfLines={2}
+          ellipsizeMode="tail"
           style={{
             marginTop: labelGap,
             textAlign: "center",
             width: tileSize,
+            alignSelf: "center",
           }}
         >
           {label}
@@ -571,11 +439,11 @@ export function HomeScene() {
   const scrollBody = (
     <>
       <View style={styles.balanceSection}>
-        <HomeBalanceBlock
+        <BalanceHeroBlock
           balanceVisible={balanceVisible}
           balanceText={balanceText}
           balanceOdometerIntroKey={balanceOdometerIntroKey}
-          estTotalValueLabel={t("home.estTotalValue")}
+          balanceLabel={t("home.estTotalValue")}
           mode={mode}
           colors={colors}
           spacing={spacing}
@@ -584,6 +452,8 @@ export function HomeScene() {
           hideBalanceLabel={t("home.hideBalance")}
           showBalanceLabel={t("home.showBalance")}
           assetChartLabel={t("home.assetDistribution")}
+          amountTestID="home-balance-amount"
+          assetChartTestID="home-balance-asset-chart"
         />
       </View>
 

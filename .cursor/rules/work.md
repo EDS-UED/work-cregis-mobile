@@ -31,9 +31,9 @@ EDS preview → playground（模拟器/真机）；禁止 Web preview
 
 | 用户说了什么 | Agent 做什么 |
 |--------------|--------------|
-| **「提交」** | §3.3.1：**`yang`** commit · 工作区干净 · **不** push |
+| **「提交」** | §3.3.1：**`yang`** · **全量** commit（工作区须净）· **不** push |
 | **「拉取」/「pull」** | §3.3.1：同步 GitHub 已 merge 的 **`origin/yang`**（Agent 亲自 `fetch`/`pull`） |
-| **「推送」/「推」** | §3.3.1：**`yang` → `main`** → GitHub + EAS `preview`（Agent 亲自执行） |
+| **「推送」/「推」** | §3.3.1：**全量** commit → **`yang` 干净** → **`yang` → `main`** → GitHub + EAS `preview`；收尾 **交付块**（§3.3.1） |
 | Expo Go 与项目 SDK 不一致 | 先确认 `package.json` / `work.md` §1 锁定版本；真机 Go 过旧/过新 → 模拟器或 Dev Client（§1） |
 | 只提业务 Scene / 功能 | 只改 `src/**`（及 i18n / navigation / store）；**新页必读 §2.5**；**改 Home 顶栏必先读 §2.3.1**，禁止未读就改 overlay / reserve / `forceRnImplementation` |
 | **设计 / 生成新页面** | **参考** [`docs/design.md`](../docs/design.md) §5.0（非强制改造既有页） |
@@ -418,11 +418,24 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 
 | 词 | 【必须】Agent 执行 |
 |----|-------------------|
-| **提交** | `checkout yang`（**禁**在 `main`/`jojo` 代提交）→ `typecheck` → `add`（禁 `.env`/密钥；未指定则本次会话范围）→ `commit` → **`git status` 干净**（有意未交须说明）→ **不** `push` |
+| **提交** | `checkout yang`（**禁**在 `main`/`jojo` 代提交）→ `typecheck` → **全量暂存**：默认 `git add -A`（**禁** `.env*` / 密钥 / 明显误建文件；用户点名路径除外也须一次性纳入）→ `commit` → **`git status` 须干净**（仅允许已写入 `.gitignore` 的忽略项；**禁止**「只交订阅/只交会话」而留脏工作区，除非用户**当条**写明排除清单）→ **不** `push` |
 | **拉取** | 目标：本机 **`yang` = 远端已 merge 的 `yang`**（典型 PR **jojo→yang** 后）。`fetch` → `checkout yang` → `pull`；本地脏 → `stash`→`pull`→`pop`，冲突即停。**禁**跑 `ensure-eds-mobile`（≠「同步」）。收尾 `log -3 --oneline`。若上下文刚 **yang→main**：再 `pull main`，`yang` 上 `merge main` |
-| **推** | 目标：**GitHub `main` = 当前 `yang`**，且 **EAS preview = 本地 Metro**（含 EDS dist）。`yang` 干净+`pull`+`typecheck` → **yang→main**（**首选** `push yang` → `gh pr create/merge` → `pull main`；规则允许时才本地 `merge`+`push main`+`yang merge main`）→ **先** `eds-mobile push main` **后** 业务 `main`（Workflow `EDS_MOBILE_GIT_REF` 默认 `main`；业务先推会短暂旧 EDS+新业务）→ 等 workflow **SUCCESS**（`eas-cli workflow:runs`/`status`；失败 `workflow:logs`；兜底 `preview:update` 且 eds-mobile 已在 GitHub `main`）→ 给 Preview 链接 + SDK 58 提示 |
+| **推** | **先**完成与 **提交** 相同的全量 commit → **`git status` 干净** → `pull` + `typecheck` → 目标：**GitHub `main` = 当前 `yang`**，且 **EAS preview = 本地 Metro**（含 EDS dist）。**yang→main**（**首选** `push yang` → `gh pr create/merge` → `pull main`；规则允许时才本地 `merge`+`push main`+`yang merge main`）→ **先** `eds-mobile push main` **后** 业务 `main`（Workflow `EDS_MOBILE_GIT_REF` 默认 `main`）→ 等 workflow **SUCCESS**（`eas-cli workflow:runs` / `workflow:logs`；兜底 `preview:update`）→ **【必须】交付块**（下） |
 
-用户要备份远程 `yang`：`push origin yang` 须先有提交，且视为「推」子集。
+**推送 / 提交收尾 · 交付块**（用户要 **推** 或 **推送** 后 **【必须】** 回复）：
+
+```text
+分支 · 提交：<branch> @ <short-sha> <subject>
+App：package.json version · Expo SDK · RN 版本（自 package.json）
+GitHub：<compare 或 PR URL>
+EAS：channel preview · Update ID / group · Dashboard Updates 链（或 workflow run 状态）
+Expo Go：SDK 须与 §1 一致（当前 58）
+本地：git status 须 working tree clean
+```
+
+仅备份 **`origin/yang`**：仍须 **全量 commit + 工作区干净**，再 `push origin yang`；交付块同上（**可省略** main/PR/EAS 若未跑 workflow，但须写明「仅 yang 备份 · 未发 preview」）。
+
+用户要备份远程 `yang`：`push origin yang` 须 **先** 全量提交且工作区干净，**禁**部分提交后 push。
 
 ---
 
@@ -464,6 +477,40 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 - 序号 &gt; 10：按上表 **循环**（`(seq - 1) % 10`）
 - `GBG`：业务 Mock ticker；EDS `EgSymbol` 映射 **Bitget Token**（`eds-bgb-bitget token`）见 `src/utils/edsCryptoSymbol.ts`
 
+### 4.3.1 Mock 数据 · 团队地址簿（28 条）
+
+**【必须】** `TEAM_ADDRESS_BOOK_ROWS` **固定 28 条**（`teamAddressBookDetailMock.ts`）。
+
+| 字段 | 规则 |
+|------|------|
+| **币种 Ticker** | 与 §4.3 同序循环：`HOME_TODO_MOCK_CURRENCIES_FIRST_10`，序号 `index` → `(index % 10)` |
+| **昵称** | `TEAM_MEMBER_NAME_POOL[index]`（与成员管理 28 人同源） |
+| **地址** | 按 Ticker 链形态确定性派生（EVM `0x` 40 hex · `TON` `EQ…` · `ZEC` `t1…`） |
+| **网络** | 主文 Tag · `networkLabelKey`：`TON`→TON · `ZEC`→Zcash · `USDT` 约每 3 条之一 BNB · 其余 Ethereum |
+
+**列表展示**：主文 **仅名称**；副文 **仅地址**（`EG_DATA_LIST_SUB_TEXT_MAX_LINES` 内换行）；**文本底 Tag**（关主文 Tag）顺序：`默认收款`（colorful `apricot`）→ `默认付款`（`grass`）→ 网络（`system` `subtle`）· **仅第 1 条** 含默认收/付 Tag。
+
+团队底栏 **`EgSearch` placeholder** 统一 i18n `team.searchPlaceholder`（zh-CN：**搜索**）。
+
+### 4.4 日期时间展示（Mobile）
+
+**【必须】** 用户可见的**完整日历日**（含 Mock、详情字段、列表副文本等）统一 **`yyyy/MM/dd`**（斜杠 · 月日**两位**零填充）。**禁止**界面展示 `yyyy-MM-dd`、未补零的 `yyyy.M.d` 等形态。
+
+| 形态 | 约定 |
+|------|------|
+| 仅日期 | `2024/03/18` |
+| 日期 + 时刻 | `2024/03/18 13:23:45`（日期段斜杠 · 时分秒段沿用 `HH:mm:ss`） |
+| 通知分组标题「今天 / 3月18日」等 | 继续走 `messagesSectionLabel` · **不适用**本条 |
+
+**【必须】** 展示层调用 `src/utils/formatMobileDateTime.ts`：
+
+- `formatMobileDate` · 仅日
+- `formatMobileDateTime` · 日 + 时刻
+
+接口 / Store 若仍为 ISO（`-`）或历史点号，**展示前**须格式化；新 Mock **直接**写 `yyyy/MM/dd`。
+
+**【禁止】** Scene 内手写 `replaceAll('-', '/')` 代替上述 helper（解析须零填充月日）。
+
 ---
 
 ## 5. 样式与展示
@@ -489,6 +536,7 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 | 块/卡片间距 | `spacing-7` |
 | Item 内间距 | 标题–副文本 `spacing-1`；左图/头像/icon–文案 `spacing-3` |
 | 尺寸 | 头像/币种默认 `avatar-lg`（首页待办币种图 `avatar-xl`）；icon `symbol-md` |
+| **产品介绍页（Intro）** | 全文 **`docs/design.md` §2.4** · 参照团队 AML · `fixedBottomChrome` 底栏常驻 |
 
 ### 5.0.1 稿面数值 → EDS 字阶 / 色（Agent 解码）
 
@@ -504,6 +552,14 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 | 主色 **40%** | `var(--text-base-tertiary)` | `bodyMediumStrong` 等 + `colors['text-base-tertiary']`（spec α 40% · 非 `opacity` 手写） |
 
 权威对照见 EDS `packages/tokens/spec/css-dist-reference.md` 透明度档（如 `66` → 40% → tertiary）。
+
+**Icon / SVG 着色（`EgSymbol` 等）**
+
+| 图形类型 | 用哪族 token | 典型入参 |
+|----------|----------------|----------|
+| **线框 / stroke 图标** | **Stroke**（如 `stroke-divider-deep` · `stroke-decor`） | `strokeColorToken` + `strokeScaleToken` |
+| **填充 / Fill 图标** | **Material**（如 `material-decor` · `material-base-quaternary` · `status-success`） | `strokeColorToken` / fill 着色（勿用 `text-base-*` 冒充填色） |
+| **与文案同色** | **Text**（`text-base-primary` · `text-base-secondary` · …） | 仅当图标语义随字色走时使用 |
 
 ### 5.1 Token 与圆角平滑
 

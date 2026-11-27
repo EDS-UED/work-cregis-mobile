@@ -53,19 +53,37 @@ const LINE_PATHS: { d: string; transform: string }[] = [
   },
 ];
 
-const LINE_STROKE_WIDTH = 0.75;
+const VIEWBOX_WIDTH = 152;
+/** 稿面 viewBox 宽度 152 时的描边（user units）。 */
+const LINE_STROKE_REF = 0.75;
+
+/** 随布局宽高放大时保持描边像素恒定；`layoutScale` 为祖先 `transform.scale` 补偿。 */
+export function cregisTeamLineArtStrokeWidth(renderWidth: number, layoutScale = 1): number {
+  const safeScale = layoutScale > 0 ? layoutScale : 1;
+  const safeWidth = renderWidth > 0 ? renderWidth : VIEWBOX_WIDTH;
+  return (LINE_STROKE_REF * VIEWBOX_WIDTH) / (safeWidth * safeScale);
+}
 
 type CregisTeamLineArtProps = {
   width: number;
   height: number;
   /** 曲线描边 · `material-card-deep`（无填充） */
   strokeColor: string;
+  /** page-shot 飞行稿等对子树施加的 `scale` · 默认 1 */
+  layoutScale?: number;
 };
 
 /** `assets/cregis-team-line.svg` · RN Svg · 无底色静态描边。 */
-export function CregisTeamLineArt({ width, height, strokeColor }: CregisTeamLineArtProps) {
+export function CregisTeamLineArt({
+  width,
+  height,
+  strokeColor,
+  layoutScale = 1,
+}: CregisTeamLineArtProps) {
+  const strokeWidth = cregisTeamLineArtStrokeWidth(width, layoutScale);
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 152 170">
+    <Svg width={width} height={height} viewBox={`0 0 ${VIEWBOX_WIDTH} 170`}>
       <Defs>
         <ClipPath id="cregis-team-line-clip">
           <Path d={CLIP_D} />
@@ -77,7 +95,7 @@ export function CregisTeamLineArt({ width, height, strokeColor }: CregisTeamLine
           fill="none"
           stroke={strokeColor}
           strokeLinecap="round"
-          strokeWidth={LINE_STROKE_WIDTH}
+          strokeWidth={strokeWidth}
         >
           {LINE_PATHS.map((line) => (
             <Path key={line.transform} d={line.d} transform={line.transform} />

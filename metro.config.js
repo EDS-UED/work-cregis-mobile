@@ -85,6 +85,10 @@ const expoRouterNativeTabsAppearanceIosShim = path.join(
   'src/shims/expo-router/build/native-tabs/appearance.ios.js',
 );
 const expoGlassEffectShim = path.join(projectRoot, 'src/shims/expo-glass-effect.js');
+/** DS 点按触感 · 业务关闭 expo-haptics，保留缩放/高亮（§3.1 workaround）。 */
+const edsGlassPressHapticShim = path.join(projectRoot, 'src/shims/eds-glass-press-haptic.ts');
+/** 通用 dist overlay（`src/shims/eds-dist-overlay/<dist相对路径>`）。 */
+const edsDistOverlayRoot = path.join(projectRoot, 'src/shims/eds-dist-overlay');
 /** RNGH 3 丢弃 stack 旧版 Pan 属性名 → 卡片手势无方向约束、抢纵向滚动。 */
 const stackGestureActivationCriteriaShim = path.join(
   projectRoot,
@@ -231,6 +235,10 @@ function resolveEdsInternalDist(moduleName) {
     return null;
   }
   const rel = moduleName.slice(EDS_INTERNAL_DIST_PREFIX.length);
+  const overlayPath = path.join(edsDistOverlayRoot, rel);
+  if (fs.existsSync(overlayPath) && fs.statSync(overlayPath).isFile()) {
+    return { type: 'sourceFile', filePath: overlayPath };
+  }
   const candidates = [path.join(edsDistRoot, rel)];
   if (!rel.endsWith('.js') && !rel.endsWith('.d.ts')) {
     candidates.push(`${path.join(edsDistRoot, rel)}.js`, path.join(edsDistRoot, rel, 'index.js'));
@@ -290,6 +298,13 @@ function resolveProjectAlias(moduleName) {
 const upstreamResolveRequest = config.resolver.resolveRequest;
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (
+    (moduleName.includes('glassPressHaptic') || moduleName.endsWith('glassPressHaptic.js')) &&
+    fs.existsSync(edsGlassPressHapticShim)
+  ) {
+    return { type: 'sourceFile', filePath: edsGlassPressHapticShim };
+  }
+
   const edsDist = resolveEdsInternalDist(moduleName);
   if (edsDist) {
     return edsDist;

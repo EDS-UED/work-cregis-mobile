@@ -10,3 +10,4 @@ export type {
 export { useCollaborationStore } from './useCollaborationStore';
 export type { CollaborationItem } from './useCollaborationStore';
 export { useAssetsStore } from './useAssetsStore';
+export type { WalletAssetItem, WalletSwitcherItem } from './useAssetsStore';

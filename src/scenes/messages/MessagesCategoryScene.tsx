@@ -3,7 +3,7 @@ import type { RouteProp } from '@react-navigation/native';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EgDataList, egDataListRowGap } from '@/eds/data-list';
+import { EgDataList } from '@/eds/data-list';
 import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
 import type { HomeStackParamList } from '@/navigation/types';
 import { HomeTodoEmptyState } from '@/scenes/home/HomeTodoEmptyState';
@@ -14,7 +14,9 @@ import { MessagesListRow } from '@/scenes/messages/MessagesListRow';
 import { MessagesTeamActivityListRow } from '@/scenes/messages/MessagesTeamActivityListRow';
 import { MessagesTransactionListRow } from '@/scenes/messages/MessagesTransactionListRow';
 import { MessagesListSectionHeader } from '@/scenes/messages/MessagesListSectionHeader';
+import { formatMessageTimeLabel } from '@/scenes/messages/messagesFormat';
 import { messageCategoryLabelKey } from '@/scenes/messages/messagesCategoryPreview';
+import { messagesDataListRowGap } from '@/scenes/messages/messagesDataListLayout';
 import { resolveMessagesSectionLabel } from '@/scenes/messages/messagesSectionLabel';
 import {
   MESSAGE_MOCK_ITEMS,
@@ -58,6 +60,7 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
     <SceneScaffold
       title={t(messageCategoryLabelKey[category])}
       showNavBack
+      shortPageScrollLayout
       overlayNavTrailing={nativeNavBar ? undefined : <MessagesNavClearButton />}
     >
       <EgDataList sceneContentInset={sceneInset} rowGap={sectionGroupGap}>
@@ -74,13 +77,13 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
             return (
               <View key={`section-${sectionDayOffset}`} style={styles.section}>
                 <MessagesListSectionHeader label={sectionLabel} />
-                <EgDataList sceneContentInset={0} rowGap={egDataListRowGap()}>
+                <EgDataList sceneContentInset={0} rowGap={messagesDataListRowGap(spacing)}>
                   {rows.map((item) =>
                     item.teamActivity ? (
                       <MessagesTeamActivityListRow
                         key={item.id}
                         activity={item.teamActivity}
-                        timeLabel={item.timeHm}
+                        timeLabel={formatMessageTimeLabel(item.timeHm)}
                         unread={item.unread}
                         onPress={() => undefined}
                       />
@@ -88,7 +91,7 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
                       <MessagesCollaborationListRow
                         key={item.id}
                         collab={item.collaboration}
-                        timeLabel={item.timeHm}
+                        timeLabel={formatMessageTimeLabel(item.timeHm)}
                         unread={item.unread}
                         onPress={() => undefined}
                       />
@@ -96,7 +99,7 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
                       <MessagesTransactionListRow
                         key={item.id}
                         tx={item.transaction}
-                        timeLabel={item.timeHm}
+                        timeLabel={formatMessageTimeLabel(item.timeHm)}
                         unread={item.unread}
                         onPress={() => undefined}
                       />
@@ -105,7 +108,7 @@ export function MessagesCategoryScene({ route }: MessagesCategorySceneProps) {
                         key={item.id}
                         title={t(item.titleKey!)}
                         subtitle={t(item.subtitleKey!)}
-                        timeLabel={item.timeHm}
+                        timeLabel={formatMessageTimeLabel(item.timeHm)}
                         unread={item.unread}
                         avatarLetter={item.avatarLetter}
                         avatarColorIndex={item.avatarColorIndex}

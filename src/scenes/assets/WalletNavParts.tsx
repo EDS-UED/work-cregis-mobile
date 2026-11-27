@@ -1,6 +1,5 @@
 import { StyleSheet, View } from 'react-native';
 import { EgButtonGlass } from '@/eds/button-glass';
-import { EgIconListLatticeMobile } from '@/eds/home-ui';
 import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -20,9 +19,9 @@ export function WalletNavServicesGlass() {
     <EgButtonGlass
       {...glassIconDefaults}
       mode={mode}
+      icon="eds-grid-layout"
       accessibilityLabel={t('scenes.walletServices')}
       testID="wallet-nav-services"
-      iconSlot={<EgIconListLatticeMobile mode={mode} size="md" fillTone="primary" />}
     />
   );
 }

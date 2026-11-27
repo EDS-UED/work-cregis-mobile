@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 import { GlassBlurBackdrop } from '@/eds/glass';
 import { useThemeColors } from '@/hooks/useEffectiveTheme';
@@ -11,7 +13,11 @@ import {
   ScanQrViewfinderOverlay,
 } from '@/scenes/home/ScanQrViewfinderOverlay';
 import { ScanQrFrostedMask } from '@/scenes/scan/ScanQrFrostedMask';
+import { buildScanNativeHeaderRightItems } from '@/scenes/scan/scanNativeIosHeader';
 import { ScanTopBar } from '@/scenes/scan/ScanTopBar';
+import { useScanAlbumPicker } from '@/scenes/scan/useScanAlbumPicker';
+import { shouldUseEgNavBarNativeStack } from '@/eds/nav-bar';
+import { useEdsTheme } from '@/hooks/useEdsTheme';
 import {
   SCAN_LAYER_CAMERA,
   SCAN_LAYER_CHROME,
@@ -32,7 +38,13 @@ type ScanPageContentProps = {
 
 /** 扫码页 · 全屏相机 + 取景磨砂暗角 + 浮层顶栏。 */
 export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageContentProps) {
+  const { t } = useTranslation();
+  const { spacing } = useEdsTheme();
+  const navigation = useNavigation();
   const colors = useThemeColors();
+  const nativeNavBar = shouldUseEgNavBarNativeStack();
+  const showOverlayTopBar = showTopBar && !nativeNavBar;
+  const onPickAlbum = useScanAlbumPicker();
   const [permission, requestPermission] = useCameraPermissions();
   const permissionGranted = permission?.granted === true;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -50,6 +62,32 @@ export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageCon
   const frameTop = Math.round((windowHeight - viewfinderSize) / 2) - VIEWFINDER_RAISE;
 
   const { torchOn, toggleTorch } = useScanTorchAssistant({ cameraReady, permissionGranted });
+
+  const applyNativeHeader = useCallback(() => {
+    if (!nativeNavBar) {
+      return;
+    }
+    navigation.setOptions({
+      unstable_headerRightItems: () =>
+        buildScanNativeHeaderRightItems({
+          spacing,
+          torchOn,
+          onToggleTorch: toggleTorch,
+          onPickAlbum,
+          t,
+        }),
+    });
+  }, [nativeNavBar, navigation, onPickAlbum, spacing, t, torchOn, toggleTorch]);
+
+  useLayoutEffect(() => {
+    applyNativeHeader();
+  }, [applyNativeHeader]);
+
+  useFocusEffect(
+    useCallback(() => {
+      applyNativeHeader();
+    }, [applyNativeHeader]),
+  );
 
   const styles = useMemo(
     () =>
@@ -116,7 +154,7 @@ export function ScanPageContent({ contentStyle, showTopBar = true }: ScanPageCon
         </View>
       ) : null}
 
-      {showTopBar ? (
+      {showOverlayTopBar ? (
         <View style={styles.topBarHost} collapsable={false} pointerEvents="box-none">
           <ScanTopBar torchOn={torchOn} onToggleTorch={toggleTorch} />
         </View>

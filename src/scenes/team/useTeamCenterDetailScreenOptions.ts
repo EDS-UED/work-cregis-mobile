@@ -7,8 +7,9 @@ import { EgEdsAnimaPage, shouldUseEgEdsAnimaNativePage } from '@/eds/page-motion
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import type { HomeStackParamList } from '@/navigation/types';
 import { edsPagePushedScreenOptions } from '@/navigation/screenOptions/edsPageStackNavigatorConfig';
-import { teamCenterDetailMeta } from '@/scenes/team/teamCenterDetail';
-import { edsPageBackground, edsPageCardBackground } from '@/utils/edsTheme';
+import { teamCenterDetailTitleKey } from '@/scenes/team/teamCenterDetail';
+import { useTeamCenterDetailIosNativeHeaderItems } from '@/scenes/team/useTeamCenterDetailIosNativeHeaderItems';
+import { edsPageBackground } from '@/utils/edsTheme';
 import { useTranslation } from 'react-i18next';
 
 type Nav = { goBack: () => void };
@@ -16,18 +17,17 @@ type Nav = { goBack: () => void };
 export function useTeamCenterDetailScreenOptions() {
   const { colors, mode } = useEdsTheme();
   const { t } = useTranslation();
+  const resolveNativeHeaderItems = useTeamCenterDetailIosNativeHeaderItems();
 
   return useCallback(
     (props: {
       route: RouteProp<HomeStackParamList, 'TeamCenterDetail'>;
       navigation: Nav;
     }): StackNavigationOptions => {
-      const meta = teamCenterDetailMeta(props.route.params.id);
-      const title = t(meta.titleKey);
-      const pageBackground =
-        meta.pageBackground === 'card'
-          ? edsPageCardBackground(colors)
-          : edsPageBackground(colors);
+      const { id } = props.route.params;
+      const title = t(teamCenterDetailTitleKey(id));
+      const pageBackground = edsPageBackground(colors);
+      const nativeHeaderItems = resolveNativeHeaderItems(id);
 
       if (shouldUseEgEdsAnimaNativePage()) {
         const base = EgEdsAnimaPage({ mode })(props) as StackNavigationOptions &
@@ -35,6 +35,7 @@ export function useTeamCenterDetailScreenOptions() {
         return {
           ...base,
           title,
+          ...nativeHeaderItems,
           contentStyle: { backgroundColor: pageBackground },
         } as StackNavigationOptions & NativeStackNavigationOptions;
       }
@@ -45,6 +46,6 @@ export function useTeamCenterDetailScreenOptions() {
         cardStyle: { backgroundColor: pageBackground, overflow: 'visible' },
       };
     },
-    [colors, mode, t],
+    [colors, mode, resolveNativeHeaderItems, t],
   );
 }

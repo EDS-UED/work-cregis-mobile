@@ -1,26 +1,37 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
+import { EgDataList } from '@/eds/data-list';
+import type { HomeStackParamList } from '@/navigation/types';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { TeamCenterAccountSection } from '@/scenes/team/TeamCenterAccountSection';
-import { TeamCenterManagementSection } from '@/scenes/team/TeamCenterManagementSection';
+import { TeamCenterMenuRow } from '@/scenes/team/TeamCenterMenuRow';
+import {
+  TEAM_CENTER_MENU_ICONS,
+  TEAM_CENTER_MENU_ITEM_ORDER,
+  TEAM_CENTER_MENU_LABEL_KEYS,
+  TEAM_CENTER_MENU_TEST_IDS,
+} from '@/scenes/team/teamCenterMenuCatalog';
 import { TeamCenterPageShotHost } from '@/scenes/team/TeamCenterPageShotHost';
-import { TEAM_CENTER_ACCOUNT_TO_MANAGEMENT_GAP } from '@/scenes/team/teamCenterEgItemLayout';
-import { edsPx } from '@/utils/edsTheme';
+import { TeamCenterPlanCard } from '@/scenes/team/TeamCenterPlanCard';
+import { teamCenterDataListRowGap } from '@/scenes/team/teamCenterDataListLayout';
+import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
-type TeamCenterContentProps = {
-  onOpenRolesSheet: () => void;
-};
+type TeamCenterNav = StackNavigationProp<HomeStackParamList, 'TeamCenter'>;
 
-/** 团队中心正文 · 账户组 + 团队管理（布局对齐个人中心）。 */
-export function TeamCenterContent({ onOpenRolesSheet }: TeamCenterContentProps) {
+/** 团队中心正文 · 套餐卡 + 菜单 DataList（仅主标题 · 无副文本）。 */
+export function TeamCenterContent() {
+  const { t } = useTranslation();
+  const navigation = useNavigation<TeamCenterNav>();
   const { spacing } = useEdsTheme();
-
+  const sceneInset = edsSceneContentInset(spacing);
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        stack: {
-          gap: edsPx(spacing[TEAM_CENTER_ACCOUNT_TO_MANAGEMENT_GAP]),
+        root: {
+          gap: edsPx(spacing['spacing-7']),
         },
       }),
     [spacing],
@@ -28,9 +39,20 @@ export function TeamCenterContent({ onOpenRolesSheet }: TeamCenterContentProps) 
 
   return (
     <TeamCenterPageShotHost>
-      <View style={styles.stack}>
-        <TeamCenterAccountSection />
-        <TeamCenterManagementSection onOpenRolesSheet={onOpenRolesSheet} />
+      <View style={styles.root}>
+        <TeamCenterPlanCard />
+
+        <EgDataList sceneContentInset={sceneInset} rowGap={teamCenterDataListRowGap(spacing)}>
+          {TEAM_CENTER_MENU_ITEM_ORDER.map((id) => (
+            <TeamCenterMenuRow
+              key={id}
+              testID={TEAM_CENTER_MENU_TEST_IDS[id]}
+              icon={TEAM_CENTER_MENU_ICONS[id]}
+              label={t(TEAM_CENTER_MENU_LABEL_KEYS[id])}
+              onPress={() => navigation.navigate('TeamCenterDetail', { id })}
+            />
+          ))}
+        </EgDataList>
       </View>
     </TeamCenterPageShotHost>
   );

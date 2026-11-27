@@ -9,6 +9,7 @@ import { SceneText } from '@/scenes/shared/SceneText';
 import type { CollaborationItem, CollaborationSignKind } from '@/store/useCollaborationStore';
 import { useEdsTypography } from '@/hooks/useEdsTypography';
 import { edsPx } from '@/utils/edsTheme';
+import { formatMobileDateTime } from '@/utils/formatMobileDateTime';
 
 type CollaborationTodoRowProps = {
   item: CollaborationItem;
@@ -92,7 +93,9 @@ export function CollaborationTodoRow({
           </Text>
           {actionLine}
         </Text>
-        <SceneText variant="bodySmallSecondary">{item.timestamp}</SceneText>
+        <SceneText variant="bodySmallSecondary">
+          {formatMobileDateTime(item.timestamp)}
+        </SceneText>
       </View>
       <View
         style={{

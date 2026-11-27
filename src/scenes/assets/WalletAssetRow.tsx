@@ -1,102 +1,80 @@
-import { View } from 'react-native';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { EgSymbol } from '@/eds/home-ui';
+import { EgTag } from '@/eds/tag';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { EgDataListRow } from '@/eds/data-list';
-import { getDataListRowLayout } from '@/scenes/shared/dataListLayout';
-import { SceneText } from '@/scenes/shared/SceneText';
-import type { AssetItem } from '@/store/useAssetsStore';
-import { edsCryptoSymbolForCurrency } from '@/utils/edsCryptoSymbol';
-import { edsPx } from '@/utils/edsTheme';
+import { WalletCryptoListLead } from '@/scenes/assets/WalletCryptoListLead';
+import type { WalletAssetNetworkTag } from '@/scenes/assets/walletAssetNetwork';
+import { TeamCenterDetailDataListRow } from '@/scenes/team/detail/TeamCenterDetailDataListRow';
+import type { WalletAssetItem } from '@/store/useAssetsStore';
 
 type WalletAssetRowProps = {
-  item: AssetItem;
+  item: WalletAssetItem;
   balanceVisible: boolean;
-  multichainLabel: string;
   onPress?: () => void;
 };
+
+function walletAssetNetworkRowTag(
+  networkTag: WalletAssetNetworkTag,
+  mode: 'light' | 'dark',
+  multichainLabel: string,
+  networkLabel: string,
+) {
+  if (networkTag.kind === 'none') {
+    return undefined;
+  }
+  const label = networkTag.kind === 'multichain' ? multichainLabel : networkLabel;
+  return (
+    <EgTag
+      family="system"
+      variant="subtle"
+      size="sm"
+      rowAlign
+      mode={mode}
+      label={label}
+      accessibilityLabel={label}
+    />
+  );
+}
 
 export function WalletAssetRow({
   item,
   balanceVisible,
-  multichainLabel,
   onPress,
 }: WalletAssetRowProps) {
-  const { mode, spacing, colors } = useEdsTheme();
-  const layout = getDataListRowLayout(spacing);
-  const mediaGap = edsPx(spacing['spacing-3']);
-  const avatarSize = edsPx(spacing['avatar-lg']);
-  const cryptoSymbol = edsCryptoSymbolForCurrency(item.symbol);
+  const { t } = useTranslation();
+  const { mode } = useEdsTheme();
+  const amountSegment = balanceVisible ? item.balance : '****';
+  const handlePress = onPress ?? (() => undefined);
+
+  const networkLabel =
+    item.networkTag.kind === 'single' ? t(item.networkTag.networkLabelKey) : '';
+  const multichainLabel = t('scenes.walletMultichain');
+
+  const tag = useMemo(
+    () =>
+      walletAssetNetworkRowTag(item.networkTag, mode, multichainLabel, networkLabel),
+    [item.networkTag, mode, multichainLabel, networkLabel],
+  );
+
+  const a11yNetwork =
+    item.networkTag.kind === 'multichain'
+      ? multichainLabel
+      : item.networkTag.kind === 'single'
+        ? networkLabel
+        : '';
 
   return (
-    <EgDataListRow
-      mode={mode}
-      layout={layout}
-      axis="row"
-      gap={mediaGap}
-      onPress={onPress}
-      accessibilityLabel={`${item.symbol} ${item.name}`}
-    >
-      <View
-        style={{
-          width: avatarSize,
-          height: avatarSize,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {cryptoSymbol ? (
-          <EgSymbol
-            name={cryptoSymbol}
-            mode={mode}
-            displayPx={avatarSize}
-            accessibilityLabel={item.symbol}
-          />
-        ) : (
-          <View
-            style={{
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: edsPx(spacing['radius-full']),
-              backgroundColor: String(colors['material-card-shallow']),
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <SceneText variant="bodySemibold">{item.symbol.slice(0, 1)}</SceneText>
-          </View>
-        )}
-      </View>
-      <View style={{ flex: 1, minWidth: 0, gap: edsPx(spacing['spacing-05']) }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: edsPx(spacing['spacing-2']),
-          }}
-        >
-          <SceneText variant="bodySemibold">{item.symbol}</SceneText>
-          {item.multichain ? (
-            <View
-              style={{
-                paddingHorizontal: edsPx(spacing['spacing-2']),
-                paddingVertical: edsPx(spacing['spacing-05']),
-                borderRadius: edsPx(spacing['radius-full']),
-                backgroundColor: String(colors['material-card-shallow']),
-              }}
-            >
-              <SceneText variant="footnotePrimary">{multichainLabel}</SceneText>
-            </View>
-          ) : null}
-        </View>
-        <SceneText variant="bodySmallSecondary" numberOfLines={1}>
-          {item.name}
-        </SceneText>
-        <SceneText variant="bodySmallTertiary">
-          {balanceVisible ? item.balance : '****'}
-        </SceneText>
-      </View>
-    </EgDataListRow>
+    <TeamCenterDetailDataListRow
+      accessibilityLabel={`${item.name} ${a11yNetwork} ${amountSegment} ${item.symbol}`.trim()}
+      primary={item.name}
+      tag={tag}
+      subSegmentA={amountSegment}
+      subSegmentB={` ${item.symbol}`}
+      boldSubA
+      lead={<WalletCryptoListLead currency={item.symbol} />}
+      trailing={null}
+      onPress={handlePress}
+    />
   );
 }

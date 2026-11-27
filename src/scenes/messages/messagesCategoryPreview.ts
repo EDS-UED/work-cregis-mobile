@@ -6,6 +6,7 @@ import {
   MESSAGE_MOCK_ITEMS,
   groupMessageItemsByDateSection,
 } from '@/scenes/messages/messagesMock';
+import { formatMessageTimeLabel } from '@/scenes/messages/messagesFormat';
 import { resolveTeamActivityCopy } from '@/scenes/messages/messagesTeamActivityCopy';
 
 /** 前置页五类顺序（与 Tab 旧序不同）。 */
@@ -125,9 +126,10 @@ export function formatCategoryHubSubtitleSegments(
   }
 }
 
-/** 前置页 · 首条通知时间 · 仅 `HH:mm`。 */
-export function formatCategoryHubTimeLabel(
-  item: MessageListItemDef | undefined,
-): string | undefined {
-  return item?.timeHm;
+/** 前置 Hub · 首条通知时间 · 仅 `HH:mm`。 */
+export function formatCategoryHubTimeLabel(item: MessageListItemDef | undefined): string | undefined {
+  if (!item) {
+    return undefined;
+  }
+  return formatMessageTimeLabel(item.timeHm);
 }
