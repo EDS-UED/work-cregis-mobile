@@ -359,6 +359,7 @@ export const enUS: {
     assetsSubtitle: 'Account asset overview (Mock)',
     assetsTotalLabel: 'Total overview',
     walletAssets: 'Total assets',
+    walletAccountAssets: 'Wallet assets',
     walletCurrenciesSection: 'Currencies',
     walletListEditor: 'List editor',
     walletOpenSwitcher: 'Switch wallet {{name}}',

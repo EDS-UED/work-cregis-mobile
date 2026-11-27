@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 
-import { sumWalletBalancesDisplay } from '@/scenes/assets/walletBalanceDisplay';
-import { buildWalletMockAssets } from '@/scenes/assets/walletCurrencyMock';
+import { buildWalletMockAssetsForWallet } from '@/scenes/assets/walletCurrencyMock';
 import type { WalletAssetNetworkTag } from '@/scenes/assets/walletAssetNetwork';
 
 export type WalletSigKind = 'multisig' | 'singlesig';
@@ -27,7 +26,6 @@ type AssetsState = {
   wallets: WalletSwitcherItem[];
   activeWalletId: string;
   walletName: string;
-  totalBalance: string;
   balanceVisible: boolean;
   assets: WalletAssetItem[];
   setActiveWallet: (walletId: string) => void;
@@ -75,9 +73,8 @@ const assetsSnapshot = () => {
     wallets,
     activeWalletId: DEFAULT_WALLET_ID,
     walletName: walletNameFor(DEFAULT_WALLET_ID),
-    totalBalance: sumWalletBalancesDisplay(wallets),
     balanceVisible: true,
-    assets: buildWalletMockAssets(),
+    assets: buildWalletMockAssetsForWallet(DEFAULT_WALLET_ID),
   };
 };
 
@@ -86,7 +83,11 @@ export const useAssetsStore = create<AssetsState>((set, get) => ({
   setActiveWallet: (walletId) => {
     const wallet = get().wallets.find((w) => w.id === walletId);
     if (!wallet) return;
-    set({ activeWalletId: walletId, walletName: wallet.name });
+    set({
+      activeWalletId: walletId,
+      walletName: wallet.name,
+      assets: buildWalletMockAssetsForWallet(walletId),
+    });
   },
   toggleBalanceVisible: () =>
     set((state) => ({ balanceVisible: !state.balanceVisible })),

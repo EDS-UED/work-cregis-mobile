@@ -29,12 +29,51 @@ const MOCK_BALANCES: Record<string, string> = {
   AVAX: '220.15',
 };
 
-/** @see `.cursor/rules/work.md` §4.3 — 与首页待办币种同序。 */
-export function buildWalletMockAssets(): WalletAssetItem[] {
-  return HOME_TODO_MOCK_CURRENCIES_FIRST_10.map((symbol, index) => ({
+function assetRow(
+  symbol: string,
+  homeOrderIndex: number,
+  balance: string,
+): WalletAssetItem {
+  return {
     symbol,
     name: WALLET_CURRENCY_FULL_NAMES[symbol] ?? symbol,
-    balance: MOCK_BALANCES[symbol] ?? '0.00',
-    networkTag: walletAssetNetworkTagAt(index, symbol),
-  }));
+    balance,
+    networkTag: walletAssetNetworkTagAt(homeOrderIndex, symbol),
+  };
+}
+
+function homeIndexForSymbol(symbol: string): number {
+  const index = (HOME_TODO_MOCK_CURRENCIES_FIRST_10 as readonly string[]).indexOf(
+    symbol,
+  );
+  return index >= 0 ? index : 0;
+}
+
+/** @see `.cursor/rules/work.md` §4.3 — 主钱包 · 与首页待办币种同序。 */
+export function buildWalletMockAssets(): WalletAssetItem[] {
+  return HOME_TODO_MOCK_CURRENCIES_FIRST_10.map((symbol, index) =>
+    assetRow(symbol, index, MOCK_BALANCES[symbol] ?? '0.00'),
+  );
+}
+
+/** 各钱包 Mock 币种 · 与 `WalletSwitcherItem.previewCurrencies` 对应。 */
+export function buildWalletMockAssetsForWallet(walletId: string): WalletAssetItem[] {
+  if (walletId === 'w_primary') {
+    return buildWalletMockAssets();
+  }
+  if (walletId === 'w_sui') {
+    return ['HYPE', 'TON', 'ZEC', 'USDT', 'AAVE', 'MNT'].map((symbol) =>
+      assetRow(symbol, homeIndexForSymbol(symbol), '0.01'),
+    );
+  }
+  if (walletId === 'w_test') {
+    return ['DEEP', 'AVAX', 'GBG'].map((symbol) =>
+      assetRow(
+        symbol,
+        homeIndexForSymbol(symbol),
+        symbol === 'DEEP' ? '1,100.00' : symbol === 'AVAX' ? '1,120.77' : '1,000.00',
+      ),
+    );
+  }
+  return buildWalletMockAssets();
 }

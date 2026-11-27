@@ -352,6 +352,7 @@ export const zhCN = {
     assetsSubtitle: '账户资产总览（Mock）',
     assetsTotalLabel: '资产总览',
     walletAssets: '总资产',
+    walletAccountAssets: '钱包资产',
     walletCurrenciesSection: '币种',
     walletListEditor: '列表编辑',
     walletOpenSwitcher: '切换钱包 {{name}}',

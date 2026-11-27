@@ -65,7 +65,8 @@ export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
   const listEditorScreenInset = walletListEditorScreenInset(spacing);
   const currencyTitleToListGap = walletCurrencyTitleToListGap(spacing);
 
-  const totalBalance = useAssetsStore((s) => s.totalBalance);
+  const wallets = useAssetsStore((s) => s.wallets);
+  const activeWalletId = useAssetsStore((s) => s.activeWalletId);
   const balanceVisible = useAssetsStore((s) => s.balanceVisible);
   const assets = useAssetsStore((s) => s.assets);
   const toggleBalanceVisible = useAssetsStore((s) => s.toggleBalanceVisible);
@@ -83,7 +84,11 @@ export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
     }, []),
   );
 
-  const balanceText = balanceVisible ? totalBalance : '**********';
+  const activeWalletBalance =
+    wallets.find((w) => w.id === activeWalletId)?.balanceDisplay ??
+    wallets[0]?.balanceDisplay ??
+    '$ 0.00';
+  const balanceText = balanceVisible ? activeWalletBalance : '**********';
   const topReserve = homeScrollTopReserve(insets.top, navContentGap);
   const scrollPaddingTop = nativeNavBar ? navContentGap : topReserve;
   const scrollPaddingBottom = tabBarReserve;
@@ -138,7 +143,7 @@ export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
         balanceVisible={balanceVisible}
         balanceText={balanceText}
         balanceOdometerIntroKey={balanceOdometerIntroKey}
-        balanceLabel={t('scenes.walletAssets')}
+        balanceLabel={t('scenes.walletAccountAssets')}
         mode={mode}
         colors={colors}
         spacing={spacing}
