@@ -1,11 +1,11 @@
 import type mobileTheme from '@/eds/tokens';
 import { edsPx } from '@/utils/edsTheme';
 
-/** 币种行尾列表编辑 · 距屏右 · `spacing-2`（8px）。 */
+/** 币种标题行 · 列表编辑钮距屏右 · `spacing-3`（12px）。 */
 export function walletListEditorScreenInset(
   spacing: typeof mobileTheme.spacing,
 ): number {
-  return edsPx(spacing['spacing-2']);
+  return edsPx(spacing['spacing-3']);
 }
 
 /** 「币种」标题 ↔ `EgDataList` · `spacing-2`（8px）。 */

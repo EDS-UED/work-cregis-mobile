@@ -11,7 +11,7 @@ import {
 
 import {
   WalletNavLeading,
-  WalletNavTrailing,
+  WalletNavNoticeGlassNav,
 } from '@/scenes/assets/WalletNavParts';
 import { edsPx } from '@/utils/edsTheme';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -41,7 +41,7 @@ export function useWalletIosNativeHeaderItems(): Pick<
       unstable_headerRightItems: (): NativeStackHeaderItem[] => [
         egNavBarNativeStackHeaderGlassItem(
           <View style={row}>
-            <WalletNavTrailing />
+            <WalletNavNoticeGlassNav />
           </View>,
         ),
       ],
