@@ -13,6 +13,8 @@ import { TeamAddressBookManagementScene } from '@/scenes/team/detail/TeamAddress
 import { TeamRoleManagementScene } from '@/scenes/team/detail/TeamRoleManagementScene';
 import { TeamAmlDetailActions } from '@/scenes/team/detail/TeamAmlDetailActions';
 import { teamAmlActionsChromeReserve } from '@/scenes/team/detail/teamAmlActionsLayout';
+import { TeamInfoDetailActions } from '@/scenes/team/detail/TeamInfoDetailActions';
+import { teamInfoActionsChromeReserve } from '@/scenes/team/detail/teamInfoActionsLayout';
 import { useTeamCenterDetailNavExtras } from '@/scenes/team/detail/useTeamCenterDetailNavExtras';
 import { teamCenterDetailTitleKey } from '@/scenes/team/teamCenterDetail';
 
@@ -30,6 +32,7 @@ export function TeamCenterDetailScene({ route }: TeamCenterDetailSceneProps) {
   const { spacing } = useEdsTheme();
   const insets = useSafeAreaInsets();
   const amlActionsChromeReserve = teamAmlActionsChromeReserve(spacing, insets.bottom);
+  const teamInfoChromeReserve = teamInfoActionsChromeReserve(spacing, insets.bottom);
 
   useHideTabBarForInnerPage(true);
 
@@ -63,19 +66,33 @@ export function TeamCenterDetailScene({ route }: TeamCenterDetailSceneProps) {
   }
 
   const amlPage = id === 'aml';
+  const teamInfoPage = id === 'teamInfo';
+  const shortPageLayout = listBacked || amlPage || teamInfoPage;
 
   return (
     <SceneScaffold
       title={title}
       showNavBack
-      showNavTitle={!amlPage}
-      shortPageScrollLayout={listBacked || amlPage}
-      bodyShowsVerticalScrollIndicator={amlPage ? false : undefined}
-      contentPaddingHorizontal={amlPage ? 0 : undefined}
-      contentPaddingBottom={amlPage ? 0 : undefined}
+      showNavTitle={!amlPage && !teamInfoPage}
+      shortPageScrollLayout={shortPageLayout}
+      bodyShowsVerticalScrollIndicator={amlPage || teamInfoPage ? false : undefined}
+      contentPaddingHorizontal={amlPage || teamInfoPage ? 0 : undefined}
+      contentPaddingBottom={amlPage || teamInfoPage ? 0 : undefined}
       navToContentGap={amlPage ? 0 : undefined}
-      fixedBottomChrome={amlPage ? <TeamAmlDetailActions /> : undefined}
-      fixedBottomChromeReserve={amlPage ? amlActionsChromeReserve : undefined}
+      fixedBottomChrome={
+        amlPage ? (
+          <TeamAmlDetailActions />
+        ) : teamInfoPage ? (
+          <TeamInfoDetailActions />
+        ) : undefined
+      }
+      fixedBottomChromeReserve={
+        amlPage
+          ? amlActionsChromeReserve
+          : teamInfoPage
+            ? teamInfoChromeReserve
+            : undefined
+      }
       pageBackground="default"
       overlayNavTrailing={nativeNavBar ? undefined : overlayNavTrailing ?? undefined}
     >

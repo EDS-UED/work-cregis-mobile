@@ -29,7 +29,6 @@ export function TeamAddressBookManagementScene({
       showNavBack
       pageBackground="default"
       shortPageScrollLayout
-      bodyShowsVerticalScrollIndicator={false}
       fixedBottomChromeReserve={chromeReserve}
       overlayNavTrailing={overlayNavTrailing}
       fixedBottomChrome={

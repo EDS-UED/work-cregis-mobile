@@ -7,6 +7,7 @@ import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
 import { TeamMemberLocateRail } from '@/scenes/team/detail/TeamMemberLocateRail';
 import { TeamMembersDetailContent } from '@/scenes/team/detail/TeamMembersDetailContent';
 import { TeamMemberSearchDock } from '@/scenes/team/detail/TeamMemberSearchDock';
+import { teamMemberLocateRailInsetTop } from '@/scenes/team/detail/teamMemberLocateLayout';
 import { teamMemberSearchChromeReserve } from '@/scenes/team/detail/teamMemberSearchDockLayout';
 
 type TeamMemberManagementSceneProps = {
@@ -26,6 +27,7 @@ export function TeamMemberManagementScene({
   const locateOffsetsRef = useRef<Record<string, number>>({});
 
   const chromeReserve = teamMemberSearchChromeReserve(spacing, insets.bottom);
+  const locateInsetTop = teamMemberLocateRailInsetTop(spacing, insets.top);
   const showLocate = query.trim().length === 0;
 
   return (
@@ -44,6 +46,7 @@ export function TeamMemberManagementScene({
           <TeamMemberLocateRail
             scrollRef={scrollRef}
             locateOffsetsRef={locateOffsetsRef}
+            insetTop={locateInsetTop}
             insetBottom={chromeReserve}
           />
         ) : null

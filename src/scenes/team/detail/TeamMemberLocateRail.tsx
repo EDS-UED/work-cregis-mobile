@@ -7,6 +7,8 @@ import { useEdsTheme } from '@/hooks/useEdsTheme';
 type TeamMemberLocateRailProps = {
   scrollRef: React.RefObject<ComponentRef<typeof ScrollView> | null>;
   locateOffsetsRef: React.RefObject<Record<string, number>>;
+  /** 正文 `ScrollView` `paddingTop` · 竖向居中区间上沿（Showcase 同源）。 */
+  insetTop: number;
   /** 底栏搜索等固定区高度 · 索引不侵入（Showcase 同源 `top`/`bottom` 约束）。 */
   insetBottom: number;
 };
@@ -18,6 +20,7 @@ type TeamMemberLocateRailProps = {
 export function TeamMemberLocateRail({
   scrollRef,
   locateOffsetsRef,
+  insetTop,
   insetBottom,
 }: TeamMemberLocateRailProps) {
   const { mode } = useEdsTheme();
@@ -31,7 +34,7 @@ export function TeamMemberLocateRail({
         keys={EG_LOCATE_DEFAULT_KEYS}
         activeKey={activeKey}
         testID="team-member-locate"
-        style={{ top: 0, bottom: insetBottom }}
+        style={{ top: insetTop, bottom: insetBottom }}
         onActiveKeyChange={(key) => {
           setActiveKey(key);
           lastScrollY.current = locateOffsetsRef.current[key] ?? lastScrollY.current;

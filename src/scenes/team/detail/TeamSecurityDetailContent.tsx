@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EgDataList } from '@/eds/data-list';
-import { EgTag } from '@/eds/tag';
+import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { edsPx } from '@/utils/edsTheme';
 import { TeamCenterDetailDataListRow } from '@/scenes/team/detail/TeamCenterDetailDataListRow';
 import { TeamSecurityLeadIcon } from '@/scenes/team/detail/TeamSecurityLeadIcon';
 import {
@@ -13,12 +14,17 @@ import {
 import { teamCenterDataListRowGap } from '@/scenes/team/teamCenterDataListLayout';
 import { edsSceneContentInset } from '@/utils/edsTheme';
 
-function SecurityStatusTag({
+/**
+ * 行内状态标 · 两档：
+ * - 未设置 / 未开启 / 未认证 → `eds-warning-fill` + `status-danger`
+ * - 已设置 / 已完成 → `eds-enable-fill` + `status-success`
+ */
+function SecurityStatusIcon({
   status,
 }: {
   status: 'uncertified' | 'off' | 'unset' | 'set';
 }) {
-  const { mode } = useEdsTheme();
+  const { mode, spacing } = useEdsTheme();
   const { t } = useTranslation();
   const label = t(
     status === 'set'
@@ -29,16 +35,16 @@ function SecurityStatusTag({
           ? 'team.securityTagUnset'
           : 'team.securityTagUncertified',
   );
+  const settled = status === 'set';
 
   return (
-    <EgTag
-      family="status"
-      status={status === 'set' ? 'success' : 'danger'}
-      variant="subtle"
-      size="sm"
-      rowAlign
+    <EgSymbol
+      name={settled ? 'eds-enable-fill' : 'eds-warning-fill'}
       mode={mode}
-      label={label}
+      size="xs"
+      displayPx={edsPx(spacing['symbol-xs'])}
+      fillTone="primary"
+      strokeColorToken={settled ? 'status-success' : 'status-danger'}
       accessibilityLabel={label}
     />
   );
@@ -56,7 +62,7 @@ const ROW_META: Record<
   enterpriseVerification: {
     titleKey: 'team.securityEnterpriseTitle',
     subtitleKey: 'team.securityEnterpriseSub',
-    status: 'uncertified',
+    status: 'set',
     trailing: 'chevron',
   },
   addressBookVerification: {
@@ -68,7 +74,7 @@ const ROW_META: Record<
   riskControl: {
     titleKey: 'team.securityRiskTitle',
     subtitleKey: 'team.securityRiskSub',
-    status: 'unset',
+    status: 'set',
     trailing: 'chevron',
   },
   inviteMembers: {
@@ -98,7 +104,7 @@ export function TeamSecurityDetailContent() {
             accessibilityLabel={title}
             lead={<TeamSecurityLeadIcon rowId={id} />}
             primary={title}
-            tag={<SecurityStatusTag status={meta.status} />}
+            tag={<SecurityStatusIcon status={meta.status} />}
             subSegmentB={t(meta.subtitleKey)}
             trailing={meta.trailing}
             switchValue={addressVerify}

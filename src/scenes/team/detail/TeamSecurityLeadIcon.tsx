@@ -23,7 +23,7 @@ type TeamSecurityLeadIconProps = {
   rowId: TeamSecurityRowId;
 };
 
-/** 团队安全 · `capsule-md` + Palette Hue 底 + 线框 · Hub 同色序。 */
+/** 团队安全 · EgDataList 图形 `md` + Palette Hue 底 + 线框。 */
 export function TeamSecurityLeadIcon({ rowId }: TeamSecurityLeadIconProps) {
   const colors = useThemeColors();
   const { mode, spacing } = useEdsTheme();
@@ -39,6 +39,7 @@ export function TeamSecurityLeadIcon({ rowId }: TeamSecurityLeadIconProps) {
         shell: {
           width: slot,
           height: slot,
+          flexShrink: 0,
           borderRadius: edsPx(spacing['radius-full']),
           alignItems: 'center',
           justifyContent: 'center',
