@@ -60,7 +60,7 @@ export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
   const sceneContentInset = edsSceneContentInset(spacing);
   const balanceLabelToAmountGap = edsPx(spacing['spacing-2']);
   const balanceToDividerMarginTop = edsPx(spacing['spacing-8']);
-  const dividerToCurrenciesMarginBottom = edsPx(spacing['spacing-5']);
+  const dividerToCurrenciesMarginBottom = edsPx(spacing['spacing-6']);
   const listRowGap = teamCenterDataListRowGap(spacing);
   const listEditorScreenInset = walletListEditorScreenInset(spacing);
   const currencyTitleToListGap = walletCurrencyTitleToListGap(spacing);
@@ -161,7 +161,7 @@ export function WalletScene({ onOpenWalletSwitcher }: WalletSceneProps) {
             {t('scenes.walletCurrenciesSection')}
           </SceneText>
           <EgSymbolAction
-            size="md"
+            size="sm"
             tone="plain"
             icon="eds-list-editor"
             mode={mode}

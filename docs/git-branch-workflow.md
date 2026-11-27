@@ -80,7 +80,7 @@ EDS 与业务仓 **分支模型不同**：eds-mobile 默认 **只有维护者写
 
 | 规则集 | 保护分支 | 规则要点 | Bypass（可跳过规则的人） |
 |--------|----------|----------|---------------------------|
-| [**main**](https://github.com/EDS-UED/work-cregis-mobile/rules/23519770) | `main` | 禁删/强推/直 push；合并须 PR；**required review = 0** | 无 |
+| [**main**](https://github.com/EDS-UED/work-cregis-mobile/rules/23519770) | `main` | 禁删/强推/直 push；合并须 PR；**required review = 0** + EAS 绿 | **`theyangsong`**（维护者 merge，等同 `work-yang` bypass） |
 | [**work-yang**](https://github.com/EDS-UED/work-cregis-mobile/rules/27705187) | `yang` | 同上；**`jojo`→`yang` PR 须 +1 review** | `theyangsong`（直推 `yang`、代合并） |
 | [**work-jojo**](https://github.com/EDS-UED/work-cregis-mobile/rules/27705869) | `jojo` | 禁删/强推/直 push | `lulujj123`、`theyangsong` |
 
@@ -166,8 +166,9 @@ git pull origin yang
 1. `git push origin yang`（若有新 commit）
 2. **New pull request** — **base: `main`** · **compare: `yang`**
 3. 等 **Publish preview update** ✅（EAS Workflow）
-4. **Merge**（**不需要** Approve）
-5. 本地对齐：
+4. **Merge**（**不需要** Approve）；或 **`gh pr merge <n> --auto --merge`**（仓库已开 `allow_auto_merge`，检查绿后自动合入）
+5. 规则集 **main** 已配 **`theyangsong` bypass**（与 `work-yang` 一致，维护者不等假二审）
+6. 本地对齐：
 
 ```bash
 git pull origin main

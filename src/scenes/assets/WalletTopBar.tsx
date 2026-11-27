@@ -68,6 +68,7 @@ export function WalletTopBar({ scrollOffset, onOpenWalletSwitcher }: WalletTopBa
         },
         sideSlot: {
           flexShrink: 0,
+          overflow: 'visible',
         },
       }),
     [insets.top, rowGap, shellHeight],

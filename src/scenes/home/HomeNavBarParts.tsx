@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { EgAvatar, EgButtonGlass } from '@/eds/button-glass';
-import { EgMessage } from '@/eds/feedback';
 import { useTranslation } from 'react-i18next';
 
 import { useEdsTheme } from '@/hooks/useEdsTheme';
@@ -12,6 +11,7 @@ import {
 } from '@/scenes/messages/messagesMock';
 import { HomeScanPageShotTrigger } from '@/scenes/home/HomeScanPageShotTrigger';
 import { useHomeStackNavigation } from '@/scenes/home/useHomeStackNavigation';
+import { NavNoticeGlassButton } from '@/scenes/shared/NavNoticeGlassButton';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
@@ -81,42 +81,17 @@ function useHomeNoticeBadgeLabel(): string | undefined {
   return formatNotificationCountBadge(total);
 }
 
-/** 通知玻璃钮 + 右上 `EgMessage`（未读合计）。 */
 function HomeNavNoticeGlassButton() {
-  const { t } = useTranslation();
-  const { mode, spacing } = useEdsTheme();
   const openMessages = useOpenMessages();
   const badgeLabel = useHomeNoticeBadgeLabel();
-  const badgeOffset = edsPx(spacing['spacing-1']);
 
   return (
-    <View style={styles.noticeCapsuleHost}>
-      <EgButtonGlass
-        {...glassIconDefaults}
-        icon="eds-notice"
-        mode={mode}
-        onPress={openMessages}
-        accessibilityLabel={t('home.notifications')}
-        testID="home-nav-notice-glass"
-      />
-      {badgeLabel ? (
-        <View
-          pointerEvents="none"
-          style={[
-            styles.noticeCapsuleBadge,
-            { top: -badgeOffset, right: -badgeOffset - edsPx(spacing['spacing-1']) },
-          ]}
-        >
-          <EgMessage
-            mode={mode}
-            tone="danger"
-            label={badgeLabel}
-            accessibilityLabel={t('messages.unreadBadge')}
-            testID="home-nav-notice-message"
-          />
-        </View>
-      ) : null}
-    </View>
+    <NavNoticeGlassButton
+      badgeLabel={badgeLabel}
+      onPress={openMessages}
+      glassTestID="home-nav-notice-glass"
+      messageTestID="home-nav-notice-message"
+    />
   );
 }
 
@@ -272,14 +247,6 @@ const styles = StyleSheet.create({
   trailingCapsules: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  noticeCapsuleHost: {
-    position: 'relative',
-    overflow: 'visible',
-  },
-  noticeCapsuleBadge: {
-    position: 'absolute',
-    zIndex: 1,
   },
   headerCompanyName: {
     maxWidth: HOME_COMPANY_NAME_MAX_WIDTH,

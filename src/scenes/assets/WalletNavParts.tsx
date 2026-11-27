@@ -2,14 +2,17 @@ import { StyleSheet, View } from 'react-native';
 import { EgButtonGlass } from '@/eds/button-glass';
 import { useTranslation } from 'react-i18next';
 
+import { NavNoticeGlassButton } from '@/scenes/shared/NavNoticeGlassButton';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
-import { edsPx } from '@/utils/edsTheme';
 
 const glassIconDefaults = {
   kind: 'icon' as const,
   iconCount: 1 as const,
   size: 'md' as const,
 };
+
+/** 钱包顶栏通知 · Mock 未读（与首页胶囊位置共用 `NavNoticeGlassButton`）。 */
+const WALLET_NAV_NOTICE_BADGE = '18';
 
 export function WalletNavServicesGlass() {
   const { mode } = useEdsTheme();
@@ -27,18 +30,18 @@ export function WalletNavServicesGlass() {
 }
 
 export function WalletNavNoticeGlass() {
-  const { t } = useTranslation();
-  const { mode } = useEdsTheme();
-
   return (
-    <EgButtonGlass
-      {...glassIconDefaults}
-      icon="eds-notice"
-      mode={mode}
-      accessibilityLabel={t('home.notifications')}
-      testID="wallet-nav-notice"
+    <NavNoticeGlassButton
+      badgeLabel={WALLET_NAV_NOTICE_BADGE}
+      glassTestID="wallet-nav-notice"
+      messageTestID="wallet-nav-notice-message"
     />
   );
+}
+
+/** iOS 26+ 系统栏 — `eds-notice`（与 `HomeNavNoticeGlassNav` 同款徽章定位）。 */
+export function WalletNavNoticeGlassNav() {
+  return <WalletNavNoticeGlass />;
 }
 
 export function WalletNavLeading() {
@@ -46,11 +49,11 @@ export function WalletNavLeading() {
 }
 
 export function WalletNavTrailing() {
-  const { spacing } = useEdsTheme();
-
   return (
-    <View style={[styles.trailing, { gap: edsPx(spacing['spacing-2-5']) }]}>
-      <WalletNavNoticeGlass />
+    <View style={styles.trailing}>
+      <View style={styles.trailingCapsules}>
+        <WalletNavNoticeGlass />
+      </View>
     </View>
   );
 }
@@ -59,5 +62,12 @@ const styles = StyleSheet.create({
   trailing: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 0,
+    overflow: 'visible',
+  },
+  trailingCapsules: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'visible',
   },
 });

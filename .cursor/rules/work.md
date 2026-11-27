@@ -404,7 +404,7 @@ jojo ──PR──► yang ──PR──► main    EAS / 同事 preview 对�
 
 | 名 | 分支 | 要点 | Bypass |
 |----|------|------|--------|
-| **`main`** | `main` | 禁删/强推/直 push · PR **+1 review** | **无** |
+| **`main`** | `main` | 禁删/强推/直 push · PR **0 review** + EAS check · **禁**直推 | **`theyangsong`**（维护者 merge / bypass，**非** jojo 式二审） |
 | **`work-yang`** | `yang` | 同上；非 bypass 须 PR | **`theyangsong`** |
 | **`work-jojo`** | `jojo` | 禁删/强推/直 push | **`lulujj123`** · **`theyangsong`** |
 
