@@ -358,6 +358,7 @@ export const zhTW: {
     assetsSubtitle: '賬戶資產總覽（Mock）',
     assetsTotalLabel: '資產總覽',
     walletAssets: '總資產',
+    walletAccountAssets: '錢包資產',
     walletCurrenciesSection: '幣種',
     walletListEditor: '列表編輯',
     walletOpenSwitcher: '切換錢包 {{name}}',
