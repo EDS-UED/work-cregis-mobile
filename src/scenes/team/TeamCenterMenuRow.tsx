@@ -5,12 +5,11 @@ import { EgSymbol } from '@/eds/home-ui';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { EgDataListRow } from '@/eds/data-list';
 import { TeamCenterMenuLeadIcon } from '@/scenes/team/TeamCenterMenuLeadIcon';
-import { TeamCenterMenuRowDivider } from '@/scenes/team/TeamCenterMenuRowDivider';
+import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChevron';
 import {
   getTeamCenterDataListRowLayout,
   teamCenterDataListMediaGap,
 } from '@/scenes/team/teamCenterDataListLayout';
-import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChevron';
 import { SceneText } from '@/scenes/shared/SceneText';
 import { edsPx } from '@/utils/edsTheme';
 
@@ -22,8 +21,6 @@ type TeamCenterMenuRowProps = {
   testID?: string;
   /** 圆角分组卡内行 — 卡壳已留 `spacing-2`，行 `marginH` 归零。 */
   inCardShell?: boolean;
-  /** 列表末行 — 不渲染底部分割线。 */
-  isLast?: boolean;
 };
 
 export function TeamCenterMenuRow({
@@ -33,7 +30,6 @@ export function TeamCenterMenuRow({
   onPress,
   testID,
   inCardShell = false,
-  isLast = false,
 }: TeamCenterMenuRowProps) {
   const { mode, spacing } = useEdsTheme();
   const layout = useMemo(() => {
@@ -43,8 +39,7 @@ export function TeamCenterMenuRow({
   const mediaGap = teamCenterDataListMediaGap(spacing);
 
   return (
-    <>
-      <EgDataListRow
+    <EgDataListRow
         mode={mode}
         testID={testID}
         accessibilityLabel={label}
@@ -82,8 +77,6 @@ export function TeamCenterMenuRow({
             accessibilityLabel=""
           />
         </View>
-      </EgDataListRow>
-      {!isLast ? <TeamCenterMenuRowDivider inCardShell={inCardShell} /> : null}
-    </>
+    </EgDataListRow>
   );
 }

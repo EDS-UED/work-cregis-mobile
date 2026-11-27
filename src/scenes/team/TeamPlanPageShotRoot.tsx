@@ -46,6 +46,11 @@ export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
   const styles = useMemo(
     () =>
       StyleSheet.create({
+        /** Page-Shot 滚动区须常开 `flexGrow`，`EgPageShotScroll` 才能判定可滚并开底弹。 */
+        scrollContent: {
+          flexGrow: 1,
+          backgroundColor: pageBg,
+        },
         body: {
           paddingHorizontal: EG_PAGE_CONTENT_PADDING_HORIZONTAL,
           paddingTop: teamSubscriptionHeroToBenefitsGap(spacing),
@@ -64,6 +69,7 @@ export function TeamPlanPageShotRoot({ api }: TeamPlanPageShotRootProps) {
         contentPaddingHorizontal={0}
         contentPaddingTop={0}
         contentPaddingBottom={scrollBottomInset}
+        contentContainerStyle={styles.scrollContent}
         style={{ flex: 1, backgroundColor: pageBg }}
       >
         <Animated.View style={[{ alignSelf: 'stretch' }, api.pageFaceStyle] as StyleProp<ViewStyle>}>

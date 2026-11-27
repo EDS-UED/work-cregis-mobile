@@ -9,10 +9,11 @@ type TeamCenterMenuLeadIconProps = {
   icon: string;
 };
 
-/** 团队中心 DL 行首图标 · `capsule-md` 壳 + `symbol-md` EgSymbol。 */
+/** 团队中心 DL 行首 · `material-card-deep` 底 · 线框 · `symbol-sm` · `stroke-base-primary`。 */
 export function TeamCenterMenuLeadIcon({ icon }: TeamCenterMenuLeadIconProps) {
   const { mode, colors, spacing } = useEdsTheme();
   const slot = edsPx(spacing['capsule-md']);
+  const iconPx = edsPx(spacing['symbol-sm']);
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -33,8 +34,8 @@ export function TeamCenterMenuLeadIcon({ icon }: TeamCenterMenuLeadIconProps) {
       <EgSymbol
         name={icon}
         mode={mode}
-        size="md"
-        fillTone="primary"
+        displayPx={iconPx}
+        strokeColorToken="stroke-base-primary"
         accessibilityLabel=""
       />
     </View>

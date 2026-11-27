@@ -9,6 +9,7 @@ import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChe
 import { SceneText } from '@/scenes/shared/SceneText';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
+import { formatMobileDate } from '@/utils/formatMobileDateTime';
 
 import { CregisTeamLineArt } from '@/scenes/team/CregisTeamLineArt';
 import { TeamCenterPlanCardBackdrop } from '@/scenes/team/TeamCenterPlanCardBackdrop';
@@ -127,7 +128,9 @@ export function TeamCenterPlanCardContent({
         <View style={styles.titleBlock}>
           <SceneText variant="headline">{t(TEAM_PLAN_TIER_LABEL_KEY[teamPlanTier])}</SceneText>
           <SceneText variant="bodyMedium">
-            {t('team.subscriptionExpires', { date: teamSubscriptionExpires })}
+            {t('team.subscriptionExpires', {
+              date: formatMobileDate(teamSubscriptionExpires),
+            })}
           </SceneText>
         </View>
         {showAccountLink ? (

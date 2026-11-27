@@ -30,7 +30,6 @@ export function TeamSubscriptionBenefitsCard({
         testID="subscription-benefits"
         icon={<TeamSubscriptionItemLeadIcon name={TEAM_SUBSCRIPTION_ITEM_ICONS.benefits} />}
         label={t('team.benefits')}
-        labelHeavy
         padSize="lg"
         trailingDisplay="icon"
         trailingEnabled

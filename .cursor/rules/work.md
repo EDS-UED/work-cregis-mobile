@@ -477,6 +477,40 @@ Expo Go：SDK 须与 §1 一致（当前 58）
 - 序号 &gt; 10：按上表 **循环**（`(seq - 1) % 10`）
 - `GBG`：业务 Mock ticker；EDS `EgSymbol` 映射 **Bitget Token**（`eds-bgb-bitget token`）见 `src/utils/edsCryptoSymbol.ts`
 
+### 4.3.1 Mock 数据 · 团队地址簿（28 条）
+
+**【必须】** `TEAM_ADDRESS_BOOK_ROWS` **固定 28 条**（`teamAddressBookDetailMock.ts`）。
+
+| 字段 | 规则 |
+|------|------|
+| **币种 Ticker** | 与 §4.3 同序循环：`HOME_TODO_MOCK_CURRENCIES_FIRST_10`，序号 `index` → `(index % 10)` |
+| **昵称** | `TEAM_MEMBER_NAME_POOL[index]`（与成员管理 28 人同源） |
+| **地址** | 按 Ticker 链形态确定性派生（EVM `0x` 40 hex · `TON` `EQ…` · `ZEC` `t1…`） |
+| **网络** | 主文 Tag · `networkLabelKey`：`TON`→TON · `ZEC`→Zcash · `USDT` 约每 3 条之一 BNB · 其余 Ethereum |
+
+**列表展示**：主文 **仅名称**；副文 **仅地址**（`EG_DATA_LIST_SUB_TEXT_MAX_LINES` 内换行）；**文本底 Tag**（关主文 Tag）顺序：`默认收款`（colorful `apricot`）→ `默认付款`（`grass`）→ 网络（`system` `subtle`）· **仅第 1 条** 含默认收/付 Tag。
+
+团队底栏 **`EgSearch` placeholder** 统一 i18n `team.searchPlaceholder`（zh-CN：**搜索**）。
+
+### 4.4 日期时间展示（Mobile）
+
+**【必须】** 用户可见的**完整日历日**（含 Mock、详情字段、列表副文本等）统一 **`yyyy/MM/dd`**（斜杠 · 月日**两位**零填充）。**禁止**界面展示 `yyyy-MM-dd`、未补零的 `yyyy.M.d` 等形态。
+
+| 形态 | 约定 |
+|------|------|
+| 仅日期 | `2024/03/18` |
+| 日期 + 时刻 | `2024/03/18 13:23:45`（日期段斜杠 · 时分秒段沿用 `HH:mm:ss`） |
+| 通知分组标题「今天 / 3月18日」等 | 继续走 `messagesSectionLabel` · **不适用**本条 |
+
+**【必须】** 展示层调用 `src/utils/formatMobileDateTime.ts`：
+
+- `formatMobileDate` · 仅日
+- `formatMobileDateTime` · 日 + 时刻
+
+接口 / Store 若仍为 ISO（`-`）或历史点号，**展示前**须格式化；新 Mock **直接**写 `yyyy/MM/dd`。
+
+**【禁止】** Scene 内手写 `replaceAll('-', '/')` 代替上述 helper（解析须零填充月日）。
+
 ---
 
 ## 5. 样式与展示
@@ -502,6 +536,7 @@ Expo Go：SDK 须与 §1 一致（当前 58）
 | 块/卡片间距 | `spacing-7` |
 | Item 内间距 | 标题–副文本 `spacing-1`；左图/头像/icon–文案 `spacing-3` |
 | 尺寸 | 头像/币种默认 `avatar-lg`（首页待办币种图 `avatar-xl`）；icon `symbol-md` |
+| **产品介绍页（Intro）** | 全文 **`docs/design.md` §2.4** · 参照团队 AML · `fixedBottomChrome` 底栏常驻 |
 
 ### 5.0.1 稿面数值 → EDS 字阶 / 色（Agent 解码）
 

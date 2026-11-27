@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactElement, ReactNode } from 'react';
+import type { ComponentRef, PropsWithChildren, ReactElement, ReactNode } from 'react';
 import { useLayoutEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -41,6 +41,10 @@ type SceneScaffoldProps = PropsWithChildren<{
   pageBackground?: 'default' | 'card';
   /** 覆盖内容区左右边距（px）；默认 `edsSceneContentInset`。 */
   contentPaddingHorizontal?: number;
+  /** 覆盖内容区底边距（px）；默认 `edsSceneContentInset`。 */
+  contentPaddingBottom?: number;
+  /** 覆盖导航底到正文间距（px）；默认 `edsNavContentGap`。 */
+  navToContentGap?: number;
   /** 系统栏 / RN overlay 栏自定义标题（如团队头像 + 下拉）。 */
   customHeaderTitle?: () => ReactElement;
   /** 顶栏主标题（默认展示；团队中心等仅右栏胶囊时可关）。 */
@@ -49,6 +53,18 @@ type SceneScaffoldProps = PropsWithChildren<{
   overlayNavTrailing?: ReactNode;
   /** 短页滚动闸（与首页 `useEdsMainScrollLayout`）：未溢出隐藏滚动条、不撑 `flexGrow`。 */
   shortPageScrollLayout?: boolean;
+  /** 覆盖正文 `ScrollView` 纵轴滚动条；未设时短页闸溢出后才显示。 */
+  bodyShowsVerticalScrollIndicator?: boolean;
+  /** 屏底固定区（如搜索条）· 不随正文滚动；仍走外壳 `ScrollView` 以保留 NavBar 滚动联动。 */
+  fixedBottomChrome?: ReactNode;
+  /** 为 {@link fixedBottomChrome} 预留的列表底内边距（px）。 */
+  fixedBottomChromeReserve?: number;
+  /** 滚动区额外 `paddingRight`（极少用；`EgLocate` 须浮动 overlay · 勿为索引让位）。 */
+  scrollContentPaddingRight?: number;
+  /** 挂载在滚动层上的浮层（如字母索引）；层级低于 {@link fixedBottomChrome}。 */
+  bodyScrollOverlay?: ReactNode;
+  /** 正文 `ScrollView` ref（与 {@link bodyScrollOverlay} 联动）。 */
+  onBodyScrollRef?: (ref: ComponentRef<typeof ScrollView> | null) => void;
 }>;
 
 export function SceneScaffold({
@@ -57,10 +73,18 @@ export function SceneScaffold({
   showNavBack = false,
   pageBackground = 'default',
   contentPaddingHorizontal,
+  contentPaddingBottom,
+  navToContentGap,
   customHeaderTitle,
   showNavTitle = true,
   overlayNavTrailing,
   shortPageScrollLayout = false,
+  bodyShowsVerticalScrollIndicator,
+  fixedBottomChrome,
+  fixedBottomChromeReserve = 0,
+  scrollContentPaddingRight,
+  bodyScrollOverlay,
+  onBodyScrollRef,
   children,
 }: SceneScaffoldProps) {
   const { colors, mode, spacing } = useEdsTheme();
@@ -86,11 +110,12 @@ export function SceneScaffold({
     : tabBarReserve;
   const topReserve = overlayNav ? egNavBarScrollContentReserve(insets.top) : 0;
   const navContentGap = edsNavContentGap(spacing);
+  const resolvedNavToContentGap = navToContentGap ?? navContentGap;
   const backLabel = t('common.back');
 
-  const nativeScrollPaddingTop = navContentGap;
+  const nativeScrollPaddingTop = resolvedNavToContentGap;
   const nativeScrollPaddingBottom = tabBarReserve;
-  const overlayScrollPaddingTop = topReserve + navContentGap;
+  const overlayScrollPaddingTop = topReserve + resolvedNavToContentGap;
   const overlayScrollPaddingBottom = overlayBottomReserve;
 
   useLayoutEffect(() => {
@@ -125,7 +150,8 @@ export function SceneScaffold({
         content: {
           paddingHorizontal:
             contentPaddingHorizontal ?? edsSceneContentInset(spacing),
-          paddingBottom: edsSceneContentInset(spacing),
+          paddingBottom:
+            contentPaddingBottom ?? edsSceneContentInset(spacing),
           gap: edsPx(spacing['spacing-3']),
         },
         subtitleBlock: {
@@ -166,7 +192,7 @@ export function SceneScaffold({
           pointerEvents: 'box-none',
         },
       }),
-    [contentPaddingHorizontal, spacing],
+    [contentPaddingBottom, contentPaddingHorizontal, spacing],
   );
 
   const pageBg =
@@ -176,6 +202,9 @@ export function SceneScaffold({
   const pageStyle = [styles.root, { backgroundColor: pageBg }];
 
   const sceneContentPaddingBottom = edsSceneContentInset(spacing);
+  const chromeScrollPaddingBottom = fixedBottomChrome
+    ? fixedBottomChromeReserve
+    : 0;
   /** Tab 根 / 显式短页走 layout 闸；其余栈内页默认 `flexGrow:1`（减轻 push 首帧）。 */
   const nativeScrollLayoutGate =
     shortPageScrollLayout ||
@@ -207,7 +236,74 @@ export function SceneScaffold({
   </>
   );
 
+  const nativeScrollPaddingBottomResolved =
+    (nativeScrollLayoutGate
+      ? nativeScrollLayout.contentContainerExtras.paddingBottom ?? 0
+      : nativeScrollPaddingBottom > 0
+        ? nativeScrollPaddingBottom
+        : 0) + chromeScrollPaddingBottom;
+
+  const nativeBodyShowsScrollIndicator =
+    bodyShowsVerticalScrollIndicator ??
+    (nativeScrollLayoutGate
+      ? nativeScrollLayout.showsVerticalScrollIndicator
+      : true);
+  const overlayBodyShowsScrollIndicator =
+    bodyShowsVerticalScrollIndicator ??
+    (overlayScrollLayoutGate
+      ? overlayScrollLayout.showsVerticalScrollIndicator
+      : true);
+
   if (!overlayNav) {
+  if (fixedBottomChrome) {
+    return (
+      <View style={styles.root} pointerEvents="box-none" collapsable={false}>
+        <ScrollView
+          ref={(node) => onBodyScrollRef?.(node)}
+          style={[
+            nativeNavScrollSurfaceStyle(colors),
+            { flex: 1, backgroundColor: pageBg },
+          ]}
+          contentInsetAdjustmentBehavior="automatic"
+          scrollIndicatorInsets={{ right: 0, left: 0 }}
+          onScroll={onScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          onLayout={nativeScrollLayoutGate ? nativeScrollLayout.onViewportLayout : undefined}
+          scrollEnabled={nativeScrollLayout.scrollEnabled}
+          showsVerticalScrollIndicator={nativeBodyShowsScrollIndicator}
+          bounces={nativeScrollLayout.bounces}
+          alwaysBounceVertical={nativeScrollLayout.alwaysBounceVertical}
+          overScrollMode={nativeScrollLayout.overScrollMode}
+          contentContainerStyle={[
+            styles.content,
+            { gap: 0, paddingBottom: 0 },
+            nativeScrollLayoutGate
+              ? nativeScrollLayout.contentContainerExtras.flexGrow != null
+                ? { flexGrow: nativeScrollLayout.contentContainerExtras.flexGrow }
+                : null
+              : { flexGrow: 1 },
+            { paddingTop: nativeScrollPaddingTop },
+            { paddingBottom: nativeScrollPaddingBottomResolved },
+            scrollContentPaddingRight != null
+              ? { paddingRight: scrollContentPaddingRight }
+              : null,
+          ]}
+        >
+          {nativeScrollLayoutGate ? (
+            <View onLayout={nativeScrollLayout.onContentLayout} collapsable={false}>
+              {body}
+            </View>
+          ) : (
+            body
+          )}
+        </ScrollView>
+        <View pointerEvents="box-none" style={StyleSheet.absoluteFill} collapsable={false}>
+          {bodyScrollOverlay}
+          {fixedBottomChrome}
+        </View>
+      </View>
+    );
+  }
     /** iOS 26+：ScrollView 须为屏内首子链（对齐 `EgPage` · `useEgNavBarScroll` hidden→soft）。 */
     return (
       <ScrollView
@@ -224,11 +320,7 @@ export function SceneScaffold({
             : undefined
         }
         scrollEnabled={nativeScrollLayout.scrollEnabled}
-        showsVerticalScrollIndicator={
-          nativeScrollLayoutGate
-            ? nativeScrollLayout.showsVerticalScrollIndicator
-            : true
-        }
+        showsVerticalScrollIndicator={nativeBodyShowsScrollIndicator}
         bounces={nativeScrollLayout.bounces}
         alwaysBounceVertical={nativeScrollLayout.alwaysBounceVertical}
         overScrollMode={nativeScrollLayout.overScrollMode}
@@ -320,7 +412,42 @@ export function SceneScaffold({
         </View>
       }
     >
-      {overlayScrollLayoutGate ? (
+      {fixedBottomChrome ? (
+        <View style={[styles.root, { minHeight: 0 }]} pointerEvents="box-none" collapsable={false}>
+          <ScrollView
+            ref={(node) => onBodyScrollRef?.(node)}
+            style={[overlayNavScrollSurfaceStyle(), { flex: 1, backgroundColor: pageBg }]}
+            nestedScrollEnabled
+            scrollIndicatorInsets={{ right: 0, left: 0 }}
+            onScroll={onScroll}
+            scrollEventThrottle={scrollEventThrottle}
+            showsVerticalScrollIndicator={overlayBodyShowsScrollIndicator}
+            bounces
+            alwaysBounceVertical
+            overScrollMode="always"
+            contentContainerStyle={[
+              styles.content,
+              { gap: 0, paddingBottom: 0 },
+              { flexGrow: 1 },
+              { paddingTop: overlayScrollPaddingTop },
+              {
+                paddingBottom:
+                  (overlayScrollPaddingBottom > 0 ? overlayScrollPaddingBottom : 0) +
+                  chromeScrollPaddingBottom,
+              },
+              scrollContentPaddingRight != null
+                ? { paddingRight: scrollContentPaddingRight }
+                : null,
+            ]}
+          >
+            {body}
+          </ScrollView>
+          <View pointerEvents="box-none" style={StyleSheet.absoluteFill} collapsable={false}>
+            {bodyScrollOverlay}
+            {fixedBottomChrome}
+          </View>
+        </View>
+      ) : overlayScrollLayoutGate ? (
         <View
           style={{ flex: 1, minHeight: 0 }}
           onLayout={overlayScrollLayout.onViewportLayout}
@@ -338,9 +465,7 @@ export function SceneScaffold({
               onScroll={onScroll}
               scrollEventThrottle={scrollEventThrottle}
               scrollEnabled={overlayScrollLayout.scrollEnabled}
-              showsVerticalScrollIndicator={
-                overlayScrollLayout.showsVerticalScrollIndicator
-              }
+              showsVerticalScrollIndicator={overlayBodyShowsScrollIndicator}
               bounces={overlayScrollLayout.bounces}
               alwaysBounceVertical={overlayScrollLayout.alwaysBounceVertical}
               overScrollMode={overlayScrollLayout.overScrollMode}
@@ -371,6 +496,7 @@ export function SceneScaffold({
             nestedScrollEnabled
             onScroll={onScroll}
             scrollEventThrottle={scrollEventThrottle}
+            showsVerticalScrollIndicator={overlayBodyShowsScrollIndicator}
             bounces
             alwaysBounceVertical
             overScrollMode="always"

@@ -129,7 +129,7 @@ const todoDetailTemplates: HomeTodoSheetDetail[] = [
     initiatorColorIndex: 0,
     recipientAddress: '0x3328309c493309c49ab12cd8e',
     businessType: 'paymentRequest',
-    occurredAt: '2027-11-28 13:23:45',
+    occurredAt: '2027/11/28 13:23:45',
     remark: null,
   },
   {
@@ -138,7 +138,7 @@ const todoDetailTemplates: HomeTodoSheetDetail[] = [
     initiatorColorIndex: 0,
     recipientAddress: '0x91f2b8e44a0c12df9e8b01',
     businessType: 'paymentRequest',
-    occurredAt: '2027-06-08 16:07:00',
+    occurredAt: '2027/06/08 16:07:00',
     remark: null,
   },
   {
@@ -147,7 +147,7 @@ const todoDetailTemplates: HomeTodoSheetDetail[] = [
     initiatorColorIndex: 0,
     recipientAddress: '0xac1200ff3311bb2200ee99',
     businessType: 'withdrawal',
-    occurredAt: '2027-06-08 16:07:00',
+    occurredAt: '2027/06/08 16:07:00',
     remark: '月末结算',
   },
 ];
@@ -228,6 +228,7 @@ export const useHomeStore = create<HomeState>((set, get) => ({
     set({
       activeTeamId: teamId,
       teamDisplayName: team.name,
+      companyName: team.name,
       teamId,
       teamPlanTier: team.planTier,
     });
@@ -248,13 +249,14 @@ export const useHomeStore = create<HomeState>((set, get) => ({
       teams,
       activeTeamId: fallback.id,
       teamDisplayName: fallback.name,
+      companyName: fallback.name,
       teamId: fallback.id,
       teamPlanTier: fallback.planTier,
     });
   },
   teamDisplayName: defaultTeam.name,
   teamPlanTier: defaultTeam.planTier,
-  teamSubscriptionExpires: '2028.12.30',
+  teamSubscriptionExpires: '2028/12/30',
   teamId: defaultTeam.id,
   teamAccountBalance: '$ 1,280.53',
   teamGasBalance: '0.045 ETH',

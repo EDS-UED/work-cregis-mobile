@@ -16,6 +16,7 @@ import {
 } from '@/scenes/team/teamCenterMenuCatalog';
 import { TeamCenterPageShotHost } from '@/scenes/team/TeamCenterPageShotHost';
 import { TeamCenterPlanCard } from '@/scenes/team/TeamCenterPlanCard';
+import { teamCenterDataListRowGap } from '@/scenes/team/teamCenterDataListLayout';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
 
 type TeamCenterNav = StackNavigationProp<HomeStackParamList, 'TeamCenter'>;
@@ -26,13 +27,11 @@ export function TeamCenterContent() {
   const navigation = useNavigation<TeamCenterNav>();
   const { spacing } = useEdsTheme();
   const sceneInset = edsSceneContentInset(spacing);
-  const lastId = TEAM_CENTER_MENU_ITEM_ORDER.at(-1);
-
   const styles = useMemo(
     () =>
       StyleSheet.create({
         root: {
-          gap: edsPx(spacing['spacing-6']),
+          gap: edsPx(spacing['spacing-7']),
         },
       }),
     [spacing],
@@ -43,7 +42,7 @@ export function TeamCenterContent() {
       <View style={styles.root}>
         <TeamCenterPlanCard />
 
-        <EgDataList sceneContentInset={sceneInset} rowGap={edsPx(spacing['spacing-0'])}>
+        <EgDataList sceneContentInset={sceneInset} rowGap={teamCenterDataListRowGap(spacing)}>
           {TEAM_CENTER_MENU_ITEM_ORDER.map((id) => (
             <TeamCenterMenuRow
               key={id}
@@ -51,7 +50,6 @@ export function TeamCenterContent() {
               icon={TEAM_CENTER_MENU_ICONS[id]}
               label={t(TEAM_CENTER_MENU_LABEL_KEYS[id])}
               onPress={() => navigation.navigate('TeamCenterDetail', { id })}
-              isLast={id === lastId}
             />
           ))}
         </EgDataList>

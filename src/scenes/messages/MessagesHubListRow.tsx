@@ -16,7 +16,6 @@ import { LIST_ROW_CHEVRON_STROKE_TOKEN } from '@/scenes/shared/listDisclosureChe
 import { SceneText } from '@/scenes/shared/SceneText';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import { useTranslation } from 'react-i18next';
-import { MessagesListRowDivider } from '@/scenes/messages/MessagesListRowDivider';
 import { edsPx } from '@/utils/edsTheme';
 
 type MessagesHubListRowProps = {
@@ -26,7 +25,6 @@ type MessagesHubListRowProps = {
   timeLabel?: string;
   unreadCount?: number;
   onPress?: () => void;
-  isLast?: boolean;
 };
 
 export function MessagesHubListRow({
@@ -36,7 +34,6 @@ export function MessagesHubListRow({
   timeLabel,
   unreadCount = 0,
   onPress,
-  isLast = false,
 }: MessagesHubListRowProps) {
   const { t } = useTranslation();
   const { mode, spacing } = useEdsTheme();
@@ -46,7 +43,6 @@ export function MessagesHubListRow({
   const unreadLabel = formatNotificationCountBadge(unreadCount);
 
   return (
-    <>
     <EgDataListRow
       mode={mode}
       accessibilityLabel={title}
@@ -101,7 +97,5 @@ export function MessagesHubListRow({
         </View>
       </View>
     </EgDataListRow>
-    {!isLast ? <MessagesListRowDivider variant="hub" /> : null}
-    </>
   );
 }

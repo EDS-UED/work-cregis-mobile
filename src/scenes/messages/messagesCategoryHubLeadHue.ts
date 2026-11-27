@@ -23,8 +23,8 @@ export const MESSAGE_HUB_LEAD_HUE_BY_CATEGORY: Record<MessageCategory, MessageHu
   transaction: 'hue-green-dim',
   collaboration: 'hue-green',
   amlAlert: 'hue-orange',
-  teamActivity: 'hue-blue-dim',
-  announcement: 'hue-blue',
+  teamActivity: 'hue-blue',
+  announcement: 'hue-blue-dim',
 };
 
 const HUE_HEX: Record<MessageHubLeadHueId, { light: string; dark: string }> = {
@@ -48,7 +48,7 @@ export function messageHubLeadHueShellHex(
   return HUE_HEX[hueId][mode];
 }
 
-/** 浅壳（暗色 `eds-hue-green-dim` → `#fff`）用深描边；`hue-green` 等饱和底用 `stroke-same-white`。 */
+/** 浅壳（暗色 `eds-hue-green-dim` → `#fff`）用深描边；饱和 Hue 底用 `stroke-same-white`。 */
 export function messageHubLeadHueUsesLightGlyph(
   hueId: MessageHubLeadHueId,
   mode: ThemeMode,

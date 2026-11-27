@@ -10,6 +10,10 @@ import {
   messageHubLeadHueShellHex,
   messageHubLeadHueUsesLightGlyph,
 } from '@/scenes/messages/messagesCategoryHubLeadHue';
+import {
+  messagesHubLeadSlotPx,
+  messagesHubLeadSymbolPx,
+} from '@/scenes/messages/messagesHubLeadIconMetrics';
 import { edsPx } from '@/utils/edsTheme';
 
 const HUB_LEAD_ICON_BY_CATEGORY: Record<MessageCategory, string> = {
@@ -24,13 +28,14 @@ type MessagesCategoryHubLeadIconProps = {
   category: MessageCategory;
 };
 
-/** 通知前置 · `capsule-md` + Palette Hue 底 + 线条 `EgSymbol`（五类色相依次）。 */
+/** 通知前置 · `capsule-md` + Palette Hue 底 + 线框 · `symbol-sm` · 白描边（五色头像）。 */
 export function MessagesCategoryHubLeadIcon({
   category,
 }: MessagesCategoryHubLeadIconProps) {
   const colors = useThemeColors();
   const { mode, spacing } = useEdsTheme();
-  const slot = edsPx(spacing['capsule-md']);
+  const slot = messagesHubLeadSlotPx(spacing);
+  const iconPx = messagesHubLeadSymbolPx(spacing);
   const hueId = MESSAGE_HUB_LEAD_HUE_BY_CATEGORY[category];
   const shellBg = messageHubLeadHueShellHex(hueId, mode, colors as Record<string, unknown>);
   const lightGlyph = messageHubLeadHueUsesLightGlyph(hueId, mode);
@@ -55,7 +60,7 @@ export function MessagesCategoryHubLeadIcon({
       <EgSymbol
         name={HUB_LEAD_ICON_BY_CATEGORY[category]}
         mode={mode}
-        size="md"
+        displayPx={iconPx}
         fillTone={lightGlyph ? 'primary' : 'decor'}
         strokeColorToken={lightGlyph ? 'text-base-primary' : 'stroke-same-white'}
         accessibilityLabel=""

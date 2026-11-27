@@ -5,6 +5,7 @@ export {
   EG_ITEM_GROUP_RADIUS,
   EG_ITEM_ICON_GAP,
   EG_ITEM_ICON_SLOT,
+  EG_ITEM_LEADING_ICON_STROKE,
   EG_ITEM_MIN_HEIGHT,
   EG_ITEM_PAD_H,
   EG_ITEM_PAD_V,
@@ -13,6 +14,7 @@ export {
   EG_ITEM_PAD_V_SM,
   EG_ITEM_TAP_RADIUS,
   EG_ITEM_TRAILING_GAP,
+  EG_ITEM_SUB_LABEL_GAP,
   getEgItemDividerInset,
   resolveEgItemPadVertical,
 } from '@/shims/eds-mobile-item';

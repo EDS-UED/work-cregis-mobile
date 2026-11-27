@@ -1,21 +1,10 @@
-import { EgSymbol } from '@/eds/home-ui';
-import { useEdsTheme } from '@/hooks/useEdsTheme';
+import { EgItemLeadIcon } from '@/scenes/shared/EgItemLeadIcon';
 
 type TeamSubscriptionItemLeadIconProps = {
   name: string;
 };
 
-/** 订阅 `EgItem` 左侧 icon · `symbol-md`。 */
+/** 订阅 · {@link EgItemLeadIcon} */
 export function TeamSubscriptionItemLeadIcon({ name }: TeamSubscriptionItemLeadIconProps) {
-  const { mode } = useEdsTheme();
-
-  return (
-    <EgSymbol
-      name={name}
-      mode={mode}
-      size="md"
-      fillTone="primary"
-      accessibilityLabel=""
-    />
-  );
+  return <EgItemLeadIcon name={name} />;
 }

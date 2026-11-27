@@ -38,7 +38,6 @@ export function CompareTeamCenterCardContent({
   const { t } = useTranslation();
   const { spacing } = useEdsTheme();
   const menuCardTone = MENU_CARD_TONE[variant];
-  const lastId = TEAM_CENTER_MENU_ITEM_ORDER.at(-1);
 
   const styles = useMemo(
     () =>
@@ -73,7 +72,6 @@ export function CompareTeamCenterCardContent({
               label={t(TEAM_CENTER_MENU_LABEL_KEYS[id])}
               onPress={() => undefined}
               inCardShell
-              isLast={id === lastId}
             />
           ))}
         </CompareTeamCenterMenuSectionCard>

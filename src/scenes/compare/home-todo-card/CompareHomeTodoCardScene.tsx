@@ -88,7 +88,7 @@ function usePressScaleMotion(
   return { animatedStyle, onPressIn, onPressOut, pressing };
 }
 
-/** Token 图标描边 — design token `stroke-sm`（EgSymbol 内建 colorize 为 stroke-lg）。 */
+/** 余额可见性 icon · 描边用 EgSymbol 默认 `stroke-lg`。 */
 function HomeBalanceVisibilityIcon({
   balanceVisible,
   mode,
@@ -113,7 +113,6 @@ function HomeBalanceVisibilityIcon({
         displayPx={iconPx}
         mode={mode}
         strokeColorToken="text-base-secondary"
-        strokeScaleToken="stroke-xl"
       />
     </View>
   );

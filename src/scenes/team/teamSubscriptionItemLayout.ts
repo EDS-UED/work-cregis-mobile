@@ -89,7 +89,7 @@ export function teamSubscriptionBenefitItemPaddingV(
   return EG_ITEM_PAD_V_LG as number;
 }
 
-/** 客户经理条 · 距上方最后一行 Item · `spacing-6`（24px）。 */
+/** 客户经理条 · 距上方 module / 根分分割线下沿 · `spacing-6`（24px）。 */
 export function teamSubscriptionSupportBannerMarginTop(
   spacing: typeof mobileTheme.spacing,
 ): number {

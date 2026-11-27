@@ -16,12 +16,13 @@ export const TEAM_CENTER_MENU_ITEM_ORDER: TeamCenterMenuItemId[] = [
   'teamInfo',
 ];
 
+/** 行首图形 · 线框（描边）资源 · 与 Fill 版同名去 `-fill`。 */
 export const TEAM_CENTER_MENU_ICONS: Record<TeamCenterMenuItemId, string> = {
   teamSecurity: 'eds-asafety',
   memberManagement: 'eds-team',
   roleManagement: 'eds-user-information',
   addressBook: 'eds-address-books',
-  aml: 'eds-text-logs-safety',
+  aml: 'eds-database-safety',
   teamInfo: 'eds-real-name',
 };
 

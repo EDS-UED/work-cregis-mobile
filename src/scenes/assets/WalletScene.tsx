@@ -44,7 +44,6 @@ function BalanceVisibilityIcon({
       displayPx={iconPx}
       mode={mode}
       strokeColorToken="text-base-secondary"
-      strokeScaleToken="stroke-xl"
     />
   );
 }

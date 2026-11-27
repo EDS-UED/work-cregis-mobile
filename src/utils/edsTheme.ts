@@ -139,6 +139,7 @@ export function createEdsTypographyStyles(
       'weight-regular',
       'text-base-primary',
     ),
+    /** `typography-body-large-heavy` · weight-semibold (600，DS 已从 bold 收口) */
     bodyLargeSemibold: edsTextStyle(
       typography,
       colors,

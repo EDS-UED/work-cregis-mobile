@@ -13,9 +13,12 @@ export {
   EG_ITEM_PAD_V_SM,
   EG_ITEM_TAP_RADIUS,
   EG_ITEM_TRAILING_GAP,
+  EG_ITEM_SUB_LABEL_GAP,
   getEgItemDividerInset,
   resolveEgItemPadVertical,
 } from '@eds/internal/dist/components/organisms/item/index.js';
+
+export { EG_ITEM_LEADING_ICON_STROKE } from '@eds/internal/dist/components/organisms/item/egItemMetrics.js';
 
 export type {
   EgItemPadSize,

@@ -1,7 +1,6 @@
 import type { ViewStyle } from 'react-native';
 
 import {
-  dataListRowGap,
   dataListRowShellInset,
   getDataListRowLayout,
   type DataListRowLayout,
@@ -23,11 +22,42 @@ export function teamCenterDataListMediaGap(
   return edsPx(spacing['spacing-3']);
 }
 
-/** 同组菜单行纵向间距 · 与 `dataListRowGap` 一致 · `spacing-1`（4px）。 */
+/** 团队中心菜单 / 子页 DataList · 行间 · `spacing-1`（4px）。 */
+export function teamCenterDataListRowGap(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return edsPx(spacing['spacing-1']);
+}
+
+/** 同组菜单行纵向间距 · 与 {@link teamCenterDataListRowGap} 一致。 */
 export function teamCenterDataListGroupStyle(
   spacing: typeof mobileTheme.spacing,
 ): ViewStyle {
-  return { gap: dataListRowGap(spacing) };
+  return { gap: teamCenterDataListRowGap(spacing) };
+}
+
+/**
+ * 分块 `EgDivider` · 左右距屏 · `spacing-5`（20px）。
+ * 须放在 {@link EgDataList}（DL-bleed）子树内，水平 padding 相对屏缘计量。
+ */
+export function teamCenterBlockDividerInsetH(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return edsPx(spacing['spacing-5']);
+}
+
+/** 分块分割线 · 上下留白 · `spacing-3`（12px）。 */
+export function teamCenterBlockDividerInsetV(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return edsPx(spacing['spacing-3']);
+}
+
+/** 成员管理 · 分组间距 · 与通知分类内页一致 · `spacing-7`（28px）。 */
+export function teamMemberSectionGroupGap(
+  spacing: typeof mobileTheme.spacing,
+): number {
+  return edsPx(spacing['spacing-7']);
 }
 
 /** TeamCenter · 行布局与全站 DL 一致（屏缘 8px · 媒体间距见上）。 */
@@ -41,18 +71,3 @@ export function getTeamCenterDataListRowLayout(
   };
 }
 
-/** 行间分割线 · 左边与 `TeamCenterMenuRow` 主标题左缘对齐。 */
-export function teamCenterMenuRowDividerInsets(
-  spacing: typeof mobileTheme.spacing,
-  inCardShell: boolean,
-): { paddingLeft: number; paddingRight: number } {
-  const layout = getTeamCenterDataListRowLayout(spacing);
-  const marginH = inCardShell ? 0 : layout.marginH;
-  const leadIconSlot = edsPx(spacing['capsule-md']);
-  const mediaGap = teamCenterDataListMediaGap(spacing);
-
-  return {
-    paddingLeft: marginH + layout.padH + leadIconSlot + mediaGap,
-    paddingRight: marginH + layout.padH,
-  };
-}

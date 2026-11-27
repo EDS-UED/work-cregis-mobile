@@ -16,20 +16,11 @@ import { SceneText } from '@/scenes/shared/SceneText';
 import { useHomeStore } from '@/store';
 import { edsPx } from '@/utils/edsTheme';
 
-import companyAvatar from '../../../assets/company-avatar.png';
-
 function useOpenTeamCenter() {
   const navigation = useHomeStackNavigation();
-  const companyName = useHomeStore((state) => state.companyName);
-  const teams = useHomeStore((state) => state.teams);
-  const setActiveTeam = useHomeStore((state) => state.setActiveTeam);
   return useCallback(() => {
     navigation.navigate('TeamCenter');
-    const companyTeam = teams.find((team) => team.name === companyName);
-    if (companyTeam) {
-      setActiveTeam(companyTeam.id);
-    }
-  }, [companyName, navigation, setActiveTeam, teams]);
+  }, [navigation]);
 }
 
 function useOpenMessages() {
@@ -43,13 +34,18 @@ function useOpenPersonalCenter() {
 }
 
 function HomeCompanyAvatar() {
-  const companyName = useHomeStore((state) => state.companyName);
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
+  const activeTeamId = useHomeStore((state) => state.activeTeamId);
+  const teams = useHomeStore((state) => state.teams);
+  const activeTeam = teams.find((team) => team.id === activeTeamId);
+
   return (
     <EgAvatar
-      name={companyName}
-      source={companyAvatar}
+      name={activeTeam?.name ?? teamDisplayName}
       size="lg"
-      accessibilityLabel={companyName}
+      source={activeTeam?.avatarSource}
+      colorIndex={activeTeam?.colorIndex}
+      accessibilityLabel={teamDisplayName}
     />
   );
 }
@@ -58,7 +54,7 @@ function HomeCompanyAvatar() {
 export const HOME_COMPANY_NAME_MAX_WIDTH = 104;
 
 function HomeCompanyName() {
-  const companyName = useHomeStore((state) => state.companyName);
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
 
   return (
     <View style={styles.companyNameWrap}>
@@ -68,7 +64,7 @@ function HomeCompanyName() {
         ellipsizeMode="tail"
         style={styles.companyNameText}
       >
-        {companyName}
+        {teamDisplayName}
       </SceneText>
     </View>
   );
@@ -127,7 +123,7 @@ function HomeNavNoticeGlassButton() {
 /** iOS 26+ 系统栏 — `EgButtonGlass`（`iconCount={1}`）。 */
 export function HomeNavCompanyGlassNav() {
   const { mode } = useEdsTheme();
-  const companyName = useHomeStore((state) => state.companyName);
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
   const openTeamCenter = useOpenTeamCenter();
 
   return (
@@ -136,7 +132,7 @@ export function HomeNavCompanyGlassNav() {
       mode={mode}
       avatarSlot={<HomeCompanyAvatar />}
       onPress={openTeamCenter}
-      accessibilityLabel={companyName}
+      accessibilityLabel={teamDisplayName}
       testID="home-nav-company-glass"
     />
   );
@@ -221,7 +217,7 @@ function HomeNavTrailingGlass() {
 /** 顶栏左栏 — 公司 `EgButtonGlass`（`iconCount={1}` 头像槽）+ 公司名（`spacing-2`）。 */
 export function HomeNavLeading() {
   const { mode, spacing } = useEdsTheme();
-  const companyName = useHomeStore((state) => state.companyName);
+  const teamDisplayName = useHomeStore((state) => state.teamDisplayName);
   const openTeamCenter = useOpenTeamCenter();
 
   return (
@@ -229,7 +225,7 @@ export function HomeNavLeading() {
       <EgButtonGlass
         {...glassIconDefaults}
         mode={mode}
-        accessibilityLabel={companyName}
+        accessibilityLabel={teamDisplayName}
         onPress={openTeamCenter}
         testID="home-nav-company-glass"
         avatarSlot={<HomeCompanyAvatar />}

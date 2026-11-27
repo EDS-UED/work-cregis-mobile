@@ -31,7 +31,6 @@ export function TeamSubscriptionDisclosureRow({
       testID={testID}
       icon={<TeamSubscriptionItemLeadIcon name={iconName} />}
       label={label}
-      labelHeavy
       padSize="lg"
       value={value}
       trailingDisplay="icon"

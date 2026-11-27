@@ -13,6 +13,9 @@ import { edsPx } from '@/utils/edsTheme';
 /** 团队切换 / 套餐卡链式箭头 · 与 `eds-arrow-*-ios` displayPx 一致。 */
 export const TEAM_NAV_CHEVRON_PX = 12;
 
+/** 团队切换下箭头 · 主色 100% · `var(--stroke-base-primary)`。 */
+export const TEAM_NAV_DROPDOWN_CHEVRON_STROKE_TOKEN = 'stroke-base-primary' as const;
+
 type TeamNavTitleRowProps = {
   /** 展示下拉箭头（团队中心切换入口）。 */
   showChevron?: boolean;
@@ -97,7 +100,7 @@ export function TeamNavTitleRow({
               name="eds-arrow-down-ios"
               mode={mode}
               displayPx={TEAM_NAV_CHEVRON_PX}
-              strokeColorToken="text-base-secondary"
+              strokeColorToken={TEAM_NAV_DROPDOWN_CHEVRON_STROKE_TOKEN}
               accessibilityLabel=""
             />
           </View>

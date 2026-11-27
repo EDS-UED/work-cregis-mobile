@@ -3,24 +3,21 @@ import { View } from 'react-native';
 import { EgDivider } from '@/eds/team-icons';
 import { useEdsTheme } from '@/hooks/useEdsTheme';
 import {
-  teamCenterListEdgeFromScreen,
+  teamCenterBlockDividerInsetH,
+  teamCenterBlockDividerInsetV,
 } from '@/scenes/team/teamCenterDataListLayout';
-import { edsPx } from '@/utils/edsTheme';
 
-/** 团队中心 · 分块模块分割线（左右距屏 `spacing-6` · 上下 spacing-3）。 */
+/**
+ * 团队中心 · 分块模块分割线。
+ * 左右距屏 `spacing-5`（20px）· 上下 `spacing-3`；**须**置于 `EgDataList` DL-bleed 内。
+ */
 export function TeamCenterMenuBlockDivider() {
   const { mode, spacing } = useEdsTheme();
-  const listEdge = teamCenterListEdgeFromScreen(spacing);
-  const dividerInset = edsPx(spacing['spacing-6']);
-  const blockGap = edsPx(spacing['spacing-3']);
+  const insetH = teamCenterBlockDividerInsetH(spacing);
+  const insetV = teamCenterBlockDividerInsetV(spacing);
 
   return (
-    <View
-      style={{
-        paddingHorizontal: Math.max(0, dividerInset - listEdge),
-        paddingVertical: blockGap,
-      }}
-    >
+    <View style={{ paddingHorizontal: insetH, paddingVertical: insetV }}>
       <EgDivider variant="module" mode={mode} />
     </View>
   );

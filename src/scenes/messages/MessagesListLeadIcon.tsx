@@ -26,7 +26,7 @@ type MessagesListLeadIconProps = {
   cryptoCurrency?: string;
 };
 
-/** 通知 DL 行首 · 五 Tab 统一 `avatar-xl`；未读红点见行尾 `EgDataListReddot`。 */
+/** 通知分类内页 DL 行首 · 五 Tab 统一 `avatar-xl`；未读红点见行尾 `EgDataListReddot`。 */
 export function MessagesListLeadIcon({
   unread,
   avatarLetter,

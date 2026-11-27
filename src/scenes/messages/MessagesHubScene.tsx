@@ -22,7 +22,7 @@ import {
   type MessageCategory,
 } from '@/scenes/messages/messagesMock';
 import { SceneScaffold } from '@/scenes/shared/SceneScaffold';
-import { messagesHubRowGap } from '@/scenes/messages/messagesDataListLayout';
+import { messagesDataListRowGap } from '@/scenes/messages/messagesDataListLayout';
 import { edsSceneContentInset } from '@/utils/edsTheme';
 
 type MessagesHubNav = StackNavigationProp<HomeStackParamList, 'Messages'>;
@@ -67,8 +67,8 @@ export function MessagesHubScene() {
       shortPageScrollLayout
       overlayNavTrailing={nativeNavBar ? undefined : <MessagesNavClearButton />}
     >
-      <EgDataList sceneContentInset={sceneInset} rowGap={messagesHubRowGap(spacing)}>
-        {rows.map((row, index) => (
+      <EgDataList sceneContentInset={sceneInset} rowGap={messagesDataListRowGap(spacing)}>
+        {rows.map((row) => (
           <MessagesHubListRow
             key={row.category}
             category={row.category}
@@ -77,7 +77,6 @@ export function MessagesHubScene() {
             timeLabel={row.timeLabel}
             unreadCount={row.unreadCount}
             onPress={() => openCategory(row.category)}
-            isLast={index === rows.length - 1}
           />
         ))}
       </EgDataList>

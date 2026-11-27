@@ -34,6 +34,7 @@
 | 7 | 段落 / 块 / 卡片之间 | `--spacing-7` | `edsPx(spacing['spacing-7'])` |
 | 8 | 头像、币种等 | `avatar-lg` | `EgAvatar size="lg"` 等 |
 | 8b | Icon | `--symbol-md` | EgIcon / `EgSymbol` · `size="md"`（或 `displayPx` 取自 `symbol-md`） |
+| 9 | **产品介绍 / 能力介绍页（Intro）** | 见 §2.4 | `SceneScaffold` + `fixedBottomChrome` · 参照团队 **AML** |
 
 **例外**：稿面或 PRD 显式标注时覆盖本默认；覆盖须在 PR/说明中一句交代依据（不视为对全站既有页的追溯改造）。
 
@@ -101,6 +102,32 @@
 - **标题 ↔ 副文本**：默认 `--spacing-05`（2px）；**双行待办等**行内用 `spacing-05` 或与稿面一致的 `gap`。
 - **左侧媒体 ↔ 右侧文本**（头像 / 币种图 / icon）：`--spacing-3`（行方向 `gap`）。
 
+### 2.4 产品介绍 / 能力介绍页（Intro · 通用壳）
+
+**用途**：单行插画 + 主副文案 + 屏底双按钮（主操作 + 次操作），**短页、无纵轴滚动条**；团队中心 **AML** 为参照实现。
+
+与 §2.1 全站默认的差异：**导航不展示标题**；插画区 **0** 导航底间距；正文区水平 **不** 走 `EDS_SCENE_CONTENT_INSET`（插画满宽）。
+
+| 区域 | 约定 | Token / 实现 |
+|------|------|----------------|
+| **壳** | 短页闸 + 隐藏滚动条；插画满宽 | `shortPageScrollLayout` · `bodyShowsVerticalScrollIndicator={false}` · `contentPaddingHorizontal={0}` · `contentPaddingBottom={0}` · `navToContentGap={0}` |
+| **导航标题** | 无 | `showNavTitle={false}` |
+| **顶图** | 稿面 SVG · 水平居中 · 宽等同屏宽 · 高等比 | 独立插画组件 · 父级 `alignItems: 'center'`；可 `absoluteFill` 叠于文案下层 |
+| **主标题** | 导航底起算 **稿面竖向偏移**（AML = **300px**） | `SceneText variant="display"` · `paddingTop` 用命名常量（勿与全站 `EDS_NAV_CONTENT_GAP` 混算） |
+| **主 ↔ 副文案** | 12px | `edsPx(spacing['spacing-3'])` |
+| **副文案** | `typography-body-large` · primary | `SceneText variant="bodyLarge"` · 居中 |
+| **文案区左右** | 与全站内容区可不同 | AML 文案 `paddingHorizontal`：`spacing-8` |
+| **底栏按钮** | **相对屏幕底常驻**，不随文案 `space-between` | `SceneScaffold` **`fixedBottomChrome`** + **`fixedBottomChromeReserve`**（与成员管理底栏搜索同源模式） |
+| **底栏留白** | 双 `button-lg` + 组内间距 + 底边 | `teamAmlActionsChromeReserve`：`2×button-lg` + `spacing-2` + `max(safeAreaBottom, spacing-5)` |
+| **主按钮** | 稿面主 CTA 文案 | `EgDecorButton` · `size="lg"` · `figmaType="primary"` · `alignSelf: 'stretch'` |
+| **副按钮** | 稿面次 CTA（如「了解更多」） | `EgOptionButton` · `size="lg"` · `figmaType="tertiary"` · **与主按钮同宽** |
+| **按钮组内间距** | 8px | `spacing-2` |
+| **按钮组左右** | 距屏缘 | `spacing-7` · 集中 helper：`teamAmlActionsEdgeInset` |
+
+**【必须】** 新 Intro 页复用上述壳时：按钮抽出为 `fixedBottomChrome` 子树（如 `TeamAmlDetailActions`），正文仅 hero/文案；勿把底栏放在滚动正文内用 `justifyContent: 'space-between'` 顶替屏底。
+
+**【参照代码】**：`TeamCenterDetailScene`（`id === 'aml'`）· `TeamAmlDetailContent` · `TeamAmlDetailActions` · `teamAmlActionsLayout.ts`。
+
 ---
 
 ## 3. 尺寸
@@ -123,6 +150,7 @@
 | DS 列表 / 设置 / Tab | `@/eds/data-list` · `@/eds/item` · `@/eds/tab-block` · `@/eds/tab` |
 | 列表 metrics 委托 | `src/scenes/shared/dataListLayout.ts` |
 | 页面壳 | `src/scenes/shared/SceneScaffold.tsx` |
+| Intro 产品介绍页 | `TeamAmlDetailContent` · `TeamAmlDetailActions` · `teamAmlActionsLayout.ts` · §2.4 |
 | 集成总规范 | `.cursor/rules/work.md` §5.0 · §5.1 · §3.1.1 |
 
 ---
@@ -134,5 +162,6 @@
 | 2026-11-12 | 初版：文字 1–4、间距 5–7、尺寸 8 |
 | 2026-11-12 | 明确：仅新页/获准场景参考；禁止未经许可按本规范替换已有页布局样式 |
 | 2026-11-16 | 移除复刻的 Data list（DL）专章；列表/设置/Tab 规约以 EDS Eg* 与 Showcase 为准 |
+| 2026-11-27 | §2.4 · §0#9：产品介绍页（Intro）通用壳 · AML 参照 |
 
 _（以下随产品补充条目，保持 §0 速查表同步更新。）_

@@ -16,6 +16,7 @@ const CURRENCY_TO_EDS_CRYPTO_SYMBOL: Record<string, string> = {
   TON: 'eds-ton-toncoin',
   USDT: 'eds-usdt-tether usd',
   ZEC: 'eds-zec-zcash',
+  SOL: 'eds-sol-solana',
 };
 
 export function edsCryptoSymbolForCurrency(currency: string): string | null {

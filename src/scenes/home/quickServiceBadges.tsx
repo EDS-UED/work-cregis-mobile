@@ -26,14 +26,12 @@ export function QuickServiceActionBadge({
   const disabled =
     kind === 'addDisabled' || (isRemoveIcon && !onPress);
   const removeDanger = kind === 'remove';
-
   const iconName = isRemoveIcon ? 'eds-disable-fill' : 'eds-add-circle-fill';
   const colorToken = disabled
     ? 'status-disable-base'
     : removeDanger
       ? 'status-danger'
       : 'material-decor';
-
   const icon = (
     <EgSymbol
       name={iconName}

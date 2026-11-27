@@ -23,6 +23,7 @@ import {
 } from '@/scenes/team/teamSubscriptionItemLayout';
 import { useHomeStore } from '@/store';
 import { edsPx, edsSceneContentInset } from '@/utils/edsTheme';
+import { formatMobileDate } from '@/utils/formatMobileDateTime';
 
 const TEAM_PLAN_LINE_ASPECT = 152 / 170;
 
@@ -150,7 +151,9 @@ export const TeamPlanPageShotHero = memo(function TeamPlanPageShotHero() {
             <View style={styles.titleBlock}>
               <SceneText variant="display">{t(TEAM_PLAN_TIER_LABEL_KEY[teamPlanTier])}</SceneText>
               <SceneText variant="secondary">
-                {t('team.subscriptionExpires', { date: teamSubscriptionExpires })}
+                {t('team.subscriptionExpires', {
+                  date: formatMobileDate(teamSubscriptionExpires),
+                })}
               </SceneText>
             </View>
             <TeamPlanSubscriptionActions />
